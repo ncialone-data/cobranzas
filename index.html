@@ -186,7 +186,7 @@ svg{display:block;width:100%;overflow:visible}
 @media(max-width:380px){.kpis{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+<body class="light">
 <div class="wrap">
 
 <header>
@@ -196,8 +196,8 @@ svg{display:block;width:100%;overflow:visible}
   </div>
   <div style="display:flex;align-items:center;gap:14px">
     <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">
-      <span class="theme-icon" id="themeIcon">&#9728;&#65039;</span>
-      <span id="themeLabel">Modo claro</span>
+      <span class="theme-icon" id="themeIcon">&#127769;</span>
+      <span id="themeLabel">Modo oscuro</span>
     </button>
     <div class="scope">
       <div class="lbl">Unidad</div>
@@ -500,14 +500,14 @@ function renderMonth(){
       bars+=`<text class="barlbl" x="${(x+bw/2).toFixed(1)}" y="${(padT+ih+16).toFixed(1)}" style="${isSel?'fill:var(--acc);font-weight:600':''}">${MLBL[MESES[i]]}</text>`;
     }
   });
-  const dots=pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="#080a0e" stroke="${col}" stroke-width="2"/>`).join('');
+  const dots=pts.map((p,i)=>`<circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5" fill="#080a0e" stroke="${col}" stroke-width="2" data-m="${MLBL[MESES[i]]}" data-v="${byM[i]}" data-mes="${MESES[i]}"/>`).join('');
   document.getElementById('monthChart').innerHTML =
     `<svg viewBox="0 0 ${W} ${H}"><defs><linearGradient id="ag" x1="0" x2="0" y1="0" y2="1">
       <stop offset="0" stop-color="${col}" stop-opacity=".28"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
       ${g}${bars}<path d="${area}" fill="url(#ag)"/><path d="${path}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
   requestAnimationFrame(()=>requestAnimationFrame(()=>
     document.querySelectorAll('#monthChart .barv').forEach(b=>{b.setAttribute('y',b.dataset.y);b.setAttribute('height',b.dataset.h);})));
-  document.querySelectorAll('#monthChart .barv').forEach(b=>{
+  document.querySelectorAll('#monthChart .barv, #monthChart .chart-dot').forEach(b=>{
     b.style.cursor='pointer';
     b.onmousemove=e=>showTip(e,`${b.dataset.m} &middot; <span class="t-v">${fmtFull(+b.dataset.v)}</span>`);
     b.onmouseleave=hideTip;
@@ -566,6 +566,7 @@ function toggleTheme(){
   try{
     const raw = await loadData();
     buildFromRaw(raw);
+    if(MESES.length) mesFilter = MESES[MESES.length-1]; // por defecto: último mes con datos (mes en curso)
     render();
     const ultima = MESES.length? MLBL[MESES[MESES.length-1]] : '';
     const ahora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
