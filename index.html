@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tablero de cobranzas</title>
+<title>Tablero de cobranzas &amp; aging</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Outfit:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -184,6 +184,41 @@ svg{display:block;width:100%;overflow:visible}
   .row .amt{min-width:60px;font-size:11.5px}
 }
 @media(max-width:380px){.kpis{grid-template-columns:1fr}}
+
+/* ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n) ===== */
+.aging-head{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
+.aging-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(24px,3.6vw,38px);line-height:.95;letter-spacing:-.03em}
+.aging-head h2 b{color:var(--teal)}
+.agtbl{border-collapse:collapse;width:100%;min-width:480px}
+.agtbl th{font-size:10.5px;color:var(--mut2);font-weight:500;padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.agtbl th:first-child{text-align:left}
+.agtbl td{padding:7px 8px;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.agtbl td:first-child{font-family:"Outfit",sans-serif;font-size:13px;text-align:left;font-weight:600;white-space:normal}
+.agtbl tr:last-child td{border-bottom:none}
+.agtbl tbody tr:hover{background:rgba(255,255,255,.04)}
+.dlegend{display:flex;gap:16px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.dlegend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut)}
+.dlegend .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.dcol{display:flex;flex-direction:column;gap:4px}
+.drow{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:10px;padding:6px 8px;border-radius:9px}
+.drow:hover{background:rgba(255,255,255,.04)}
+.drow .dnm{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dtrack{position:relative;height:14px;background:rgba(255,255,255,.05);border-radius:7px;overflow:hidden}
+.dseg{position:absolute;top:0;height:100%}
+.dzero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--line2);z-index:1}
+.drow .damt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--tx);text-align:right;min-width:100px}
+.donut-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap;justify-content:center;padding:6px 0}
+.donut-legend{display:flex;flex-direction:column;gap:10px}
+.donut-legend .li{display:flex;align-items:center;gap:9px;font-size:13px}
+.donut-legend .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.donut-legend .lv{font-family:"IBM Plex Mono",monospace;color:var(--tx);margin-left:16px}
+@media(max-width:600px){
+  .drow{grid-template-columns:96px 1fr auto;gap:6px}
+  .drow .dnm{font-size:11px}
+  .drow .damt{min-width:66px;font-size:10.5px}
+  .agtbl th,.agtbl td{padding:6px 5px;font-size:11px}
+}
 </style>
 </head>
 <body class="light">
@@ -250,29 +285,169 @@ svg{display:block;width:100%;overflow:visible}
   </div>
 </div>
 
+<!-- ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n, fuente de datos independiente) ===== -->
+<div class="aging-head">
+  <h2>Aging de <b>cartera</b></h2>
+  <div class="scope">
+    <div class="lbl">Actualizado</div>
+    <div class="who" id="agingUpdated">&mdash;</div>
+  </div>
+</div>
+
+<div id="agingErrorBox"></div>
+
+<div class="kpis" id="agingKpis"></div>
+
+<div class="card" style="margin-top:10px;margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Venta real vs. no real</span>
+    <span class="c-note">proporci&oacute;n sobre la deuda total</span>
+  </div>
+  <div id="agingDonut"></div>
+</div>
+
+<div class="card" style="margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Cobrador / Analista</span>
+    <span class="c-note">venta real &middot; no real &middot; total deuda</span>
+  </div>
+  <div style="overflow-x:auto"><table class="agtbl" id="agingAnalistaTable"></table></div>
+</div>
+<div class="card" style="margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Cobrador / Analista &middot; gr&aacute;fico</span>
+    <span class="hint">venta real vs. no real por analista</span>
+  </div>
+  <div class="dlegend">
+    <span><span class="sw" style="background:var(--acc)"></span>Venta real</span>
+    <span><span class="sw" style="background:var(--teal)"></span>No real</span>
+  </div>
+  <div class="dcol" id="agingAnalistaChart"></div>
+</div>
+
+<div class="card" style="margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Vendedor</span>
+    <span class="c-note">venta real &middot; no real &middot; total deuda</span>
+  </div>
+  <div style="overflow-x:auto"><table class="agtbl" id="agingVendedorTable"></table></div>
+</div>
+<div class="card" style="margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Vendedor &middot; gr&aacute;fico</span>
+    <span class="hint">venta real vs. no real por vendedor</span>
+  </div>
+  <div class="dlegend">
+    <span><span class="sw" style="background:var(--acc)"></span>Venta real</span>
+    <span><span class="sw" style="background:var(--teal)"></span>No real</span>
+  </div>
+  <div class="dcol" id="agingVendedorChart"></div>
+</div>
+
+<div class="card" style="margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Clientes: vencidos vs no vencidos</span>
+    <span class="c-note">deuda por cliente</span>
+  </div>
+  <div style="overflow-x:auto"><table class="agtbl" id="agingClienteTable"></table></div>
+</div>
+<div class="card" style="margin-bottom:14px">
+  <div class="c-head">
+    <span class="c-title">Clientes &middot; gr&aacute;fico</span>
+    <span class="hint">vencido vs. no vencido por cliente</span>
+  </div>
+  <div class="dlegend">
+    <span><span class="sw" style="background:#f87171"></span>Vencido</span>
+    <span><span class="sw" style="background:var(--acc)"></span>No vencido</span>
+  </div>
+  <div class="dcol" id="agingClienteChart"></div>
+</div>
+
 </div>
 <div id="tip"></div>
 <script>
-// URL del CSV publicado (Archivo > Compartir > Publicar en la web > pestaña "Datos" > CSV).
+// FUENTE DE DATOS (v7): el Sheet viejo (fila=día, 5 columnas de unidad) fue borrado por el
+// usuario y daba HTTP 410. Este tablero ahora reconstruye las mismas 5 unidades a partir de la
+// pestaña "Aging" (comprobante por comprobante) del Sheet "Aging", publicada como CSV.
+// Criterio acordado con Nahuel/Graciela para ubicar cada comprobante en el calendario:
+//  - Si ya se cobró (COBRADO / DESCONTADO = TRUE): fecha = FECHA COBRANZA, monto = SALDO PARCIAL APLICADO.
+//  - Si todavía no se cobró: fecha = FECHA ESTIMADA DE COBRANZA; si está vacía, FECHA DE ENTREGA DE
+//    PRODUCTOS + días de CONDICION DE VENTA; si tampoco hay entrega, FECHA DE VENCIMIENTO. Monto = SALDO.
+// Unidad = columna TIO DE CLIENTE, mapeada a las 5 categorías existentes (ver mapTipoClienteToUnit).
 // Este dashboard SIEMPRE lee de acá — no tiene datos embebidos ni fallback local.
 // Si esto está vacío, o si falla la lectura, se muestra un error en vez del dashboard.
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRlq0f41sYQ1jpsqGBuca5DEngtjv-thFKlovXVNBVkkeidgqbmHWfok6mIOGfLRgjyizb5q4ubivjC/pub?gid=1024724132&single=true&output=csv';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJXSOuDH9QTf-i7czJt-5l9TsdoNWgLHr55blzpWWfwG4ivbMnaJaKgs92yNJSSfubAzq713apwyd8/pub?gid=457164138&single=true&output=csv';
 
 let DATA = [], MESES = [], MLBL = {};
 
+// Fechas de la pestaña "Aging" vienen en dos formatos distintos según la columna:
+// DD/MM/AA (año de 2 dígitos, ej. FECHA COBRANZA "31/07/26") o M/D/AAAA (año de 4 dígitos,
+// ej. FECHA ESTIMADA DE COBRANZA "8/7/2026"). Se distinguen por la cantidad de dígitos del año.
+function agParseDateFlexible(s){
+  s = (s==null?'':String(s)).trim();
+  if(!s) return null;
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(!m) return null;
+  const a=parseInt(m[1],10), b=parseInt(m[2],10), c=parseInt(m[3],10);
+  let day, month, year;
+  if(m[3].length<=2){ day=a; month=b; year=2000+c; } // DD/MM/AA
+  else { month=a; day=b; year=c; } // M/D/AAAA
+  if(!day||!month||!year) return null;
+  const d = new Date(Date.UTC(year, month-1, day));
+  return isNaN(d.getTime())? null : d;
+}
+const agToISO = d => d ? `${d.getUTCFullYear()}-${(d.getUTCMonth()+1).toString().padStart(2,'0')}-${d.getUTCDate().toString().padStart(2,'0')}` : null;
+function agAddDays(d, days){ const r=new Date(d.getTime()); r.setUTCDate(r.getUTCDate()+(days||0)); return r; }
+
+// Mapeo TIO DE CLIENTE -> las 5 unidades del tablero (confirmado con Nahuel: "Otros / CHD" = CDH).
+function mapTipoClienteToUnit(tipoCliente){
+  const t = (tipoCliente||'').trim().toLowerCase();
+  if(t==='papelera' || t==='pepelera') return 'Papeleras CC';
+  if(t==='catering') return 'Catering';
+  if(t==='otros / chd' || t==='otros/chd') return 'CDH';
+  if(t==='vymat') return 'VyMat';
+  return 'Otros/Ajustes'; // "Cliente / proveedor", vacío, o cualquier valor no reconocido
+}
+
 function parseCSV(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
-  const out = [];
-  for(let i=1;i<lines.length;i++){ // fila 0 = encabezado
-    const cells = lines[i].split(',').map(c=>c.replace(/^"|"$/g,'').trim());
-    if(cells.length<6) continue;
-    const date = cells[0];
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-    const nums = cells.slice(1,6).map(v=>{
-      const n = parseFloat(v.replace(/\.(?=.*\.)/g,'').replace(',','.'));
-      return isNaN(n)?0:n;
-    });
-    out.push([date, ...nums]);
+  if(!lines.length) return [];
+  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
+  const idx = name => header.findIndex(h=>h===name);
+  const iCobrado = idx('COBRADO / DESCONTADO');
+  const iFechaCobranza = idx('FECHA COBRANZA');
+  const iSaldoParcial = idx('SALDO PARCIAL APLICADO');
+  const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
+  const iFechaVenc = idx('FECHA DE VENCIMIENTO');
+  const iCondVenta = idx('CONDICION DE VENTA')>=0 ? idx('CONDICION DE VENTA') : idx('CONDICIÓN DE VENTA');
+  const iSaldo = idx('SALDO');
+  const iFechaEstimada = idx('FECHA ESTIMADA DE COBRANZA');
+  const iFechaEntrega = idx('FECHA DE ENTREGA DE PRODUCTOS');
+  if([iCobrado,iFechaCobranza,iSaldoParcial,iTipoCliente,iFechaVenc,iCondVenta,iSaldo,iFechaEstimada,iFechaEntrega].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas en la pestaña "Aging" (revisá si cambiaron los encabezados)');
+  }
+  const out=[];
+  for(let i=1;i<lines.length;i++){
+    const c = splitCSVLine(lines[i]);
+    const first = (c[0]||'').trim();
+    if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
+    if(!c.some(v=>v && v.trim())) continue; // fila vacía
+    const cobrado = first.toUpperCase()==='TRUE';
+    let dateObj, amount;
+    if(cobrado){
+      dateObj = agParseDateFlexible(c[iFechaCobranza]);
+      amount = agNum(c[iSaldoParcial]);
+    } else {
+      dateObj = agParseDateFlexible(c[iFechaEstimada]);
+      if(!dateObj){
+        const entrega = agParseDateFlexible(c[iFechaEntrega]);
+        if(entrega) dateObj = agAddDays(entrega, parseInt(c[iCondVenta],10)||0);
+      }
+      if(!dateObj) dateObj = agParseDateFlexible(c[iFechaVenc]);
+      amount = agNum(c[iSaldo]);
+    }
+    if(!dateObj) continue; // sin ninguna fecha usable, no se puede ubicar en el calendario
+    out.push({date: agToISO(dateObj), unit: mapTipoClienteToUnit(c[iTipoCliente]), amount});
   }
   return out;
 }
@@ -288,13 +463,17 @@ async function loadData(){
 }
 
 function buildFromRaw(raw){
-  DATA = raw.map(r=>{
-    const o={date:r[0], m:r[0].slice(0,7)};
-    let tot=0;
-    UNIT_NAMES.forEach((u,i)=>{o[u]=r[i+1]; tot+=r[i+1];});
-    o.total=tot;
-    return o;
+  const byDate = {};
+  raw.forEach(t=>{
+    if(!byDate[t.date]){
+      const o={date:t.date, m:t.date.slice(0,7), total:0};
+      UNIT_NAMES.forEach(u=>o[u]=0);
+      byDate[t.date]=o;
+    }
+    byDate[t.date][t.unit] += t.amount;
+    byDate[t.date].total += t.amount;
   });
+  DATA = Object.values(byDate).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
   MESES = [...new Set(DATA.map(d=>d.m))].sort();
   MLBL = {};
   MESES.forEach(m=>{const [y,mo]=m.split('-'); MLBL[m]=mnAbbr[parseInt(mo)-1]+" '"+y.slice(2);});
@@ -554,6 +733,7 @@ function toggleTheme(){
   document.getElementById('themeIcon').textContent = isLight? '\u{1F319}':'☀️';
   document.getElementById('themeLabel').textContent = isLight? 'Modo oscuro':'Modo claro';
   render();
+  if(AGING_DATA) agRenderAll(AGING_DATA); // re-pinta el aging con los colores del tema nuevo
 }
 
 (async function init(){
@@ -566,7 +746,16 @@ function toggleTheme(){
   try{
     const raw = await loadData();
     buildFromRaw(raw);
-    if(MESES.length) mesFilter = MESES[MESES.length-1]; // por defecto: último mes con datos (mes en curso)
+    // Por defecto abre en el mes real de HOY (no en "el último mes con datos": ahora que hay
+    // fechas estimadas/proyectadas a futuro —cheques diferidos, forecast de cobranza pendiente—
+    // el último mes con datos puede ser un mes futuro, y no queremos que el tablero abra ahí).
+    // Si el mes en curso todavía no tiene ningún dato cargado, cae al último mes PASADO con datos.
+    if(MESES.length){
+      const hoy = new Date();
+      const hoyKey = hoy.getFullYear() + '-' + (hoy.getMonth()+1).toString().padStart(2,'0');
+      const pasados = MESES.filter(m=>m<=hoyKey);
+      mesFilter = MESES.includes(hoyKey) ? hoyKey : (pasados.length ? pasados[pasados.length-1] : MESES[0]);
+    }
     render();
     const ultima = MESES.length? MLBL[MESES[MESES.length-1]] : '';
     const ahora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
@@ -575,6 +764,206 @@ function toggleTheme(){
     console.error(err);
     document.getElementById('periodo').textContent = 'Error al cargar datos';
     showError('No pude leer los datos desde Google Sheets. Revisá tu conexión o que el link siga publicado. Detalle: ' + err.message);
+  }
+})();
+
+// ================================================================
+// ===== AGING (secci&oacute;n agregada en esta versi&oacute;n) ====
+// Fuente de datos completamente independiente del tablero de arriba:
+// lee en vivo la pesta&ntilde;a "Resumen Aging" del Sheet "Aging" (publicada como CSV).
+// Si falla, el error se muestra SOLO en esta secci&oacute;n; el tablero de
+// cobranzas de arriba sigue funcionando igual.
+// ================================================================
+const AGING_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJXSOuDH9QTf-i7czJt-5l9TsdoNWgLHr55blzpWWfwG4ivbMnaJaKgs92yNJSSfubAzq713apwyd8/pub?output=csv';
+
+function splitCSVLine(line){
+  const out=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(inQ){
+      if(c==='"'){ if(line[i+1]==='"'){cur+='"'; i++;} else inQ=false; }
+      else cur+=c;
+    }else{
+      if(c==='"') inQ=true;
+      else if(c===','){ out.push(cur); cur=''; }
+      else cur+=c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+function agNum(s){
+  // El CSV publicado usa el formato regional del Sheet (es-AR): "." separador
+  // de miles, "," separador decimal (ej. "$ 2.051.731.373,10" o "-$ 395.161,70").
+  // Por eso hay que sacar los puntos de miles y convertir la coma decimal a punto
+  // antes de parsear — un parseFloat directo da un número truncado y equivocado.
+  if(s==null) return 0;
+  s=String(s).trim();
+  if(!s) return 0;
+  let neg=false;
+  if(/^\(.*\)$/.test(s)){ neg=true; s=s.slice(1,-1); } // por si viniera en formato contable "(1.234,56)"
+  s = s.replace(/[^0-9.,\-]/g,'');   // deja solo dígitos, puntos, comas y el signo menos
+  s = s.replace(/\./g,'').replace(',', '.'); // quita puntos de miles, pasa coma decimal a punto
+  const n=parseFloat(s);
+  if(isNaN(n)) return 0;
+  return neg? -Math.abs(n): n;
+}
+const agTxt=s=>(s==null?'':String(s)).trim();
+const agFmtFull=n=>{
+  const neg=n<0;
+  return (neg?'-$':'$')+Math.round(Math.abs(n)).toLocaleString('es-AR',{maximumFractionDigits:0});
+};
+
+// Parsea el CSV multi-tabla de "Resumen Aging": busca las filas/columnas por
+// texto (no por número de fila/columna fijo) para que no se rompa si el Sheet
+// crece o cambia de forma con el tiempo.
+function parseAgingCSV(text){
+  const rows = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0).map(splitCSVLine);
+  const findByFirst = label => rows.find(r=>agTxt(r[0])===label);
+  const rTotal = findByFirst('Deuda total');
+  const rVenta = findByFirst('Venta real');
+  const rNo = findByFirst('No real');
+  if(!rTotal||!rVenta||!rNo) throw new Error('no encontré las filas de KPIs (Deuda total / Venta real / No real) en el CSV de Aging');
+  const kpi = { total: agNum(rTotal[1]), ventaReal: agNum(rVenta[1]), noReal: agNum(rNo[1]) };
+
+  const headerRowIdx = rows.findIndex(r=>r.some(c=>/analista/i.test(agTxt(c))));
+  if(headerRowIdx<0) throw new Error('no encontré la fila de encabezados de las tablas de desglose (Analista/Vendedor/Cliente)');
+  const header = rows[headerRowIdx];
+  const colA = header.findIndex(c=>/analista/i.test(agTxt(c)));
+  const colV = header.findIndex(c=>/^vendedor$/i.test(agTxt(c)));
+  const colC = header.findIndex(c=>/^cliente$/i.test(agTxt(c)));
+  if(colA<0||colV<0||colC<0) throw new Error('no encontré alguna de las 3 tablas de desglose (Analista/Vendedor/Cliente) en el CSV de Aging');
+
+  function readBlock(col){
+    const out=[];
+    for(let i=headerRowIdx+1;i<rows.length;i++){
+      const r=rows[i]; const name=agTxt(r[col]);
+      if(!name) break;
+      out.push({name, a:agNum(r[col+1]), b:agNum(r[col+2]), total:agNum(r[col+3])});
+    }
+    return out;
+  }
+  return { kpi, analistas:readBlock(colA), vendedores:readBlock(colV), clientes:readBlock(colC) };
+}
+
+async function loadAging(){
+  const url = AGING_CSV_URL + (AGING_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  return parseAgingCSV(text);
+}
+
+function showAgingError(msg){
+  ['agingKpis','agingDonut','agingAnalistaChart','agingVendedorChart','agingClienteChart'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML='';
+  });
+  ['agingAnalistaTable','agingVendedorTable','agingClienteTable'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML='';
+  });
+  const box = document.getElementById('agingErrorBox');
+  box.innerHTML = '<div class="card" style="border-color:#f87171;margin-bottom:14px">'+
+    '<div class="c-title" style="color:#f87171">No se pudo cargar el Aging</div>'+
+    '<div class="c-note" style="margin-top:8px;color:var(--tx)">'+msg+'</div></div>';
+}
+
+function agRenderKpis(kpi){
+  const pct = kpi.total>0? kpi.ventaReal/kpi.total*100 : 0;
+  document.getElementById('agingKpis').innerHTML =
+    `<div class="kpi acc"><div class="k-lbl">Deuda total</div><div class="k-val full">${agFmtFull(kpi.total)}</div></div>
+     <div class="kpi"><div class="k-lbl">Venta real</div><div class="k-val" style="color:var(--acc)">${agFmtFull(kpi.ventaReal)}</div></div>
+     <div class="kpi mrg"><div class="k-lbl">No real</div><div class="k-val">${agFmtFull(kpi.noReal)}</div></div>
+     <div class="kpi"><div class="k-lbl">% venta real</div><div class="k-val">${fmtPct(pct)}</div></div>`;
+}
+
+function agRenderDonut(kpi){
+  const total = kpi.ventaReal + kpi.noReal;
+  const pctV = total>0? kpi.ventaReal/total*100 : 0;
+  const R=54, C=2*Math.PI*R;
+  const dashV = C*pctV/100;
+  const accCol = A();
+  const noCol = getComputedStyle(document.body).getPropertyValue('--teal').trim();
+  document.getElementById('agingDonut').innerHTML = `
+    <div class="donut-row">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="${R}" fill="none" stroke="${noCol}" stroke-width="18"/>
+        <circle cx="75" cy="75" r="${R}" fill="none" stroke="${accCol}" stroke-width="18"
+          stroke-dasharray="${dashV.toFixed(1)} ${(C-dashV).toFixed(1)}"
+          transform="rotate(-90 75 75)" stroke-linecap="round"/>
+        <text x="75" y="71" text-anchor="middle" class="num" font-size="20" fill="var(--tx)" font-weight="600">${pctV.toFixed(1)}%</text>
+        <text x="75" y="88" text-anchor="middle" font-size="10.5" fill="var(--mut2)">venta real</text>
+      </svg>
+      <div class="donut-legend">
+        <div class="li"><span class="sw" style="background:${accCol}"></span>Venta real<span class="lv">${agFmtFull(kpi.ventaReal)}</span></div>
+        <div class="li"><span class="sw" style="background:${noCol}"></span>No real<span class="lv">${agFmtFull(kpi.noReal)}</span></div>
+      </div>
+    </div>`;
+}
+
+function agRenderTable(containerId, items, nameLabel, labelA, labelB){
+  const el = document.getElementById(containerId);
+  let html = `<thead><tr><th>${nameLabel}</th><th>${labelA}</th><th>${labelB}</th><th>Total deuda</th></tr></thead><tbody>`;
+  items.forEach(it=>{
+    html += `<tr><td>${it.name}</td><td>${agFmtFull(it.a)}</td><td>${agFmtFull(it.b)}</td><td>${agFmtFull(it.total)}</td></tr>`;
+  });
+  html += '</tbody>';
+  el.innerHTML = html;
+}
+
+// Barras horizontales "divergentes": cada fila apila el segmento A y despu&eacute;s
+// el segmento B a partir del final de A (como una cascada), sobre una escala
+// compartida con cero al centro. Esto permite representar bien los casos donde
+// alguno de los dos valores (o el total) es negativo, algo que una barra
+// apilada tradicional (que arranca siempre en cero) no puede mostrar bien.
+function agRenderDiverging(containerId, items, colA, colB){
+  let lo=0, hi=0;
+  items.forEach(it=>{
+    [0, it.a, it.a+it.b].forEach(v=>{ if(v<lo) lo=v; if(v>hi) hi=v; });
+  });
+  const span = (hi-lo)||1;
+  const pct = v => (v-lo)/span*100;
+  const zero = pct(0);
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map(it=>{
+    const p0=pct(0), pA=pct(it.a), pAB=pct(it.a+it.b);
+    const left1=Math.min(p0,pA), w1=Math.abs(pA-p0);
+    const left2=Math.min(pA,pAB), w2=Math.abs(pAB-pA);
+    return `<div class="drow">
+      <div class="dnm" title="${it.name}">${it.name}</div>
+      <div class="dtrack">
+        <div class="dzero" style="left:${zero.toFixed(2)}%"></div>
+        <div class="dseg" style="left:${left1.toFixed(2)}%;width:${w1.toFixed(2)}%;background:${colA}"></div>
+        <div class="dseg" style="left:${left2.toFixed(2)}%;width:${w2.toFixed(2)}%;background:${colB}"></div>
+      </div>
+      <div class="damt">${agFmtFull(it.total)}</div>
+    </div>`;
+  }).join('');
+}
+
+function agRenderAll(ag){
+  agRenderKpis(ag.kpi);
+  agRenderDonut(ag.kpi);
+  agRenderTable('agingAnalistaTable', ag.analistas, 'Cobrador / Analista', 'Venta real', 'No real');
+  agRenderTable('agingVendedorTable', ag.vendedores, 'Vendedor', 'Venta real', 'No real');
+  agRenderTable('agingClienteTable', ag.clientes, 'Cliente', 'Vencido', 'No vencido');
+  const accCol = A(), noCol = getComputedStyle(document.body).getPropertyValue('--teal').trim();
+  agRenderDiverging('agingAnalistaChart', ag.analistas, accCol, noCol);
+  agRenderDiverging('agingVendedorChart', ag.vendedores, accCol, noCol);
+  agRenderDiverging('agingClienteChart', ag.clientes, '#f87171', accCol);
+}
+
+let AGING_DATA = null;
+(async function initAging(){
+  document.getElementById('agingUpdated').textContent = 'Cargando…';
+  try{
+    AGING_DATA = await loadAging();
+    agRenderAll(AGING_DATA);
+    document.getElementById('agingUpdated').textContent =
+      new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  }catch(err){
+    console.error(err);
+    document.getElementById('agingUpdated').textContent = 'Error';
+    showAgingError('No pude leer los datos desde el Sheet de Aging (pesta&ntilde;a "Resumen Aging"). Revis&aacute; que el link de publicaci&oacute;n siga activo. Detalle: ' + err.message);
   }
 })();
 </script>
