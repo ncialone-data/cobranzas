@@ -94,6 +94,11 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .clear-btn:hover{color:var(--tx);background:rgba(255,255,255,.09)}
 .clear-btn.hide{display:none}
 .kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.kpis.kpis6{grid-template-columns:repeat(6,1fr)}
+/* v17: la fila de KPIs de Aging tiene 4 tarjetas (no 5 ni 6) — sin esta clase heredaba
+   la grilla de 5 columnas de .kpis base y quedaba una columna vacía a la derecha,
+   por eso las tarjetas se veían corridas a la izquierda / no ocupaban el ancho completo. */
+.kpis.kpis4{grid-template-columns:repeat(4,1fr)}
 .mom-up{color:#b8ff36}.mom-dn{color:#f87171}.mom-neu{color:var(--mut)}
 .mom-bars{margin-top:10px;display:flex;flex-direction:column;gap:5px}
 .mom-bar-row{display:grid;grid-template-columns:26px 1fr 46px;align-items:center;gap:6px}
@@ -162,10 +167,10 @@ svg{display:block;width:100%;overflow:visible}
   border-radius:10px;padding:10px 14px;font-size:13px;opacity:0;transition:opacity .12s;z-index:999;max-width:280px}
 .t-v{color:var(--acc);font-family:"IBM Plex Mono",monospace}
 @media(max-width:1200px){
-  .kpis{grid-template-columns:repeat(3,1fr)}
+  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:860px){
-  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(2,1fr)}
   .grid{grid-template-columns:1fr}
   .card.full{grid-column:1}
   .row{grid-template-columns:110px 1fr auto auto}
@@ -175,7 +180,7 @@ svg{display:block;width:100%;overflow:visible}
   header{flex-direction:column;align-items:flex-start;gap:6px}
   .scope{text-align:left}
   .brand h1{font-size:clamp(26px,8vw,38px)}
-  .kpis{grid-template-columns:1fr 1fr}
+  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr 1fr}
   .kpi{padding:14px 14px}
   .kpi .k-val{font-size:clamp(18px,5vw,26px)}
   .tipos{grid-template-columns:1fr!important}
@@ -187,9 +192,11 @@ svg{display:block;width:100%;overflow:visible}
   .row .pct{display:none}
   .row .amt{min-width:60px;font-size:11.5px}
 }
-@media(max-width:380px){.kpis{grid-template-columns:1fr}}
+@media(max-width:380px){.kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr}}
 
 /* ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n) ===== */
+/* v17: las 4 tarjetas de KPI de Aging quedan centradas (texto y separación) dentro de su propia fila */
+#agingKpis .kpi{text-align:center}
 .aging-head{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);
   display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
 .aging-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(24px,3.6vw,38px);line-height:.95;letter-spacing:-.03em}
@@ -212,11 +219,6 @@ svg{display:block;width:100%;overflow:visible}
 .dseg{position:absolute;top:0;height:100%}
 .dzero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--line2);z-index:1}
 .drow .damt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--tx);text-align:right;min-width:100px}
-.donut-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap;justify-content:center;padding:6px 0}
-.donut-legend{display:flex;flex-direction:column;gap:10px}
-.donut-legend .li{display:flex;align-items:center;gap:9px;font-size:13px}
-.donut-legend .sw{width:11px;height:11px;border-radius:3px;flex:none}
-.donut-legend .lv{font-family:"IBM Plex Mono",monospace;color:var(--tx);margin-left:16px}
 @media(max-width:600px){
   .drow{grid-template-columns:96px 1fr auto;gap:6px}
   .drow .dnm{font-size:11px}
@@ -272,7 +274,7 @@ svg{display:block;width:100%;overflow:visible}
   <button class="clear-btn hide" id="clearUnitBtn">&times; Quitar unidad</button>
 </div>
 
-<div class="kpis" id="kpis"></div>
+<div class="kpis kpis6" id="kpis"></div>
 
 <div class="card" style="margin-bottom:14px">
   <div class="c-head">
@@ -321,15 +323,7 @@ svg{display:block;width:100%;overflow:visible}
 
 <div id="agingErrorBox"></div>
 
-<div class="kpis" id="agingKpis"></div>
-
-<div class="card" style="margin-top:10px;margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Venta real vs. no real</span>
-    <span class="c-note">proporci&oacute;n sobre la deuda total (TIPO = Mercader&iacute;a vs. Iva)</span>
-  </div>
-  <div id="agingDonut"></div>
-</div>
+<div class="kpis kpis4" id="agingKpis"></div>
 
 <div class="card" style="margin-bottom:14px">
   <div class="c-head">
@@ -669,9 +663,11 @@ function render(){
 
   document.getElementById('kpis').innerHTML =
     `<div class="kpi acc"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
-      <div class="k-val full">${fmtFull(totalPeriodo)}</div>
-      <div class="k-split"><span class="k-split-real">&#9679; Real (ya cobrado): <b>${fmtFull(totalReal)}</b></span><span class="k-split-proy">&#9679; Proyectado (pendiente): <b>${fmtFull(totalProy)}</b></span></div>
-      <div class="k-sub">${unitFilter||'todas las unidades'} &middot; ${diasConDatos} d&iacute;as h&aacute;biles</div></div>
+      <div class="k-val full">${fmtFull(totalReal)}</div>
+      <div class="k-sub">Real (ya cobrado) &middot; ${unitFilter||'todas las unidades'} &middot; ${diasConDatos} d&iacute;as h&aacute;biles</div></div>
+    <div class="kpi mrg"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
+      <div class="k-val full">${fmtFull(totalProy)}</div>
+      <div class="k-sub">Pendiente de cobro &middot; ${unitFilter||'todas las unidades'} &middot; ${diasConDatos} d&iacute;as h&aacute;biles</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
       <div class="k-val ${momCls}" style="font-size:clamp(16px,2vw,26px)">${momSign}</div>
       <div class="mom-bars">
@@ -686,7 +682,7 @@ function render(){
           <span class="mom-bar-amt">${fmtM(curMesVta)}</span>
         </div>
       </div></div>
-    <div class="kpi mrg"><div class="k-lbl">Promedio diario</div>
+    <div class="kpi"><div class="k-lbl">Promedio diario</div>
       <div class="k-val">${fmtM(promedioDiario)}</div>
       <div class="k-sub">sobre d&iacute;as con actividad</div></div>
     <div class="kpi"><div class="k-lbl">Mejor unidad</div>
@@ -943,22 +939,33 @@ async function loadAgingFromRaw(){
     total += saldo;
     if(esReal) ventaReal += saldo; else noReal += saldo;
 
-    const analista = (c[iAnalista]||'').trim() || '(sin analista)';
-    if(!analistaAgg[analista]) analistaAgg[analista] = {name:analista, real:0, noreal:0, total:0};
-    analistaAgg[analista][esReal?'real':'noreal'] += saldo;
-    analistaAgg[analista].total += saldo;
+    // v19: si el campo viene vacío, la fila directamente no se suma a esa tabla/gráfico
+    // (antes se agrupaba bajo "(sin analista)"/"(sin vendedor)"/"(sin cliente)", lo cual
+    // ensuciaba las tablas y gráficos con filas sin datos reales). No afecta a las 4
+    // tarjetas KPI de arriba (Deuda total / Venta real / No real), que siguen sumando
+    // TODAS las filas pendientes de cobro más allá de si tienen o no analista/vendedor/cliente.
+    const analista = (c[iAnalista]||'').trim();
+    if(analista){
+      if(!analistaAgg[analista]) analistaAgg[analista] = {name:analista, real:0, noreal:0, total:0};
+      analistaAgg[analista][esReal?'real':'noreal'] += saldo;
+      analistaAgg[analista].total += saldo;
+    }
 
-    const vendedor = (c[iVendedor]||'').trim() || '(sin vendedor)';
-    if(!vendedorAgg[vendedor]) vendedorAgg[vendedor] = {name:vendedor, real:0, noreal:0, total:0};
-    vendedorAgg[vendedor][esReal?'real':'noreal'] += saldo;
-    vendedorAgg[vendedor].total += saldo;
+    const vendedor = (c[iVendedor]||'').trim();
+    if(vendedor){
+      if(!vendedorAgg[vendedor]) vendedorAgg[vendedor] = {name:vendedor, real:0, noreal:0, total:0};
+      vendedorAgg[vendedor][esReal?'real':'noreal'] += saldo;
+      vendedorAgg[vendedor].total += saldo;
+    }
 
-    const cliente = (c[iRazon]||'').trim() || '(sin cliente)';
-    const estadoVenc = (c[iEstadoVenc]||'').trim().toUpperCase();
-    const bucket = estadoVenc==='VENCIDO' ? 'vencido' : estadoVenc==='EN PLAZO' ? 'enplazo' : estadoVenc==='CUMPLIDO' ? 'cumplido' : 'otro';
-    if(!clienteAgg[cliente]) clienteAgg[cliente] = {name:cliente, vencido:0, enplazo:0, cumplido:0, otro:0, total:0};
-    clienteAgg[cliente][bucket] += saldo;
-    clienteAgg[cliente].total += saldo;
+    const cliente = (c[iRazon]||'').trim();
+    if(cliente){
+      const estadoVenc = (c[iEstadoVenc]||'').trim().toUpperCase();
+      const bucket = estadoVenc==='VENCIDO' ? 'vencido' : estadoVenc==='EN PLAZO' ? 'enplazo' : estadoVenc==='CUMPLIDO' ? 'cumplido' : 'otro';
+      if(!clienteAgg[cliente]) clienteAgg[cliente] = {name:cliente, vencido:0, enplazo:0, cumplido:0, otro:0, total:0};
+      clienteAgg[cliente][bucket] += saldo;
+      clienteAgg[cliente].total += saldo;
+    }
   }
   const sortDesc = obj => Object.values(obj).sort((a,b)=>b.total-a.total);
   return {
@@ -970,7 +977,7 @@ async function loadAgingFromRaw(){
 }
 
 function showAgingError(msg){
-  ['agingKpis','agingDonut','agingAnalistaChart','agingVendedorChart','agingClienteChart'].forEach(id=>{
+  ['agingKpis','agingAnalistaChart','agingVendedorChart','agingClienteChart'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML='';
   });
   ['agingAnalistaTable','agingVendedorTable','agingClienteTable'].forEach(id=>{
@@ -982,37 +989,19 @@ function showAgingError(msg){
     '<div class="c-note" style="margin-top:8px;color:var(--tx)">'+msg+'</div></div>';
 }
 
+// v18: se agrega una breve descripción (k-sub) debajo del total de cada tarjeta,
+// igual que en las tarjetas KPI de la parte superior del tablero (Cobrado, Proyectado, etc.)
 function agRenderKpis(kpi){
   const pct = kpi.total>0? kpi.ventaReal/kpi.total*100 : 0;
   document.getElementById('agingKpis').innerHTML =
-    `<div class="kpi acc"><div class="k-lbl">Deuda total</div><div class="k-val full">${agFmtFull(kpi.total)}</div></div>
-     <div class="kpi"><div class="k-lbl">Venta real</div><div class="k-val" style="color:var(--acc)">${agFmtFull(kpi.ventaReal)}</div></div>
-     <div class="kpi mrg"><div class="k-lbl">No real</div><div class="k-val">${agFmtFull(kpi.noReal)}</div></div>
-     <div class="kpi"><div class="k-lbl">% venta real</div><div class="k-val">${fmtPct(pct)}</div></div>`;
-}
-
-function agRenderDonut(kpi){
-  const total = kpi.ventaReal + kpi.noReal;
-  const pctV = total>0? kpi.ventaReal/total*100 : 0;
-  const R=54, C=2*Math.PI*R;
-  const dashV = C*pctV/100;
-  const accCol = A();
-  const noCol = getComputedStyle(document.body).getPropertyValue('--teal').trim();
-  document.getElementById('agingDonut').innerHTML = `
-    <div class="donut-row">
-      <svg width="150" height="150" viewBox="0 0 150 150">
-        <circle cx="75" cy="75" r="${R}" fill="none" stroke="${noCol}" stroke-width="18"/>
-        <circle cx="75" cy="75" r="${R}" fill="none" stroke="${accCol}" stroke-width="18"
-          stroke-dasharray="${dashV.toFixed(1)} ${(C-dashV).toFixed(1)}"
-          transform="rotate(-90 75 75)" stroke-linecap="round"/>
-        <text x="75" y="71" text-anchor="middle" class="num" font-size="20" fill="var(--tx)" font-weight="600">${pctV.toFixed(1)}%</text>
-        <text x="75" y="88" text-anchor="middle" font-size="10.5" fill="var(--mut2)">venta real</text>
-      </svg>
-      <div class="donut-legend">
-        <div class="li"><span class="sw" style="background:${accCol}"></span>Venta real<span class="lv">${agFmtFull(kpi.ventaReal)}</span></div>
-        <div class="li"><span class="sw" style="background:${noCol}"></span>No real<span class="lv">${agFmtFull(kpi.noReal)}</span></div>
-      </div>
-    </div>`;
+    `<div class="kpi acc"><div class="k-lbl">Deuda total</div><div class="k-val">${agFmtFull(kpi.total)}</div>
+      <div class="k-sub">saldo pendiente de toda la cartera (Aging)</div></div>
+     <div class="kpi"><div class="k-lbl">Venta real</div><div class="k-val" style="color:var(--acc)">${agFmtFull(kpi.ventaReal)}</div>
+      <div class="k-sub">comprobantes con TIPO = Mercader&iacute;a</div></div>
+     <div class="kpi mrg"><div class="k-lbl">No real</div><div class="k-val">${agFmtFull(kpi.noReal)}</div>
+      <div class="k-sub">comprobantes con TIPO = Iva</div></div>
+     <div class="kpi"><div class="k-lbl">% venta real</div><div class="k-val">${fmtPct(pct)}</div>
+      <div class="k-sub">venta real sobre la deuda total</div></div>`;
 }
 
 // v12: tabla genérica de N columnas numéricas + Total deuda (antes admitía sólo 2
@@ -1064,7 +1053,6 @@ function agRenderDivergingN(containerId, items, series){
 
 function agRenderAll(ag){
   agRenderKpis(ag.kpi);
-  agRenderDonut(ag.kpi);
   agRenderTableN('agingAnalistaTable', ag.analistas, 'Cobrador / Analista', [{key:'real',label:'Venta real'},{key:'noreal',label:'No real'}]);
   agRenderTableN('agingVendedorTable', ag.vendedores, 'Vendedor', [{key:'real',label:'Venta real'},{key:'noreal',label:'No real'}]);
   agRenderTableN('agingClienteTable', ag.clientes, 'Cliente', [{key:'vencido',label:'Vencido'},{key:'enplazo',label:'En plazo'},{key:'cumplido',label:'Cumplido'},{key:'otro',label:'Otro'}]);
