@@ -111,6 +111,10 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .kpi.acc .k-val{color:var(--acc)}
 .kpi.mrg .k-val{color:var(--teal)}
 .kpi .k-sub{font-size:12px;color:var(--mut);margin-top:5px}
+.kpi .k-split{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;margin-top:7px}
+.kpi .k-split span{white-space:nowrap}
+.kpi .k-split-real{color:var(--teal)}
+.kpi .k-split-proy{color:var(--mut2)}
 .grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}
 .card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);
   border-radius:var(--r);padding:18px 20px 20px;position:relative}
@@ -219,6 +223,27 @@ svg{display:block;width:100%;overflow:visible}
   .drow .damt{min-width:66px;font-size:10.5px}
   .agtbl th,.agtbl td{padding:6px 5px;font-size:11px}
 }
+
+/* ===== Sección Semáforo de gerencia (agregada en esta versión) ===== */
+.mgmt-section{margin-top:14px}
+.mgmt-body{border-radius:14px;padding:0;overflow:hidden}
+.mgmt-legend{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px 22px;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--mut);border-bottom:1px solid rgba(127,127,127,.18)}
+.mgmt-legend .mgmt-legend-right{margin-left:auto;display:flex;gap:14px;font-weight:500;letter-spacing:0;text-transform:none}
+.mgmt-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.mgmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:18px 22px}
+@media(max-width:820px){.mgmt-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.mgmt-grid{grid-template-columns:1fr}}
+.mgmt-tile{border-radius:10px;overflow:hidden;background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:5px solid transparent}
+.mgmt-tile.franja-naranja{border-left-color:#f59e0b}
+.mgmt-tile.franja-teal{border-left-color:#14b8a6}
+.mgmt-tile-top{height:5px}
+.mgmt-tile-body{padding:14px 16px 16px;position:relative}
+.mgmt-tile-lbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--mut);text-transform:uppercase;padding-right:20px}
+.mgmt-tile-dot{position:absolute;top:14px;right:14px;width:12px;height:12px;border-radius:50%}
+.mgmt-tile-val{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:700;margin-top:10px;color:var(--tx)}
+.mgmt-tile-val.tbd{font-size:16px;color:var(--mut);font-weight:600;font-family:inherit}
+.mgmt-tile-target{font-size:11.5px;color:var(--mut);margin-top:6px}
+.mgmt-foot{padding:12px 22px;font-size:11.5px;font-style:italic;color:var(--mut);background:rgba(127,127,127,.06)}
 </style>
 </head>
 <body class="light">
@@ -301,7 +326,7 @@ svg{display:block;width:100%;overflow:visible}
 <div class="card" style="margin-top:10px;margin-bottom:14px">
   <div class="c-head">
     <span class="c-title">Venta real vs. no real</span>
-    <span class="c-note">proporci&oacute;n sobre la deuda total</span>
+    <span class="c-note">proporci&oacute;n sobre la deuda total (TIPO = Mercader&iacute;a vs. Iva)</span>
   </div>
   <div id="agingDonut"></div>
 </div>
@@ -346,67 +371,104 @@ svg{display:block;width:100%;overflow:visible}
 
 <div class="card" style="margin-bottom:14px">
   <div class="c-head">
-    <span class="c-title">Clientes: vencidos vs no vencidos</span>
-    <span class="c-note">deuda por cliente</span>
+    <span class="c-title">Clientes: por estado de vencimiento</span>
+    <span class="c-note">deuda por cliente &middot; columna ESTADO VENCIMIENTO de la pesta&ntilde;a Aging</span>
   </div>
   <div style="overflow-x:auto"><table class="agtbl" id="agingClienteTable"></table></div>
 </div>
 <div class="card" style="margin-bottom:14px">
   <div class="c-head">
     <span class="c-title">Clientes &middot; gr&aacute;fico</span>
-    <span class="hint">vencido vs. no vencido por cliente</span>
+    <span class="hint">vencido / en plazo / cumplido por cliente</span>
   </div>
   <div class="dlegend">
     <span><span class="sw" style="background:#f87171"></span>Vencido</span>
-    <span><span class="sw" style="background:var(--acc)"></span>No vencido</span>
+    <span><span class="sw" style="background:var(--acc)"></span>En plazo</span>
+    <span><span class="sw" style="background:var(--teal)"></span>Cumplido</span>
+    <span><span class="sw" style="background:#94a3b8"></span>Otro</span>
   </div>
   <div class="dcol" id="agingClienteChart"></div>
+</div>
+
+<!-- ===== Sección Semáforo de gerencia (agregada en esta versión, fuente de datos independiente) ===== -->
+<div class="mgmt-section">
+  <div class="card mgmt-body">
+    <div class="mgmt-legend">
+      <span>SEMAFORO DEL MES</span>
+      <span id="mgmtErrorNote" style="color:#f87171;font-weight:600;text-transform:none;letter-spacing:0"></span>
+      <div class="mgmt-legend-right">
+        <span><span class="mgmt-dot" style="background:#22c55e"></span>Verde = en rango</span>
+        <span><span class="mgmt-dot" style="background:#f59e0b"></span>Amarillo = atenci&oacute;n</span>
+        <span><span class="mgmt-dot" style="background:#ef4444"></span>Rojo = acci&oacute;n inmediata</span>
+      </div>
+    </div>
+    <div class="mgmt-grid" id="mgmtGrid"></div>
+    <div class="mgmt-foot" id="mgmtFoot">
+      Cta. Cte. en Calle: franja naranja&nbsp;=&nbsp;Papeleras &middot; franja teal&nbsp;=&nbsp;Caterings &middot; sin franja&nbsp;=&nbsp;Especiales (agrupa CDH + VyMat + Cliente/Proveedor + Otros/Ajustes del tablero de arriba &mdash; a confirmar con Graciela). NC Emitidas incluye comprobantes NCR y NCE.
+      Calculado en vivo desde la pesta&ntilde;a "Aging". Pendientes de definici&oacute;n con Graciela: DSO, CEI&nbsp;48hs, Deuda incobrable, Tasa disputada, Cheques rechazados.
+    </div>
+  </div>
 </div>
 
 </div>
 <div id="tip"></div>
 <script>
 // FUENTE DE DATOS (v7): el Sheet viejo (fila=día, 5 columnas de unidad) fue borrado por el
-// usuario y daba HTTP 410. Este tablero ahora reconstruye las mismas 5 unidades a partir de la
+// usuario y daba HTTP 410. Este tablero ahora reconstruye las mismas unidades a partir de la
 // pestaña "Aging" (comprobante por comprobante) del Sheet "Aging", publicada como CSV.
 // Criterio acordado con Nahuel/Graciela para ubicar cada comprobante en el calendario:
-//  - Si ya se cobró (COBRADO / DESCONTADO = TRUE): fecha = FECHA COBRANZA, monto = SALDO PARCIAL APLICADO.
+//  - Si ya se cobró (COBRADO / DESCONTADO = TRUE/VERDADERO): fecha = FECHA COBRANZA, monto = SALDO PARCIAL APLICADO.
 //  - Si todavía no se cobró: fecha = FECHA ESTIMADA DE COBRANZA; si está vacía, FECHA DE ENTREGA DE
 //    PRODUCTOS + días de CONDICION DE VENTA; si tampoco hay entrega, FECHA DE VENCIMIENTO. Monto = SALDO.
-// Unidad = columna TIO DE CLIENTE, mapeada a las 5 categorías existentes (ver mapTipoClienteToUnit).
+// Unidad = columna TIO DE CLIENTE, mapeada a las 6 categorías existentes (ver mapTipoClienteToUnit).
 // Este dashboard SIEMPRE lee de acá — no tiene datos embebidos ni fallback local.
 // Si esto está vacío, o si falla la lectura, se muestra un error en vez del dashboard.
+//
+// AJUSTES v10 (el Sheet cambió de idioma/agregó un tipo de cliente nuevo):
+//  1) La columna COBRADO / DESCONTADO pasó de mostrar "TRUE"/"FALSE" a "VERDADERO"/"FALSO"
+//     (cambio de idioma del Sheet). Se acepta cualquiera de los dos por resiliencia.
+//  2) Apareció un nuevo valor de TIPO DE CLIENTE, "Cliente / proveedor" (antes cualquier valor
+//     no reconocido caía en "Otros/Ajustes"). A pedido de Nahuel ahora tiene su propio bucket.
+//  3) En el semáforo de gerencia, "NC Emitidas" ahora también cuenta comprobantes "NCE"
+//     (antes solo "NCR") — parecen ser la misma familia de Notas de Crédito.
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJXSOuDH9QTf-i7czJt-5l9TsdoNWgLHr55blzpWWfwG4ivbMnaJaKgs92yNJSSfubAzq713apwyd8/pub?gid=457164138&single=true&output=csv';
 
 let DATA = [], MESES = [], MLBL = {};
 
-// Fechas de la pestaña "Aging" vienen en dos formatos distintos según la columna:
-// DD/MM/AA (año de 2 dígitos, ej. FECHA COBRANZA "31/07/26") o M/D/AAAA (año de 4 dígitos,
-// ej. FECHA ESTIMADA DE COBRANZA "8/7/2026"). Se distinguen por la cantidad de dígitos del año.
+// v14 — BUG CORREGIDO: esta función asumía que un año de 4 dígitos significaba formato
+// M/D/AAAA (mes primero, "americano"), reservando D/M/AA (día primero, es-AR) solo para
+// año de 2 dígitos. Esa distinción nunca fue real: TODAS las columnas de fecha de la
+// pestaña "Aging" son día/mes/año (es-AR), sea el año de 2 o de 4 dígitos — el Sheet viene
+// migrando de a poco filas de 2 a 4 dígitos de año, mezclando ambos formatos en la misma
+// columna. Con la lógica vieja, una fecha como "31/07/2026" se leía como mes=31, lo cual
+// desborda meses (31 → +2 años, +6 meses) y terminaba mostrando comprobantes en 2027/2028
+// que no existen en el Sheet. Detectado por Nahuel. Ahora se interpreta SIEMPRE como
+// día/mes/año, sin importar cuántos dígitos tenga el año.
 function agParseDateFlexible(s){
   s = (s==null?'':String(s)).trim();
   if(!s) return null;
   const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if(!m) return null;
-  const a=parseInt(m[1],10), b=parseInt(m[2],10), c=parseInt(m[3],10);
-  let day, month, year;
-  if(m[3].length<=2){ day=a; month=b; year=2000+c; } // DD/MM/AA
-  else { month=a; day=b; year=c; } // M/D/AAAA
+  const day=parseInt(m[1],10), month=parseInt(m[2],10), yRaw=parseInt(m[3],10);
+  const year = yRaw<100 ? 2000+yRaw : yRaw; // año de 2 dígitos -> 20XX; de 4 dígitos, tal cual
   if(!day||!month||!year) return null;
+  if(day<1||day>31||month<1||month>12) return null; // defensivo: nunca forzar una fecha imposible
   const d = new Date(Date.UTC(year, month-1, day));
   return isNaN(d.getTime())? null : d;
 }
 const agToISO = d => d ? `${d.getUTCFullYear()}-${(d.getUTCMonth()+1).toString().padStart(2,'0')}-${d.getUTCDate().toString().padStart(2,'0')}` : null;
 function agAddDays(d, days){ const r=new Date(d.getTime()); r.setUTCDate(r.getUTCDate()+(days||0)); return r; }
 
-// Mapeo TIO DE CLIENTE -> las 5 unidades del tablero (confirmado con Nahuel: "Otros / CHD" = CDH).
+// Mapeo TIO DE CLIENTE -> las 6 unidades del tablero (confirmado con Nahuel: "Otros / CHD" = CDH;
+// "Cliente / proveedor" tiene su propio bucket desde v10 — antes caía en Otros/Ajustes).
 function mapTipoClienteToUnit(tipoCliente){
   const t = (tipoCliente||'').trim().toLowerCase();
   if(t==='papelera' || t==='pepelera') return 'Papeleras CC';
   if(t==='catering') return 'Catering';
   if(t==='otros / chd' || t==='otros/chd') return 'CDH';
   if(t==='vymat') return 'VyMat';
-  return 'Otros/Ajustes'; // "Cliente / proveedor", vacío, o cualquier valor no reconocido
+  if(t==='cliente / proveedor' || t==='cliente/proveedor') return 'Cliente/Proveedor';
+  return 'Otros/Ajustes'; // vacío, o cualquier otro valor no reconocido
 }
 
 function parseCSV(text){
@@ -432,7 +494,7 @@ function parseCSV(text){
     const first = (c[0]||'').trim();
     if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
     if(!c.some(v=>v && v.trim())) continue; // fila vacía
-    const cobrado = first.toUpperCase()==='TRUE';
+    const cobrado = first.toUpperCase()==='TRUE' || first.toUpperCase()==='VERDADERO'; // v10: el Sheet ahora usa "VERDADERO"/"FALSO" (antes TRUE/FALSE)
     let dateObj, amount;
     if(cobrado){
       dateObj = agParseDateFlexible(c[iFechaCobranza]);
@@ -447,9 +509,24 @@ function parseCSV(text){
       amount = agNum(c[iSaldo]);
     }
     if(!dateObj) continue; // sin ninguna fecha usable, no se puede ubicar en el calendario
-    out.push({date: agToISO(dateObj), unit: mapTipoClienteToUnit(c[iTipoCliente]), amount});
+    out.push({date: agToISO(dateObj), unit: mapTipoClienteToUnit(c[iTipoCliente]), amount, cobrado});
   }
   return out;
+}
+
+// Guarda las transacciones sin agregar (con el flag "cobrado" de cada una), para poder separar
+// "real" (ya cobrado) de "proyectado" (pendiente, fecha estimada) en la tarjeta de KPIs sin
+// tener que tocar DATA/MESES ni el ranking, la matriz o el gráfico mensual, que siguen usando
+// el total combinado como hasta ahora.
+let RAW_TX = [];
+function realProyectadoTotals(){
+  let real=0, proy=0;
+  RAW_TX.forEach(t=>{
+    if(mesFilter && t.date.slice(0,7)!==mesFilter) return;
+    if(unitFilter && t.unit!==unitFilter) return;
+    if(t.cobrado) real+=t.amount; else proy+=t.amount;
+  });
+  return {real, proy};
 }
 
 async function loadData(){
@@ -463,6 +540,7 @@ async function loadData(){
 }
 
 function buildFromRaw(raw){
+  RAW_TX = raw;
   const byDate = {};
   raw.forEach(t=>{
     if(!byDate[t.date]){
@@ -497,9 +575,9 @@ function showError(msg){
     '<div class="c-note" style="margin-top:8px;color:var(--tx)">'+msg+'</div>';
 }
 
-const UNIT_NAMES=['Papeleras CC','Catering','CDH','VyMat','Otros/Ajustes'];
-const PAL_DARK=['#5fb8ff','#34e3c6','#f59e0b','#9d7bff','#6b7280'];
-const PAL_LIGHT=['#1d4ed8','#0891b2','#d97706','#7c3aed','#64748b'];
+const UNIT_NAMES=['Papeleras CC','Catering','CDH','VyMat','Cliente/Proveedor','Otros/Ajustes'];
+const PAL_DARK=['#5fb8ff','#34e3c6','#f59e0b','#9d7bff','#e879f9','#6b7280'];
+const PAL_LIGHT=['#1d4ed8','#0891b2','#d97706','#7c3aed','#a21caf','#64748b'];
 const COLOR={};
 function updateColor(){
   const pal = document.body.classList.contains('light')?PAL_LIGHT:PAL_DARK;
@@ -564,6 +642,7 @@ function render(){
   const totalPeriodo = R.reduce((s,d)=>s+(unitFilter?d[unitFilter]:d.total),0);
   const diasConDatos = R.length;
   const promedioDiario = diasConDatos>0?totalPeriodo/diasConDatos:0;
+  const {real: totalReal, proy: totalProy} = realProyectadoTotals();
 
   document.getElementById('scope').textContent = unitFilter||'Todas';
   document.getElementById('clearUnitBtn').classList.toggle('hide', !unitFilter);
@@ -591,6 +670,7 @@ function render(){
   document.getElementById('kpis').innerHTML =
     `<div class="kpi acc"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
       <div class="k-val full">${fmtFull(totalPeriodo)}</div>
+      <div class="k-split"><span class="k-split-real">&#9679; Real (ya cobrado): <b>${fmtFull(totalReal)}</b></span><span class="k-split-proy">&#9679; Proyectado (pendiente): <b>${fmtFull(totalProy)}</b></span></div>
       <div class="k-sub">${unitFilter||'todas las unidades'} &middot; ${diasConDatos} d&iacute;as h&aacute;biles</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
       <div class="k-val ${momCls}" style="font-size:clamp(16px,2vw,26px)">${momSign}</div>
@@ -768,13 +848,25 @@ function toggleTheme(){
 })();
 
 // ================================================================
-// ===== AGING (secci&oacute;n agregada en esta versi&oacute;n) ====
-// Fuente de datos completamente independiente del tablero de arriba:
-// lee en vivo la pesta&ntilde;a "Resumen Aging" del Sheet "Aging" (publicada como CSV).
-// Si falla, el error se muestra SOLO en esta secci&oacute;n; el tablero de
-// cobranzas de arriba sigue funcionando igual.
+// ===== AGING (secci&oacute;n agregada originalmente, reconstruida en v12) ====
+// v6-v11: le&iacute;a en vivo la pesta&ntilde;a "Resumen Aging" (un resumen armado a mano por
+// Graciela), publicada aparte como CSV (AGING_CSV_URL, sin gid = la hoja publicada por defecto).
+// v12: Nahuel elimin&oacute; esa pesta&ntilde;a del Sheet, as&iacute; que esta secci&oacute;n ahora se reconstruye
+// enteramente a partir de la MISMA pesta&ntilde;a "Aging" cruda (SHEET_CSV_URL) que usan el tablero
+// principal y el sem&aacute;foro de gerencia — sigue siendo una lectura/agregaci&oacute;n independiente
+// de esas dos (si algo cambia acá, no rompe las otras secciones, y viceversa). Definiciones
+// acordadas con Nahuel:
+//  - "Deuda total" = suma de SALDO de los comprobantes TODAV&Iacute;A NO cobrados (COBRADO/DESCONTADO=FALSO).
+//    Lo ya cobrado no se considera "deuda en la calle".
+//  - "Venta real" vs "No real" = columna TIPO: "Mercaderia" es venta real; "Iva" (y comprobantes
+//    sin TIPO, t&iacute;picamente notas de cr&eacute;dito/d&eacute;bito) es "no real".
+//  - Vencido / En plazo / Cumplido (tabla y gr&aacute;fico de Clientes) = tal cual la columna
+//    ESTADO VENCIMIENTO de la pesta&ntilde;a Aging, sin recalcular por fecha. Se agreg&oacute; una 4ta
+//    categor&iacute;a "Otro" por si en el futuro aparece un valor distinto a esos 3 (para no
+//    perder silenciosamente ninguna fila).
+// Si falla la lectura, el error se muestra SOLO en esta secci&oacute;n; el tablero de
+// cobranzas y el sem&aacute;foro de gerencia siguen funcionando igual.
 // ================================================================
-const AGING_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJXSOuDH9QTf-i7czJt-5l9TsdoNWgLHr55blzpWWfwG4ivbMnaJaKgs92yNJSSfubAzq713apwyd8/pub?output=csv';
 
 function splitCSVLine(line){
   const out=[]; let cur=''; let inQ=false;
@@ -814,44 +906,67 @@ const agFmtFull=n=>{
   return (neg?'-$':'$')+Math.round(Math.abs(n)).toLocaleString('es-AR',{maximumFractionDigits:0});
 };
 
-// Parsea el CSV multi-tabla de "Resumen Aging": busca las filas/columnas por
-// texto (no por número de fila/columna fijo) para que no se rompa si el Sheet
-// crece o cambia de forma con el tiempo.
-function parseAgingCSV(text){
-  const rows = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0).map(splitCSVLine);
-  const findByFirst = label => rows.find(r=>agTxt(r[0])===label);
-  const rTotal = findByFirst('Deuda total');
-  const rVenta = findByFirst('Venta real');
-  const rNo = findByFirst('No real');
-  if(!rTotal||!rVenta||!rNo) throw new Error('no encontré las filas de KPIs (Deuda total / Venta real / No real) en el CSV de Aging');
-  const kpi = { total: agNum(rTotal[1]), ventaReal: agNum(rVenta[1]), noReal: agNum(rNo[1]) };
-
-  const headerRowIdx = rows.findIndex(r=>r.some(c=>/analista/i.test(agTxt(c))));
-  if(headerRowIdx<0) throw new Error('no encontré la fila de encabezados de las tablas de desglose (Analista/Vendedor/Cliente)');
-  const header = rows[headerRowIdx];
-  const colA = header.findIndex(c=>/analista/i.test(agTxt(c)));
-  const colV = header.findIndex(c=>/^vendedor$/i.test(agTxt(c)));
-  const colC = header.findIndex(c=>/^cliente$/i.test(agTxt(c)));
-  if(colA<0||colV<0||colC<0) throw new Error('no encontré alguna de las 3 tablas de desglose (Analista/Vendedor/Cliente) en el CSV de Aging');
-
-  function readBlock(col){
-    const out=[];
-    for(let i=headerRowIdx+1;i<rows.length;i++){
-      const r=rows[i]; const name=agTxt(r[col]);
-      if(!name) break;
-      out.push({name, a:agNum(r[col+1]), b:agNum(r[col+2]), total:agNum(r[col+3])});
-    }
-    return out;
-  }
-  return { kpi, analistas:readBlock(colA), vendedores:readBlock(colV), clientes:readBlock(colC) };
-}
-
-async function loadAging(){
-  const url = AGING_CSV_URL + (AGING_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
+// v12: agrega/deriva todo lo que necesita esta sección directamente de la pestaña "Aging"
+// cruda (comprobante por comprobante), en vez de leerlo ya calculado de "Resumen Aging"
+// (que ya no existe). Busca columnas por nombre, no por posición, para no romperse si el
+// Sheet cambia de forma con el tiempo.
+async function loadAgingFromRaw(){
+  const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
   const res = await fetch(url, {cache:'no-store'});
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const text = await res.text();
-  return parseAgingCSV(text);
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
+  if(!lines.length) throw new Error('el CSV no tiene filas');
+  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
+  const idx = name => header.findIndex(h=>h===name);
+  const iSaldo = idx('SALDO');
+  const iTipo = idx('TIPO');
+  const iEstadoVenc = idx('ESTADO VENCIMIENTO');
+  const iAnalista = idx('ANALISTA');
+  const iVendedor = idx('VENDEDOR');
+  const iRazon = idx('RAZON SOCIAL CLIENTE');
+  if([iSaldo,iTipo,iEstadoVenc,iAnalista,iVendedor,iRazon].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas en la pestaña "Aging" (revisá si cambiaron los encabezados)');
+  }
+  const analistaAgg={}, vendedorAgg={}, clienteAgg={};
+  let ventaReal=0, noReal=0, total=0;
+  for(let i=1;i<lines.length;i++){
+    const c = splitCSVLine(lines[i]);
+    const first = (c[0]||'').trim();
+    if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
+    if(!c.some(v=>v && v.trim())) continue; // fila vacía
+    const cobrado = first.toUpperCase()==='TRUE' || first.toUpperCase()==='VERDADERO';
+    if(cobrado) continue; // "Deuda total" = solo lo pendiente de cobro (acordado con Nahuel)
+    const saldo = agNum(c[iSaldo]);
+    const tipo = (c[iTipo]||'').trim().toLowerCase();
+    const esReal = tipo==='mercaderia'; // "no real" = "Iva" o sin TIPO (NC/ND), acordado con Nahuel
+    total += saldo;
+    if(esReal) ventaReal += saldo; else noReal += saldo;
+
+    const analista = (c[iAnalista]||'').trim() || '(sin analista)';
+    if(!analistaAgg[analista]) analistaAgg[analista] = {name:analista, real:0, noreal:0, total:0};
+    analistaAgg[analista][esReal?'real':'noreal'] += saldo;
+    analistaAgg[analista].total += saldo;
+
+    const vendedor = (c[iVendedor]||'').trim() || '(sin vendedor)';
+    if(!vendedorAgg[vendedor]) vendedorAgg[vendedor] = {name:vendedor, real:0, noreal:0, total:0};
+    vendedorAgg[vendedor][esReal?'real':'noreal'] += saldo;
+    vendedorAgg[vendedor].total += saldo;
+
+    const cliente = (c[iRazon]||'').trim() || '(sin cliente)';
+    const estadoVenc = (c[iEstadoVenc]||'').trim().toUpperCase();
+    const bucket = estadoVenc==='VENCIDO' ? 'vencido' : estadoVenc==='EN PLAZO' ? 'enplazo' : estadoVenc==='CUMPLIDO' ? 'cumplido' : 'otro';
+    if(!clienteAgg[cliente]) clienteAgg[cliente] = {name:cliente, vencido:0, enplazo:0, cumplido:0, otro:0, total:0};
+    clienteAgg[cliente][bucket] += saldo;
+    clienteAgg[cliente].total += saldo;
+  }
+  const sortDesc = obj => Object.values(obj).sort((a,b)=>b.total-a.total);
+  return {
+    kpi: {total, ventaReal, noReal},
+    analistas: sortDesc(analistaAgg),
+    vendedores: sortDesc(vendedorAgg),
+    clientes: sortDesc(clienteAgg),
+  };
 }
 
 function showAgingError(msg){
@@ -900,40 +1015,47 @@ function agRenderDonut(kpi){
     </div>`;
 }
 
-function agRenderTable(containerId, items, nameLabel, labelA, labelB){
+// v12: tabla genérica de N columnas numéricas + Total deuda (antes admitía sólo 2
+// columnas fijas "a"/"b", ahora la tabla de Clientes necesita 4: Vencido/En plazo/Cumplido/Otro).
+function agRenderTableN(containerId, items, nameLabel, cols){
   const el = document.getElementById(containerId);
-  let html = `<thead><tr><th>${nameLabel}</th><th>${labelA}</th><th>${labelB}</th><th>Total deuda</th></tr></thead><tbody>`;
+  let html = `<thead><tr><th>${nameLabel}</th>${cols.map(c=>`<th>${c.label}</th>`).join('')}<th>Total deuda</th></tr></thead><tbody>`;
   items.forEach(it=>{
-    html += `<tr><td>${it.name}</td><td>${agFmtFull(it.a)}</td><td>${agFmtFull(it.b)}</td><td>${agFmtFull(it.total)}</td></tr>`;
+    html += `<tr><td>${it.name}</td>${cols.map(c=>`<td>${agFmtFull(it[c.key]||0)}</td>`).join('')}<td>${agFmtFull(it.total)}</td></tr>`;
   });
   html += '</tbody>';
   el.innerHTML = html;
 }
 
-// Barras horizontales "divergentes": cada fila apila el segmento A y despu&eacute;s
-// el segmento B a partir del final de A (como una cascada), sobre una escala
-// compartida con cero al centro. Esto permite representar bien los casos donde
-// alguno de los dos valores (o el total) es negativo, algo que una barra
-// apilada tradicional (que arranca siempre en cero) no puede mostrar bien.
-function agRenderDiverging(containerId, items, colA, colB){
+// Barras horizontales "divergentes": cada fila apila los segmentos (2, 3, 4... los que
+// haga falta) uno a continuación del otro, sobre una escala compartida con cero al centro.
+// Esto permite representar bien los casos donde algún segmento (o el total) sea negativo,
+// algo que una barra apilada tradicional (que arranca siempre en cero) no puede mostrar bien.
+function agRenderDivergingN(containerId, items, series){
   let lo=0, hi=0;
   items.forEach(it=>{
-    [0, it.a, it.a+it.b].forEach(v=>{ if(v<lo) lo=v; if(v>hi) hi=v; });
+    let cum=0;
+    const stops=[0];
+    series.forEach(s=>{ cum+=(it[s.key]||0); stops.push(cum); });
+    stops.forEach(v=>{ if(v<lo) lo=v; if(v>hi) hi=v; });
   });
   const span = (hi-lo)||1;
   const pct = v => (v-lo)/span*100;
   const zero = pct(0);
   const el = document.getElementById(containerId);
   el.innerHTML = items.map(it=>{
-    const p0=pct(0), pA=pct(it.a), pAB=pct(it.a+it.b);
-    const left1=Math.min(p0,pA), w1=Math.abs(pA-p0);
-    const left2=Math.min(pA,pAB), w2=Math.abs(pAB-pA);
+    let cum=0;
+    let segs='';
+    series.forEach(s=>{
+      const from=cum; cum+=(it[s.key]||0); const to=cum;
+      const left=Math.min(pct(from),pct(to)), w=Math.abs(pct(to)-pct(from));
+      segs += `<div class="dseg" style="left:${left.toFixed(2)}%;width:${w.toFixed(2)}%;background:${s.color}"></div>`;
+    });
     return `<div class="drow">
       <div class="dnm" title="${it.name}">${it.name}</div>
       <div class="dtrack">
         <div class="dzero" style="left:${zero.toFixed(2)}%"></div>
-        <div class="dseg" style="left:${left1.toFixed(2)}%;width:${w1.toFixed(2)}%;background:${colA}"></div>
-        <div class="dseg" style="left:${left2.toFixed(2)}%;width:${w2.toFixed(2)}%;background:${colB}"></div>
+        ${segs}
       </div>
       <div class="damt">${agFmtFull(it.total)}</div>
     </div>`;
@@ -943,27 +1065,144 @@ function agRenderDiverging(containerId, items, colA, colB){
 function agRenderAll(ag){
   agRenderKpis(ag.kpi);
   agRenderDonut(ag.kpi);
-  agRenderTable('agingAnalistaTable', ag.analistas, 'Cobrador / Analista', 'Venta real', 'No real');
-  agRenderTable('agingVendedorTable', ag.vendedores, 'Vendedor', 'Venta real', 'No real');
-  agRenderTable('agingClienteTable', ag.clientes, 'Cliente', 'Vencido', 'No vencido');
+  agRenderTableN('agingAnalistaTable', ag.analistas, 'Cobrador / Analista', [{key:'real',label:'Venta real'},{key:'noreal',label:'No real'}]);
+  agRenderTableN('agingVendedorTable', ag.vendedores, 'Vendedor', [{key:'real',label:'Venta real'},{key:'noreal',label:'No real'}]);
+  agRenderTableN('agingClienteTable', ag.clientes, 'Cliente', [{key:'vencido',label:'Vencido'},{key:'enplazo',label:'En plazo'},{key:'cumplido',label:'Cumplido'},{key:'otro',label:'Otro'}]);
   const accCol = A(), noCol = getComputedStyle(document.body).getPropertyValue('--teal').trim();
-  agRenderDiverging('agingAnalistaChart', ag.analistas, accCol, noCol);
-  agRenderDiverging('agingVendedorChart', ag.vendedores, accCol, noCol);
-  agRenderDiverging('agingClienteChart', ag.clientes, '#f87171', accCol);
+  agRenderDivergingN('agingAnalistaChart', ag.analistas, [{key:'real',color:accCol},{key:'noreal',color:noCol}]);
+  agRenderDivergingN('agingVendedorChart', ag.vendedores, [{key:'real',color:accCol},{key:'noreal',color:noCol}]);
+  agRenderDivergingN('agingClienteChart', ag.clientes, [{key:'vencido',color:'#f87171'},{key:'enplazo',color:accCol},{key:'cumplido',color:noCol},{key:'otro',color:'#94a3b8'}]);
 }
 
 let AGING_DATA = null;
 (async function initAging(){
   document.getElementById('agingUpdated').textContent = 'Cargando…';
   try{
-    AGING_DATA = await loadAging();
+    AGING_DATA = await loadAgingFromRaw();
     agRenderAll(AGING_DATA);
     document.getElementById('agingUpdated').textContent =
       new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
   }catch(err){
     console.error(err);
     document.getElementById('agingUpdated').textContent = 'Error';
-    showAgingError('No pude leer los datos desde el Sheet de Aging (pesta&ntilde;a "Resumen Aging"). Revis&aacute; que el link de publicaci&oacute;n siga activo. Detalle: ' + err.message);
+    showAgingError('No pude calcular el Aging desde la pesta&ntilde;a "Aging" de Google Sheets. Revis&aacute; que el link de publicaci&oacute;n siga activo. Detalle: ' + err.message);
+  }
+})();
+
+// ================================================================
+// ===== Semáforo de gerencia (agregada en esta versión) =========
+// Fuente de datos independiente de las dos secciones de arriba: lee la MISMA
+// pestaña "Aging" cruda (SHEET_CSV_URL) pero con su propio parser simple,
+// para no depender de la lógica de fechas estimadas del tablero principal.
+// Sólo calcula en vivo lo que hay dato confirmado para calcular (NC Emitidas,
+// Cta Cte en Calle por bloque); el resto queda "a definir" hasta que Graciela
+// confirme fórmula y fuente (ver nota al pie de la sección).
+// ================================================================
+// Nota v10: el tablero principal (arriba) le dio su propio bucket a "Cliente / proveedor" en vez
+// de dejarlo caer en "Otros/Ajustes". Acá en el semáforo de gerencia, por decisión de Nahuel, esto
+// NO cambia: se mantienen las 3 franjas actuales (Papeleras/Caterings/Especiales) y "Cliente /
+// proveedor" sigue agrupado dentro de "Especiales" junto con CDH, Vymat y Otros/Ajustes.
+function mgmtMapUnitBucket(tipoCliente){
+  const t = (tipoCliente||'').trim().toLowerCase();
+  if(t==='papelera' || t==='pepelera') return 'Papeleras';
+  if(t==='catering') return 'Caterings';
+  return 'Especiales'; // Otros/CHD (CDH), Vymat, Cliente/proveedor, vacío, etc.
+}
+
+async function mgmtLoadAndCompute(){
+  const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
+  if(!lines.length) throw new Error('el CSV no tiene filas');
+  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
+  const idx = name => header.findIndex(h=>h===name);
+  const iCobrado = idx('COBRADO / DESCONTADO');
+  const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
+  const iSaldo = idx('SALDO');
+  const iImporte = idx('IMPORTE');
+  const iNumero = idx('NUMERO');
+  const iFechaEmision = idx('FECHA DE EMISION');
+  const iFechaEntrega = idx('FECHA DE ENTREGA DE PRODUCTOS');
+  if([iCobrado,iTipoCliente,iSaldo,iImporte,iNumero,iFechaEmision,iFechaEntrega].some(i=>i<0)){
+    throw new Error('no encontré alguna columna esperada en la pestaña "Aging"');
+  }
+  const hoy = new Date();
+  const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
+  const ctaCte = {Papeleras:0, Caterings:0, Especiales:0};
+  let ncEmitidas = 0, cateringsOverdue = 0;
+  for(let i=1;i<lines.length;i++){
+    const c = splitCSVLine(lines[i]);
+    const first = (c[0]||'').trim();
+    if(first.toLowerCase()==='total') continue;
+    if(!c.some(v=>v && v.trim())) continue;
+    const cobrado = first.toUpperCase()==='TRUE' || first.toUpperCase()==='VERDADERO'; // v10: idem parseCSV
+    const bucket = mgmtMapUnitBucket(c[iTipoCliente]);
+    if(!cobrado){
+      const saldo = agNum(c[iSaldo]);
+      ctaCte[bucket] += saldo;
+      if(bucket==='Caterings'){
+        const entrega = agParseDateFlexible(c[iFechaEntrega]);
+        if(entrega && (hoy - entrega)/86400000 > 7) cateringsOverdue += saldo;
+      }
+    }
+    const numero = c[iNumero]||'';
+    if(/NCR|NCE/i.test(numero)){ // v10: se descubrió el tipo "NCE" (misma familia de Notas de Crédito que NCR) — Nahuel confirmó sumarlo acá también
+      const emision = agParseDateFlexible(c[iFechaEmision]);
+      const emisionKey = emision ? (emision.getUTCFullYear()+'-'+(emision.getUTCMonth()+1).toString().padStart(2,'0')) : null;
+      if(emisionKey===hoyKey) ncEmitidas += Math.abs(agNum(c[iImporte]));
+    }
+  }
+  return {ctaCte, ncEmitidas, cateringsOverdue};
+}
+
+function mgmtErrorClear(){
+  document.getElementById('mgmtErrorNote').textContent = '';
+}
+function mgmtShowError(msg){
+  document.getElementById('mgmtErrorNote').textContent = msg;
+  document.getElementById('mgmtGrid').innerHTML = '';
+}
+
+function mgmtTile(label, value, target, statusColor, franjaClass){
+  const isTbd = value==='a definir';
+  return `<div class="mgmt-tile ${franjaClass||''}">
+    <div class="mgmt-tile-top" style="background:${statusColor||'transparent'}"></div>
+    <div class="mgmt-tile-body">
+      <div class="mgmt-tile-lbl">${label}</div>
+      ${statusColor?`<div class="mgmt-tile-dot" style="background:${statusColor}"></div>`:''}
+      <div class="mgmt-tile-val${isTbd?' tbd':''}">${value}</div>
+      <div class="mgmt-tile-target">Target: ${target}</div>
+    </div>
+  </div>`;
+}
+
+function mgmtRenderAll(d){
+  const VERDE='#22c55e', ROJO='#ef4444', GRIS='#94a3b8';
+  const fmtMgmtM = n => '$'+(n/1e6).toLocaleString('es-AR',{maximumFractionDigits:1});
+  document.getElementById('mgmtGrid').innerHTML = [
+    mgmtTile('DSO &mdash; D&iacute;as de cobro', 'a definir', '&le; 60 d', GRIS),
+    mgmtTile('CEI 48hs &mdash; Efic. cobranza %', 'a definir', '100%', GRIS),
+    mgmtTile('NC Emitidas ($M) &middot; este mes', fmtMgmtM(d.ncEmitidas), 'a definir', GRIS),
+    mgmtTile('Cta Cte en Calle &mdash; Papeleras ($M)', fmtMgmtM(d.ctaCte.Papeleras), '$0 (cobro al entregado)', d.ctaCte.Papeleras>0?ROJO:VERDE, 'franja-naranja'),
+    mgmtTile('Cta Cte en Calle &mdash; Caterings ($M)', fmtMgmtM(d.ctaCte.Caterings), '&le; 1 sem. entregado', d.cateringsOverdue>0?ROJO:VERDE, 'franja-teal'),
+    mgmtTile('Deuda incobrable', 'a definir', '0 clientes &middot; $0', GRIS),
+    mgmtTile('Tasa disputada %', 'a definir', 'a definir', GRIS),
+    mgmtTile('Cta Cte en Calle &mdash; Especiales ($M)', fmtMgmtM(d.ctaCte.Especiales), '$0 (cobro al entregado)', d.ctaCte.Especiales>0?ROJO:VERDE),
+    mgmtTile('Cheques rechazados', 'a definir', 'a definir', GRIS),
+  ].join('');
+}
+
+let MGMT_DATA = null;
+(async function initMgmt(){
+  try{
+    mgmtErrorClear();
+    MGMT_DATA = await mgmtLoadAndCompute();
+    mgmtRenderAll(MGMT_DATA);
+  }catch(err){
+    console.error(err);
+    mgmtShowError('No pude calcular el sem&aacute;foro desde la pesta&ntilde;a "Aging". Detalle: ' + err.message);
   }
 })();
 </script>
