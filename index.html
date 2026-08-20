@@ -549,9 +549,16 @@ function parseCSV(text){
 //   - "Cobrado" (neto) = IMPORTE − SALDO de ese comprobante (lo ya cobrado a la fecha,
 //     incluye cobros parciales de facturas todav&iacute;a abiertas).
 //   - "Proyectado" = SALDO de ese comprobante (lo que falta cobrar). Cobrado + Proyectado = IMPORTE.
-// Importante: esto NO toca "Mix por unidad de negocio", "Ranking por unidad" ni "Evoluci&oacute;n
-// mensual" — esos tres siguen usando DATA/MESES tal como antes (parseCSV/buildFromRaw, sin
-// cambios), porque Graciela no pidi&oacute; modificarlos.
+// v25: "Mix por unidad de negocio", "Ranking por unidad", "Evoluci&oacute;n mensual" y el
+// "Mapa mensual · unidad &times; mes" ahora TAMBI&Eacute;N se calculan a partir de VENC_TX (misma
+// regla de Graciela: mes = FECHA DE VENCIMIENTO, monto = Cobrado+Proyectado = IMPORTE de cada
+// comprobante), en vez de DATA/MESES (parseCSV/buildFromRaw, la l&oacute;gica vieja). Antes esas
+// 4 secciones no se tocaron a prop&oacute;sito (para no meter cambios de m&aacute;s), pero eso dejó
+// un tablero con dos maneras distintas de sumar lo mismo y n&uacute;meros que no cerraban entre
+// secciones (ej.: $147,9M ahí vs $76,9M en "Total del mes" para agosto/2026, mismo mes). Ahora
+// las 4 usan exactamente la misma base que Cobrado/Proyectado/Total del mes/Aging. DATA/MESES
+// (parseCSV/buildFromRaw) se mantienen SOLO para "Promedio diario" (cantidad de d&iacute;as con
+// actividad), que no fue parte de este pedido — ver nota en render().
 function parseVencTx(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) return [];
@@ -598,6 +605,34 @@ function realProyectadoTotals(){
   return {real, proy};
 }
 
+// v25 — misma base (VENC_TX) para "Mix por unidad", "Ranking por unidad" y la tarjeta "Mejor
+// unidad": desglosa Cobrado+Proyectado por unidad para un mes dado (o para TODO el período si
+// mes es null/''), sin filtrar por unitFilter (siempre las 6 unidades, el filtro de unidad solo
+// resalta/selecciona, igual que antes con DATA).
+function vencUnitBreakdown(mes){
+  const unitTot={};
+  UNIT_NAMES.forEach(u=>unitTot[u]=0);
+  VENC_TX.forEach(t=>{
+    if(mes && t.month!==mes) return;
+    unitTot[t.unit] += t.cobrado + t.proyectado;
+  });
+  return unitTot;
+}
+
+// v25 — tabla unidad×mes (Cobrado+Proyectado) para "Evolución mensual" y el "Mapa mensual", a
+// partir de VENC_TX. Solo cubre los meses de MESES (comprobantes sin FECHA DE VENCIMIENTO usable
+// quedan afuera de esta tabla mensual, igual que quedaban afuera del gráfico/mapa viejo si no
+// tenían fecha usable bajo la cadena anterior).
+function vencByMonthUnit(){
+  const byMonthUnit = {};
+  MESES.forEach(m=>{ byMonthUnit[m]={}; UNIT_NAMES.forEach(u=>byMonthUnit[m][u]=0); });
+  VENC_TX.forEach(t=>{
+    if(!t.month || !byMonthUnit[t.month]) return;
+    byMonthUnit[t.month][t.unit] += t.cobrado + t.proyectado;
+  });
+  return byMonthUnit;
+}
+
 async function loadData(){
   const text = await getSheetText(); // v22: fetch compartido (ver comentario junto a SHEET_CSV_URL)
   const raw = parseCSV(text);
@@ -619,10 +654,11 @@ function buildFromRaw(raw){
   });
   DATA = Object.values(byDate).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
   const mesesSet = new Set(DATA.map(d=>d.m));
-  // v20: además de los meses con actividad "combinada" (lógica anterior, la que sigue usando
-  // Mix/Ranking/Evolución mensual), se agregan los meses que tengan comprobantes según FECHA DE
-  // VENCIMIENTO (regla de Graciela para Cobrado/Proyectado/Aging) — así el selector de período
-  // siempre deja elegir un mes aunque no tenga actividad bajo el criterio anterior.
+  // v20: además de los meses con actividad "combinada" (lógica anterior, la que desde v25 solo
+  // sigue usando "Promedio diario" para su cantidad de días con actividad), se agregan los meses
+  // que tengan comprobantes según FECHA DE VENCIMIENTO (regla de Graciela, usada desde v25 por
+  // TODO lo demás: Cobrado/Proyectado/Total del mes/Aging/Mix/Ranking/Evolución/Mapa) — así el
+  // selector de período siempre deja elegir un mes aunque no tenga actividad bajo el criterio viejo.
   VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
   MESES = [...mesesSet].sort();
   MLBL = {};
@@ -709,8 +745,11 @@ function getPrevMonth(m){
 function render(){
   updateColor();
   buildMesSeg();
+  // v25: "Promedio diario" es la ÚNICA tarjeta que sigue leyendo DATA/rows() (lógica vieja,
+  // combinada) — no fue parte de este pedido, así que se deja tal cual (con su nota de "días
+  // con actividad" agregada en v24). Todo lo demás de acá para abajo (Mix/Ranking/Evolución/
+  // Mapa/Mejor unidad) ya usa VENC_TX (regla de Graciela), ver vencUnitBreakdown/vencByMonthUnit.
   const R=rows();
-  const Rf=unitFilter?R.filter(()=>true):R;
   const totalPeriodo = R.reduce((s,d)=>s+(unitFilter?d[unitFilter]:d.total),0);
   const diasConDatos = R.length;
   const promedioDiario = diasConDatos>0?totalPeriodo/diasConDatos:0;
@@ -719,18 +758,29 @@ function render(){
   document.getElementById('scope').textContent = unitFilter||'Todas';
   document.getElementById('clearUnitBtn').classList.toggle('hide', !unitFilter);
 
-  // unit totals for selected period
-  const unitTot={};
-  UNIT_NAMES.forEach(u=>unitTot[u]=R.reduce((s,d)=>s+d[u],0));
-  const totalAllUnits = R.reduce((s,d)=>s+d.total,0);
+  // v25: desglose por unidad (Mix/Ranking/Mejor unidad) según VENC_TX (Cobrado+Proyectado,
+  // vencimiento), respetando el mes elegido arriba — reemplaza el desglose anterior basado en DATA.
+  const unitTot = vencUnitBreakdown(mesFilter);
+  const totalAllUnits = UNIT_NAMES.reduce((s,u)=>s+unitTot[u],0);
   const bestUnit = UNIT_NAMES.reduce((a,b)=>unitTot[b]>unitTot[a]?b:a, UNIT_NAMES[0]);
   const bestPct = totalAllUnits>0? unitTot[bestUnit]/totalAllUnits*100:0;
 
   // MoM: mes seleccionado (o ultimo mes con datos) vs mes anterior
+  // v24: antes esta comparación salía de DATA (la lógica "combinada" vieja, que hasta v25 también
+  // usaban Mix/Ranking/Evolución), que quedó desalineada de "Total del mes" (Cobrado+Proyectado
+  // según FECHA DE VENCIMIENTO, regla de Graciela) — por eso no coincidían los números. Ahora usa
+  // la MISMA base que "Total del mes", para que ambas tarjetas sean consistentes entre sí. (v25:
+  // Mix/Ranking/Evolución/Mapa ya también migraron a esta misma base, ver vencUnitBreakdown/
+  // vencByMonthUnit más arriba.)
   const curMesKey = mesFilter||MESES[MESES.length-1];
   const prevMesKey = getPrevMonth(curMesKey);
-  const curMesVta = DATA.filter(d=>d.m===curMesKey).reduce((s,d)=>s+(unitFilter?d[unitFilter]:d.total),0);
-  const prevMesVta = DATA.filter(d=>d.m===prevMesKey).reduce((s,d)=>s+(unitFilter?d[unitFilter]:d.total),0);
+  const totalDelMesVenc = mes => VENC_TX.reduce((s,t)=>{
+    if(t.month!==mes) return s;
+    if(unitFilter && t.unit!==unitFilter) return s;
+    return s + t.cobrado + t.proyectado;
+  }, 0);
+  const curMesVta = totalDelMesVenc(curMesKey);
+  const prevMesVta = totalDelMesVenc(prevMesKey);
   const momDelta = prevMesVta>0 ? (curMesVta-prevMesVta)/prevMesVta*100 : null;
   const momCls = momDelta===null?'mom-neu':momDelta>=0?'mom-up':'mom-dn';
   const momSign = momDelta===null?'Sin mes anterior':momDelta>=0?`&uarr; +${momDelta.toFixed(1)}%`:`&darr; ${momDelta.toFixed(1)}%`;
@@ -746,6 +796,9 @@ function render(){
     <div class="kpi mrg"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
       <div class="k-val full">${fmtFull(totalProy)}</div>
       <div class="k-sub">Saldo pendiente &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
+    <div class="kpi"><div class="k-lbl">Total del mes</div>
+      <div class="k-val full">${fmtFull(totalReal+totalProy)}</div>
+      <div class="k-sub">Cobrado + Proyectado &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
       <div class="k-val ${momCls}" style="font-size:clamp(16px,2vw,26px)">${momSign}</div>
       <div class="mom-bars">
@@ -762,18 +815,16 @@ function render(){
       </div></div>
     <div class="kpi"><div class="k-lbl">Promedio diario</div>
       <div class="k-val">${fmtM(promedioDiario)}</div>
-      <div class="k-sub">sobre d&iacute;as con actividad</div></div>
+      <div class="k-sub">sobre ${diasConDatos} d&iacute;a${diasConDatos===1?'':'s'} con actividad</div></div>
     <div class="kpi"><div class="k-lbl">Mejor unidad</div>
       <div class="k-val" style="color:${COLOR[bestUnit]};font-size:clamp(15px,1.8vw,22px)">${bestUnit}</div>
-      <div class="k-sub">${fmtPct(bestPct)} del total cobrado</div></div>
-    <div class="kpi"><div class="k-lbl">Unidades activas</div>
-      <div class="k-val">${UNIT_NAMES.filter(u=>unitTot[u]>0).length}<span style="font-size:14px;color:var(--mut)">/${UNIT_NAMES.length}</span></div>
-      <div class="k-sub">con cobranza registrada</div></div>`;
+      <div class="k-sub">${fmtPct(bestPct)} del total cobrado</div></div>`;
 
+  const byMonthUnit = vencByMonthUnit(); // v25: base común (VENC_TX) para Evolución mensual y el Mapa
   renderUnidades(unitTot, totalAllUnits);
   renderRanking(unitTot, totalAllUnits);
-  renderMonth();
-  renderMatrix();
+  renderMonth(byMonthUnit);
+  renderMatrix(byMonthUnit);
 
   document.getElementById('mixNote').textContent = mesFilter?MLBL[mesFilter]:'período completo';
   document.getElementById('evNote').textContent = unitFilter||'todas las unidades';
@@ -816,8 +867,10 @@ function renderRanking(unitTot,total){
     document.querySelectorAll('#ranking .fill').forEach(f=>f.style.width=f.dataset.w+'%')));
 }
 
-function renderMonth(){
-  const byM = MESES.map(m=>DATA.filter(d=>d.m===m).reduce((s,d)=>s+(unitFilter?d[unitFilter]:d.total),0));
+function renderMonth(byMonthUnit){
+  // v25: antes sumaba DATA (lógica vieja); ahora suma byMonthUnit, derivado de VENC_TX (regla
+  // de Graciela) — mismo criterio que "Total del mes"/Cobrado/Proyectado.
+  const byM = MESES.map(m=>unitFilter? byMonthUnit[m][unitFilter] : UNIT_NAMES.reduce((s,u)=>s+byMonthUnit[m][u],0));
   const max=Math.max(...byM.map(Math.abs),1);
   const n=MESES.length;
   const W=Math.max(560, n*30), H=250, padL=18, padR=14, padB=32, padT=18;
@@ -857,15 +910,17 @@ function renderMonth(){
   });
 }
 
-function renderMatrix(){
-  const max=Math.max(...UNIT_NAMES.map(u=>Math.max(...MESES.map(m=>DATA.filter(d=>d.m===m).reduce((s,d)=>s+d[u],0)))),1);
+function renderMatrix(byMonthUnit){
+  // v25: antes leía DATA (lógica vieja); ahora lee byMonthUnit, derivado de VENC_TX (regla de
+  // Graciela) — mismo criterio que "Total del mes"/Cobrado/Proyectado.
+  const max=Math.max(...UNIT_NAMES.map(u=>Math.max(...MESES.map(m=>byMonthUnit[m][u]))),1);
   let html='<thead><tr><th class="first">Unidad</th>';
   MESES.forEach(m=>html+=`<th>${MLBL[m]}</th>`);
   html+='</tr></thead><tbody>';
   UNIT_NAMES.forEach(u=>{
     html+=`<tr><td class="nm" data-u="${u}" style="color:${unitFilter===u?COLOR[u]:''}">${u}</td>`;
     MESES.forEach(m=>{
-      const v=DATA.filter(d=>d.m===m).reduce((s,d)=>s+d[u],0);
+      const v=byMonthUnit[m][u];
       const t = v/max;
       const isZero = v<=0;
       const bg = isZero? '' : `background:${COLOR[u]};opacity:${(0.18+t*0.82).toFixed(2)}`;
