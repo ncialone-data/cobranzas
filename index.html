@@ -94,7 +94,12 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .clear-btn:hover{color:var(--tx);background:rgba(255,255,255,.09)}
 .clear-btn.hide{display:none}
 .kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.kpis.kpis6{grid-template-columns:repeat(6,1fr)}
+/* v31: las primeras 3 tarjetas (Cobrado/Proyectado/Total del mes) muestran números completos en
+   pesos y venían recortándose (overflow:hidden) contra 6 columnas iguales — "Total del mes" y
+   "Cobrado" son las que más ancho necesitan. "Promedio diario" y "Mejor unidad" muestran textos
+   cortos (un valor abreviado o un nombre de unidad) y no necesitan tanto lugar, así que se
+   achican para compensarle ancho al resto. */
+.kpis.kpis6{grid-template-columns:1.3fr 1.3fr 1.35fr 1.05fr .75fr .8fr}
 /* v17: la fila de KPIs de Aging tiene 4 tarjetas (no 5 ni 6) — sin esta clase heredaba
    la grilla de 5 columnas de .kpis base y quedaba una columna vacía a la derecha,
    por eso las tarjetas se veían corridas a la izquierda / no ocupaban el ancho completo. */
@@ -112,7 +117,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .kpi::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 60%,rgba(184,255,54,.05));pointer-events:none}
 .kpi .k-lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2)}
 .kpi .k-val{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:clamp(22px,2.9vw,33px);margin-top:9px;letter-spacing:-.03em}
-.kpi .k-val.full{font-size:clamp(16px,2.0vw,28px);line-height:1.05}
+/* v31: tope bajado de 28px a 25px (con el ancho de columna ganado arriba alcanza de sobra, y deja
+   margen para números todavía más largos sin volver a recortarse) */
+.kpi .k-val.full{font-size:clamp(15px,1.85vw,25px);line-height:1.05;white-space:nowrap}
 .kpi.acc .k-val{color:var(--acc)}
 .kpi.mrg .k-val{color:var(--teal)}
 .kpi .k-sub{font-size:12px;color:var(--mut);margin-top:5px}
@@ -128,13 +135,15 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .kpi-clickable.active .kpi-caret{color:var(--acc)}
 #kpiDetailCard .agtbl{min-width:420px}
 /* v28 — renglones de cliente desplegables (más de un comprobante) dentro del detalle */
-#kpiDetailTable tr.cli-row{cursor:pointer}
-#kpiDetailTable tr.cli-row:hover td{background:rgba(255,255,255,.05)}
-#kpiDetailTable tr.cli-row td:first-child .kpi-caret{font-size:10px;margin-right:2px}
-#kpiDetailTable tr.sub-row td{background:rgba(255,255,255,.025);color:var(--mut);font-weight:400}
-#kpiDetailTable tr.sub-row td:first-child{padding-left:26px;font-size:12px;white-space:normal}
-#kpiDetailTable tr.sub-row.hidden{display:none}
-#kpiDetailTable tr.tot-row td{border-top:1px solid var(--line)}
+/* v33: mismas reglas para #mixDetailTable (Mix por unidad de negocio) — mismo estilo y
+   funcionalidad de renglón de cliente desplegable que en las tarjetas Cobrado/Proyectado/Total. */
+#kpiDetailTable tr.cli-row,#mixDetailTable tr.cli-row{cursor:pointer}
+#kpiDetailTable tr.cli-row:hover td,#mixDetailTable tr.cli-row:hover td{background:rgba(255,255,255,.05)}
+#kpiDetailTable tr.cli-row td:first-child .kpi-caret,#mixDetailTable tr.cli-row td:first-child .kpi-caret{font-size:10px;margin-right:2px}
+#kpiDetailTable tr.sub-row td,#mixDetailTable tr.sub-row td{background:rgba(255,255,255,.025);color:var(--mut);font-weight:400}
+#kpiDetailTable tr.sub-row td:first-child,#mixDetailTable tr.sub-row td:first-child{padding-left:26px;font-size:12px;white-space:normal}
+#kpiDetailTable tr.sub-row.hidden,#mixDetailTable tr.sub-row.hidden{display:none}
+#kpiDetailTable tr.tot-row td,#mixDetailTable tr.tot-row td{border-top:1px solid var(--line)}
 .grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}
 .card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);
   border-radius:var(--r);padding:18px 20px 20px;position:relative}
@@ -162,12 +171,19 @@ svg{display:block;width:100%;overflow:visible}
 .barlbl{fill:var(--mut);font-family:"IBM Plex Mono",monospace;font-size:9.5px;text-anchor:middle}
 .tipos{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:stretch}
 .tipo-chip{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
-  display:flex;align-items:center;gap:10px;min-width:170px;flex:1 1 170px;max-width:240px}
+  display:flex;align-items:center;gap:10px;min-width:170px;flex:1 1 170px;max-width:240px;
+  cursor:pointer;transition:border-color .15s}
+.tipo-chip:hover{border-color:var(--acc)}
+.tipo-chip.active{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
 .tipo-dot{width:12px;height:12px;border-radius:50%;flex:none}
 .tipo-info{flex:1;min-width:0}
 .tipo-name{font-size:13.5px;font-weight:600;white-space:nowrap}
+.tipo-name .kpi-caret{font-size:9px;margin-left:2px}
 .tipo-val{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--tx);margin-top:4px}
 .tipo-sub{font-size:11px;color:var(--mut2);margin-top:2px}
+/* v32/v33 — detalle desplegable de "Mix por unidad de negocio" (clic en una unidad, agrupado por
+   cliente con comprobantes desplegables — mismas 2 columnas que Cliente/Importe) */
+#mixDetailCard .agtbl{min-width:340px}
 .matrix{overflow-x:auto}
 .mtbl{border-collapse:collapse;width:100%;min-width:760px}
 .mtbl th{font-size:10.5px;color:var(--mut2);font-weight:500;padding:6px 5px;text-align:center;white-space:nowrap}
@@ -306,6 +322,14 @@ svg{display:block;width:100%;overflow:visible}
     <span class="c-note" id="mixNote"></span>
   </div>
   <div class="tipos" id="unidades"></div>
+  <!-- v32: detalle desplegable por comprobante (clic en una unidad) -->
+  <div id="mixDetailCard" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+    <div class="c-head">
+      <span class="c-title" id="mixDetailTitle" style="font-size:14px"></span>
+      <span class="c-note" id="mixDetailNote"></span>
+    </div>
+    <div style="overflow-x:auto"><table class="agtbl" id="mixDetailTable"></table></div>
+  </div>
 </div>
 
 <div class="grid">
@@ -586,6 +610,24 @@ function parseCSV(text){
 // buildFromRaw) ya no se usan para calcular NINGÚN valor mostrado en el tablero; MESES los sigue
 // usando únicamente para no perder, del selector de período, un mes que solo tuviera actividad
 // bajo la lógica vieja (ver comentario en buildFromRaw).
+// v30 — dos cambios de fondo pedidos por Nahuel/Graciela sobre la base de esta función:
+//  1) Solo entran comprobantes con TIPO = "Mercaderia" (columna W). Los de TIPO "Iva" (notas de
+//     crédito/débito) y cualquier otro valor quedan afuera de Cobrado/Proyectado/Total del mes por
+//     completo — no son venta real, igual que ya los excluye la sección de Aging ("venta real" vs
+//     "no real"). Se descartó incluirlos: en un caso puntual (cliente LEO FILM, TIPO=Iva) el saldo
+//     ya estaba en $0 pero la FECHA COBRANZA cargada era varios meses A FUTURO, lo que habría hecho
+//     "desaparecer" collections ya reconocidas de sus meses reales.
+//  2) El mes de "Cobrado" ya NO es siempre el de FECHA DE VENCIMIENTO: si el comprobante tiene una
+//     FECHA COBRANZA cargada, esa fecha manda (sea ANTES o DESPUÉS del vencimiento) — así un cobro
+//     adelantado (contra una factura que vence en un mes posterior) se contabiliza en el mes real
+//     en que efectivamente entró el dinero, no en el mes de vencimiento. Si no hay FECHA COBRANZA
+//     cargada (pasa en ~1 de cada 3 comprobantes con algo cobrado), se sigue usando FECHA DE
+//     VENCIMIENTO como hasta ahora (único dato disponible).
+//  "Proyectado" (el saldo pendiente) sigue exclusivamente por FECHA DE VENCIMIENTO, sin cambios —
+//  es lo que todavía falta cobrar, tiene sentido seguir mostrándolo en el mes en que vence.
+//  Por eso cada transacción ahora guarda DOS meses distintos: "month" (vencimiento, para
+//  Proyectado) y "cobradoMonth" (cobranza o vencimiento si no hay, para Cobrado) — pueden diferir
+//  para el mismo comprobante.
 function parseVencTx(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) return [];
@@ -597,8 +639,10 @@ function parseVencTx(text){
   const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
   const iCliente = idx('RAZON SOCIAL CLIENTE'); // v27: para el detalle desplegable por cliente
   const iNumero = idx('NUMERO'); // v28: número de comprobante, para el detalle desplegable por factura
-  if([iFechaVenc,iImporte,iSaldo,iTipoCliente,iCliente,iNumero].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO) para calcular Cobrado/Proyectado');
+  const iTipo = idx('TIPO'); // v30: para filtrar solo Mercadería
+  const iFechaCobranza = idx('FECHA COBRANZA'); // v30: manda sobre vencimiento para "Cobrado", si existe
+  if([iFechaVenc,iImporte,iSaldo,iTipoCliente,iCliente,iNumero,iTipo,iFechaCobranza].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO / TIPO / FECHA COBRANZA) para calcular Cobrado/Proyectado');
   }
   const out=[];
   for(let i=1;i<lines.length;i++){
@@ -606,11 +650,17 @@ function parseVencTx(text){
     const first = (c[0]||'').trim();
     if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
     if(!c.some(v=>v && v.trim())) continue; // fila vacía
-    const dateObj = agParseDateFlexible(c[iFechaVenc]);
+    const tipo = (c[iTipo]||'').trim().toLowerCase();
+    if(tipo!=='mercaderia') continue; // v30: fuera todo lo que no sea venta real (Iva, otros, vacío)
+    const vencObj = agParseDateFlexible(c[iFechaVenc]);
+    const vencMes = vencObj ? agToISO(vencObj).slice(0,7) : null; // null = sin FECHA DE VENCIMIENTO usable
+    const cobObj = agParseDateFlexible(c[iFechaCobranza]);
+    const cobradoMes = cobObj ? agToISO(cobObj).slice(0,7) : vencMes; // v30: fecha de cobranza manda; si no hay, cae a vencimiento
     const importe = agNum(c[iImporte]);
     const saldo = agNum(c[iSaldo]);
     out.push({
-      month: dateObj ? agToISO(dateObj).slice(0,7) : null, // null = sin FECHA DE VENCIMIENTO usable
+      month: vencMes, // vencimiento: determina el mes de "Proyectado"
+      cobradoMonth: cobradoMes, // cobranza (o vencimiento si no hay): determina el mes de "Cobrado"
       cobrado: importe - saldo,
       proyectado: saldo,
       unit: mapTipoClienteToUnit(c[iTipoCliente]),
@@ -621,45 +671,44 @@ function parseVencTx(text){
   return out;
 }
 
-// Transacciones re-derivadas para Cobrado/Proyectado (regla Graciela, ver arriba). Si no hay
-// filtro de mes ("todo el período"), se suma todo aunque falte FECHA DE VENCIMIENTO (month=null);
-// si hay un mes elegido, esas filas sin fecha usable no se pueden ubicar y quedan afuera.
+// Transacciones re-derivadas para Cobrado/Proyectado (regla Graciela + ajuste v30, ver arriba).
+// Si no hay filtro de mes ("todo el período"), se suma todo; si hay un mes elegido, "Cobrado" se
+// filtra por t.cobradoMonth y "Proyectado" por t.month (vencimiento) — son independientes, un
+// mismo comprobante puede aportar Cobrado a un mes y Proyectado a otro distinto.
 let VENC_TX = [];
 function realProyectadoTotals(){
   let real=0, proy=0;
   VENC_TX.forEach(t=>{
-    if(mesFilter && t.month!==mesFilter) return;
     if(unitFilter && t.unit!==unitFilter) return;
-    real += t.cobrado;
-    proy += t.proyectado;
+    if(!mesFilter || t.cobradoMonth===mesFilter) real += t.cobrado;
+    if(!mesFilter || t.month===mesFilter) proy += t.proyectado;
   });
   return {real, proy};
 }
 
-// v25 — misma base (VENC_TX) para "Mix por unidad", "Ranking por unidad" y la tarjeta "Mejor
-// unidad": desglosa Cobrado+Proyectado por unidad para un mes dado (o para TODO el período si
-// mes es null/''), sin filtrar por unitFilter (siempre las 6 unidades, el filtro de unidad solo
-// resalta/selecciona, igual que antes con DATA).
+// v25 (ajustado en v30 para el split Cobrado/Proyectado por mes distinto) — misma base (VENC_TX)
+// para "Mix por unidad", "Ranking por unidad" y la tarjeta "Mejor unidad": desglosa por unidad
+// para un mes dado (o para TODO el período si mes es null/''), sin filtrar por unitFilter (siempre
+// las 6 unidades, el filtro de unidad solo resalta/selecciona, igual que antes con DATA).
 function vencUnitBreakdown(mes){
   const unitTot={};
   UNIT_NAMES.forEach(u=>unitTot[u]=0);
   VENC_TX.forEach(t=>{
-    if(mes && t.month!==mes) return;
-    unitTot[t.unit] += t.cobrado + t.proyectado;
+    if(!mes || t.cobradoMonth===mes) unitTot[t.unit] += t.cobrado;
+    if(!mes || t.month===mes) unitTot[t.unit] += t.proyectado;
   });
   return unitTot;
 }
 
-// v25 — tabla unidad×mes (Cobrado+Proyectado) para "Evolución mensual" y el "Mapa mensual", a
-// partir de VENC_TX. Solo cubre los meses de MESES (comprobantes sin FECHA DE VENCIMIENTO usable
-// quedan afuera de esta tabla mensual, igual que quedaban afuera del gráfico/mapa viejo si no
-// tenían fecha usable bajo la cadena anterior).
+// v25 (ajustado en v30) — tabla unidad×mes para "Evolución mensual" y el "Mapa mensual", a partir
+// de VENC_TX. El Cobrado de cada comprobante cae en el bucket de t.cobradoMonth y su Proyectado en
+// el de t.month (vencimiento) — pueden ser meses distintos del mismo comprobante.
 function vencByMonthUnit(){
   const byMonthUnit = {};
   MESES.forEach(m=>{ byMonthUnit[m]={}; UNIT_NAMES.forEach(u=>byMonthUnit[m][u]=0); });
   VENC_TX.forEach(t=>{
-    if(!t.month || !byMonthUnit[t.month]) return;
-    byMonthUnit[t.month][t.unit] += t.cobrado + t.proyectado;
+    if(t.cobradoMonth && byMonthUnit[t.cobradoMonth]) byMonthUnit[t.cobradoMonth][t.unit] += t.cobrado;
+    if(t.month && byMonthUnit[t.month]) byMonthUnit[t.month][t.unit] += t.proyectado;
   });
   return byMonthUnit;
 }
@@ -692,6 +741,10 @@ function buildFromRaw(raw){
   // Proyectado/Total del mes/Promedio diario/Aging/Mix/Ranking/Evolución/Mapa) — así el selector
   // de período siempre deja elegir un mes aunque no tenga actividad bajo el criterio viejo.
   VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
+  // v30: también se agregan los meses de FECHA COBRANZA (t.cobradoMonth) — con la fecha de
+  // cobranza mandando sobre el vencimiento para "Cobrado", un comprobante puede aportar a un mes
+  // que no tenga ningún vencimiento propio en esa misma tanda de datos.
+  VENC_TX.forEach(t=>{ if(t.cobradoMonth) mesesSet.add(t.cobradoMonth); });
   MESES = [...mesesSet].sort();
   MLBL = {};
   MESES.forEach(m=>{const [y,mo]=m.split('-'); MLBL[m]=mnAbbr[parseInt(mo)-1]+" '"+y.slice(2);});
@@ -742,6 +795,8 @@ const fmtPct=n=>n.toFixed(1)+'%';
 let mesFilter=null, unitFilter=null;
 let kpiDetailOpen=null; // v27: 'cobrado' | 'proyectado' | 'total' | null — qué tarjeta tiene el detalle abierto
 let kpiDetailExpanded=new Set(); // v28: claves "modo::i::cliente" de los clientes desplegados (más de 1 comprobante)
+let mixDetailOpen=null; // v32: nombre de la unidad con el detalle abierto en "Mix por unidad de negocio", o null
+let mixDetailExpanded=new Set(); // v33: claves "unidad::i::cliente" de los clientes desplegados dentro de ese detalle
 
 // v27 — desglose para el panel desplegable de Cobrado/Proyectado/Total del mes, siempre sobre
 // VENC_TX (regla de Graciela) y respetando el mesFilter/unitFilter elegidos arriba (el mismo
@@ -755,20 +810,22 @@ let kpiDetailExpanded=new Set(); // v28: claves "modo::i::cliente" de los client
 // v28: ahora las 3 vistas agrupan SIEMPRE por cliente (antes "cobrado" listaba un renglón por
 // comprobante suelto). Cada cliente trae además su lista de comprobantes (con NÚMERO), para que
 // el renglón se pueda desplegar y ver de qué factura sale el total — ver renderKpiDetail().
+// v30: "Cobrado" de un comprobante se ubica por t.cobradoMonth y su "Proyectado" por t.month
+// (vencimiento) — pueden ser meses distintos. Por eso cada comprobante se evalúa dos veces (una
+// vez para cuánto aporta a Cobrado en el mes elegido, otra para cuánto aporta a Proyectado), y
+// solo entra en la lista si algo de eso es relevante para el modo que se está mirando.
 function vencClientDetail(mode){
-  const pasaFiltro = t => (!mesFilter || t.month===mesFilter) && (!unitFilter || t.unit===unitFilter);
   const byClient = {};
   VENC_TX.forEach(t=>{
-    if(!pasaFiltro(t)) return;
-    // solo entran los comprobantes relevantes para la tarjeta que se está mirando: en "cobrado"
-    // los que tengan algo cobrado, en "proyectado" los que tengan saldo pendiente, en "total"
-    // cualquiera de las dos cosas (así no se pierde ningún comprobante que aporte al total).
-    const relevante = mode==='cobrado' ? !!t.cobrado : mode==='proyectado' ? !!t.proyectado : !!(t.cobrado||t.proyectado);
+    if(unitFilter && t.unit!==unitFilter) return;
+    const cobradoAporte = (!mesFilter || t.cobradoMonth===mesFilter) ? t.cobrado : 0;
+    const proyectadoAporte = (!mesFilter || t.month===mesFilter) ? t.proyectado : 0;
+    const relevante = mode==='cobrado' ? !!cobradoAporte : mode==='proyectado' ? !!proyectadoAporte : !!(cobradoAporte||proyectadoAporte);
     if(!relevante) return;
     if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, cobrado:0, proyectado:0, comprobantes:[]};
-    byClient[t.cliente].cobrado += t.cobrado;
-    byClient[t.cliente].proyectado += t.proyectado;
-    byClient[t.cliente].comprobantes.push({numero:t.numero, cobrado:t.cobrado, proyectado:t.proyectado, total:t.cobrado+t.proyectado});
+    byClient[t.cliente].cobrado += cobradoAporte;
+    byClient[t.cliente].proyectado += proyectadoAporte;
+    byClient[t.cliente].comprobantes.push({numero:t.numero, cobrado:cobradoAporte, proyectado:proyectadoAporte, total:cobradoAporte+proyectadoAporte});
   });
   let rows = Object.values(byClient).map(r=>({...r, total:r.cobrado+r.proyectado}));
   const sortKey = mode==='cobrado' ? 'cobrado' : mode==='proyectado' ? 'proyectado' : 'total';
@@ -776,6 +833,75 @@ function vencClientDetail(mode){
   rows.sort((a,b)=>b[sortKey]-a[sortKey]);
   rows.forEach(r=>r.comprobantes.sort((a,b)=>b[sortKey]-a[sortKey]));
   return rows;
+}
+
+// v33 — detalle de "Mix por unidad de negocio" agrupado POR CLIENTE (antes v32 listaba un
+// renglón por comprobante suelto). Cada cliente trae su lista de comprobantes (número + importe)
+// para desplegar, igual que vencClientDetail() de las tarjetas Cobrado/Proyectado/Total del mes.
+// "Importe" es la misma magnitud que ya muestra el chip de esa unidad (Cobrado+Proyectado del
+// período elegido, regla de Graciela con el ajuste v30: la parte Cobrado por t.cobradoMonth, la
+// parte Proyectado por t.month/vencimiento) — no el IMPORTE crudo de la factura. Ignora unitFilter
+// a propósito: el Mix siempre desglosa las 6 unidades sin filtrar por unidad (igual que
+// vencUnitBreakdown), así que el detalle de una unidad puntual debe mostrar sus comprobantes sin
+// importar qué unidad esté seleccionada en el resto del tablero.
+function vencUnitDetail(unit){
+  const byClient = {};
+  VENC_TX.forEach(t=>{
+    if(t.unit!==unit) return;
+    const cobradoAporte = (!mesFilter || t.cobradoMonth===mesFilter) ? t.cobrado : 0;
+    const proyectadoAporte = (!mesFilter || t.month===mesFilter) ? t.proyectado : 0;
+    const importe = cobradoAporte + proyectadoAporte;
+    if(!importe) return;
+    if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, importe:0, comprobantes:[]};
+    byClient[t.cliente].importe += importe;
+    byClient[t.cliente].comprobantes.push({numero:t.numero, importe});
+  });
+  const rows = Object.values(byClient).filter(r=>r.importe);
+  rows.sort((a,b)=>b.importe-a.importe);
+  rows.forEach(r=>r.comprobantes.sort((a,b)=>b.importe-a.importe));
+  return rows;
+}
+
+// v32/v33 — pinta (o esconde) el panel de detalle dentro de la tarjeta "Mix por unidad de
+// negocio". v33: mismo estilo y funcionalidad que renderKpiDetail() — cada cliente es un renglón
+// SIEMPRE desplegable (flechita, sin número ni cantidad de comprobantes al lado) que al abrirse
+// muestra el detalle comprobante por comprobante, con su NÚMERO de factura.
+function renderMixDetail(){
+  const card = document.getElementById('mixDetailCard');
+  if(!mixDetailOpen){ card.style.display='none'; return; }
+  card.style.display='';
+  const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
+  const rows = vencUnitDetail(mixDetailOpen);
+  document.getElementById('mixDetailTitle').innerHTML = `Detalle de <span style="color:${COLOR[mixDetailOpen]}">${mixDetailOpen}</span> &middot; por cliente`;
+  document.getElementById('mixDetailNote').innerHTML = `fecha de cobranza + vencimiento &middot; ${periodoTxt}`;
+  let body = '';
+  if(!rows.length){
+    body = '<tr><td colspan="2" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>';
+  } else {
+    rows.forEach((r,i)=>{
+      const key = mixDetailOpen+'::'+i+'::'+r.cliente;
+      const expanded = mixDetailExpanded.has(key);
+      const label = `<span class="kpi-caret">${expanded?'&#9662;':'&#9656;'}</span> ${r.cliente}`;
+      body += `<tr class="cli-row" data-key="${key}"><td>${label}</td><td>${fmtFull(r.importe)}</td></tr>`;
+      r.comprobantes.forEach(c=>{
+        const subLabel = `&#8618; Comprobante N&deg; ${c.numero}`;
+        body += `<tr class="sub-row${expanded?'':' hidden'}" data-parent="${key}"><td>${subLabel}</td><td>${fmtFull(c.importe)}</td></tr>`;
+      });
+    });
+    const tot = rows.reduce((s,r)=>s+r.importe,0);
+    body += `<tr class="tot-row"><td style="font-weight:700">Total (${rows.length} cliente${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(tot)}</td></tr>`;
+  }
+  document.getElementById('mixDetailTable').innerHTML =
+    `<thead><tr><th style="text-align:left">Cliente</th><th>Importe</th></tr></thead><tbody>${body}</tbody>`;
+
+  document.querySelectorAll('#mixDetailTable tr.cli-row').forEach(tr=>{
+    tr.onclick = () => {
+      const key = tr.dataset.key;
+      if(mixDetailExpanded.has(key)) mixDetailExpanded.delete(key);
+      else mixDetailExpanded.add(key);
+      renderMixDetail();
+    };
+  });
 }
 
 // v27/v28/v29 — pinta (o esconde) el panel de detalle debajo de la fila de KPIs, según kpiDetailOpen.
@@ -795,7 +921,12 @@ function renderKpiDetail(){
     total: 'Detalle de Total del mes &middot; por cliente',
   };
   document.getElementById('kpiDetailTitle').innerHTML = titles[kpiDetailOpen];
-  document.getElementById('kpiDetailNote').innerHTML = `vencimiento ${periodoTxt} &middot; ${unidadTxt}`;
+  // v30: el criterio de fecha ya no es siempre "vencimiento" — Cobrado usa fecha de cobranza (o
+  // vencimiento si no hay), Proyectado sigue por vencimiento, y Total del mes combina las dos.
+  const criterioTxt = kpiDetailOpen==='cobrado' ? 'fecha de cobranza (o vencimiento si no hay)'
+    : kpiDetailOpen==='proyectado' ? 'vencimiento'
+    : 'fecha de cobranza + vencimiento';
+  document.getElementById('kpiDetailNote').innerHTML = `${criterioTxt} &middot; ${periodoTxt} &middot; ${unidadTxt}`;
 
   const cols = kpiDetailOpen==='total' ? 4 : 2;
   const thead = kpiDetailOpen==='cobrado' ? '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th></tr>'
@@ -938,10 +1069,15 @@ function render(){
   // vencByMonthUnit más arriba.)
   const curMesKey = mesFilter||MESES[MESES.length-1];
   const prevMesKey = getPrevMonth(curMesKey);
+  // v30: Cobrado entra si t.cobradoMonth===mes, Proyectado si t.month(vencimiento)===mes — igual
+  // criterio que realProyectadoTotals()/vencUnitBreakdown(), un comprobante puede aportar una
+  // pieza a un mes y otra pieza a otro.
   const totalDelMesVenc = mes => VENC_TX.reduce((s,t)=>{
-    if(t.month!==mes) return s;
     if(unitFilter && t.unit!==unitFilter) return s;
-    return s + t.cobrado + t.proyectado;
+    let v = 0;
+    if(t.cobradoMonth===mes) v += t.cobrado;
+    if(t.month===mes) v += t.proyectado;
+    return s + v;
   }, 0);
   const curMesVta = totalDelMesVenc(curMesKey);
   const prevMesVta = totalDelMesVenc(prevMesKey);
@@ -956,15 +1092,15 @@ function render(){
   document.getElementById('kpis').innerHTML =
     `<div class="kpi acc kpi-clickable${kpiDetailOpen==='cobrado'?' active':''}" data-detail="cobrado"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='cobrado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal)}</div>
-      <div class="k-sub">Neto (Importe &minus; Saldo) &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
+      <div class="k-sub">Neto (Importe &minus; Saldo), TIPO=Mercader&iacute;a &middot; fecha de cobranza (o vencimiento si no hay) ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi mrg kpi-clickable${kpiDetailOpen==='proyectado'?' active':''}" data-detail="proyectado"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='proyectado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalProy)}</div>
-      <div class="k-sub">Saldo pendiente &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
+      <div class="k-sub">Saldo pendiente, TIPO=Mercader&iacute;a &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi kpi-clickable${kpiDetailOpen==='total'?' active':''}" data-detail="total"><div class="k-lbl">Total del mes <span class="kpi-caret">${kpiDetailOpen==='total'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal+totalProy)}</div>
-      <div class="k-sub">Cobrado + Proyectado &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
+      <div class="k-sub">Cobrado (fecha cobranza) + Proyectado (vencimiento) ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
-      <div class="k-val ${momCls}" style="font-size:clamp(16px,2vw,26px)">${momSign}</div>
+      <div class="k-val ${momCls}" style="font-size:${momDelta===null?'clamp(13px,1.35vw,18px)':'clamp(14px,1.6vw,22px)'}">${momSign}</div>
       <div class="mom-bars">
         <div class="mom-bar-row">
           <span class="mom-bar-lbl">${MLBL[prevMesKey]||'Ant'}</span>
@@ -978,10 +1114,10 @@ function render(){
         </div>
       </div></div>
     <div class="kpi"><div class="k-lbl">Promedio diario</div>
-      <div class="k-val">${fmtM(promedioDiario)}</div>
+      <div class="k-val" style="font-size:clamp(16px,1.7vw,22px)">${fmtM(promedioDiario)}</div>
       <div class="k-sub">${diasSub}</div></div>
     <div class="kpi"><div class="k-lbl">Mejor unidad</div>
-      <div class="k-val" style="color:${COLOR[bestUnit]};font-size:clamp(15px,1.8vw,22px)">${bestUnit}</div>
+      <div class="k-val" style="color:${COLOR[bestUnit]};font-size:clamp(13px,1.4vw,18px);white-space:normal;overflow-wrap:break-word;line-height:1.15">${bestUnit}</div>
       <div class="k-sub">${fmtPct(bestPct)} del total cobrado</div></div>`;
 
   // v27: clic en Cobrado/Proyectado/Total del mes abre/cierra su detalle debajo de la fila de KPIs
@@ -995,6 +1131,7 @@ function render(){
 
   const byMonthUnit = vencByMonthUnit(); // v25: base común (VENC_TX) para Evolución mensual y el Mapa
   renderUnidades(unitTot, totalAllUnits);
+  renderMixDetail(); // v32: si había una unidad desplegada, refresca su detalle con el período/filtro actual
   renderRanking(unitTot, totalAllUnits);
   renderMonth(byMonthUnit);
   renderMatrix(byMonthUnit);
@@ -1008,19 +1145,30 @@ function render(){
   if(typeof agReloadAndRender==='function') agReloadAndRender();
 }
 
+// v32: cada chip es clicable — abre/cierra debajo un detalle por comprobante de esa unidad
+// (cliente, comprobante, importe), ver vencUnitDetail()/renderMixDetail().
 function renderUnidades(unitTot,total){
   const wrap=document.getElementById('unidades');
   wrap.innerHTML = UNIT_NAMES.map(u=>{
     const v=unitTot[u], pct= total>0? v/total*100:0;
-    return `<div class="tipo-chip">
+    const isOpen = mixDetailOpen===u;
+    return `<div class="tipo-chip${isOpen?' active':''}" data-unit="${u}">
       <div class="tipo-dot" style="background:${COLOR[u]}"></div>
       <div class="tipo-info">
-        <div class="tipo-name">${u}</div>
+        <div class="tipo-name">${u} <span class="kpi-caret">${isOpen?'&#9662;':'&#9656;'}</span></div>
         <div class="tipo-val">${fmtM(v)}</div>
         <div class="tipo-sub">${fmtPct(pct)} del total</div>
       </div>
     </div>`;
   }).join('');
+  wrap.querySelectorAll('.tipo-chip').forEach(chip=>{
+    chip.onclick = () => {
+      const u = chip.dataset.unit;
+      mixDetailOpen = (mixDetailOpen===u) ? null : u;
+      renderUnidades(unitTot,total);
+      renderMixDetail();
+    };
+  });
 }
 
 function renderRanking(unitTot,total){
