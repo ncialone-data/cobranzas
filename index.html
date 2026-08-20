@@ -127,6 +127,14 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .kpi-caret{font-size:9px;color:var(--mut2);margin-left:2px}
 .kpi-clickable.active .kpi-caret{color:var(--acc)}
 #kpiDetailCard .agtbl{min-width:420px}
+/* v28 — renglones de cliente desplegables (más de un comprobante) dentro del detalle */
+#kpiDetailTable tr.cli-row{cursor:pointer}
+#kpiDetailTable tr.cli-row:hover td{background:rgba(255,255,255,.05)}
+#kpiDetailTable tr.cli-row td:first-child .kpi-caret{font-size:10px;margin-right:2px}
+#kpiDetailTable tr.sub-row td{background:rgba(255,255,255,.025);color:var(--mut);font-weight:400}
+#kpiDetailTable tr.sub-row td:first-child{padding-left:26px;font-size:12px;white-space:normal}
+#kpiDetailTable tr.sub-row.hidden{display:none}
+#kpiDetailTable tr.tot-row td{border-top:1px solid var(--line)}
 .grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}
 .card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);
   border-radius:var(--r);padding:18px 20px 20px;position:relative}
@@ -588,8 +596,9 @@ function parseVencTx(text){
   const iSaldo = idx('SALDO');
   const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
   const iCliente = idx('RAZON SOCIAL CLIENTE'); // v27: para el detalle desplegable por cliente
-  if([iFechaVenc,iImporte,iSaldo,iTipoCliente,iCliente].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE) para calcular Cobrado/Proyectado');
+  const iNumero = idx('NUMERO'); // v28: número de comprobante, para el detalle desplegable por factura
+  if([iFechaVenc,iImporte,iSaldo,iTipoCliente,iCliente,iNumero].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO) para calcular Cobrado/Proyectado');
   }
   const out=[];
   for(let i=1;i<lines.length;i++){
@@ -606,6 +615,7 @@ function parseVencTx(text){
       proyectado: saldo,
       unit: mapTipoClienteToUnit(c[iTipoCliente]),
       cliente: (c[iCliente]||'').trim() || '(sin cliente)',
+      numero: (c[iNumero]||'').trim() || '&mdash;',
     });
   }
   return out;
@@ -731,6 +741,7 @@ const fmtPct=n=>n.toFixed(1)+'%';
 
 let mesFilter=null, unitFilter=null;
 let kpiDetailOpen=null; // v27: 'cobrado' | 'proyectado' | 'total' | null — qué tarjeta tiene el detalle abierto
+let kpiDetailExpanded=new Set(); // v28: claves "modo::i::cliente" de los clientes desplegados (más de 1 comprobante)
 
 // v27 — desglose para el panel desplegable de Cobrado/Proyectado/Total del mes, siempre sobre
 // VENC_TX (regla de Graciela) y respetando el mesFilter/unitFilter elegidos arriba (el mismo
@@ -741,37 +752,36 @@ let kpiDetailOpen=null; // v27: 'cobrado' | 'proyectado' | 'total' | null — qu
 //  - 'total': agregado POR CLIENTE con 3 columnas (Cobrado, Proyectado, Total = la suma).
 // Orden: siempre de mayor a menor según el importe relevante de cada tarjeta (para 'total', por
 // la columna Total).
+// v28: ahora las 3 vistas agrupan SIEMPRE por cliente (antes "cobrado" listaba un renglón por
+// comprobante suelto). Cada cliente trae además su lista de comprobantes (con NÚMERO), para que
+// el renglón se pueda desplegar y ver de qué factura sale el total — ver renderKpiDetail().
 function vencClientDetail(mode){
   const pasaFiltro = t => (!mesFilter || t.month===mesFilter) && (!unitFilter || t.unit===unitFilter);
-  if(mode==='cobrado'){
-    const rows = [];
-    VENC_TX.forEach(t=>{
-      if(!pasaFiltro(t)) return;
-      if(!t.cobrado) return; // este comprobante no aportó nada cobrado en el período
-      rows.push({cliente:t.cliente, monto:t.cobrado});
-    });
-    rows.sort((a,b)=>b.monto-a.monto);
-    return rows;
-  }
   const byClient = {};
   VENC_TX.forEach(t=>{
     if(!pasaFiltro(t)) return;
-    if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, cobrado:0, proyectado:0};
+    // solo entran los comprobantes relevantes para la tarjeta que se está mirando: en "cobrado"
+    // los que tengan algo cobrado, en "proyectado" los que tengan saldo pendiente, en "total"
+    // cualquiera de las dos cosas (así no se pierde ningún comprobante que aporte al total).
+    const relevante = mode==='cobrado' ? !!t.cobrado : mode==='proyectado' ? !!t.proyectado : !!(t.cobrado||t.proyectado);
+    if(!relevante) return;
+    if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, cobrado:0, proyectado:0, comprobantes:[]};
     byClient[t.cliente].cobrado += t.cobrado;
     byClient[t.cliente].proyectado += t.proyectado;
+    byClient[t.cliente].comprobantes.push({numero:t.numero, cobrado:t.cobrado, proyectado:t.proyectado, total:t.cobrado+t.proyectado});
   });
   let rows = Object.values(byClient).map(r=>({...r, total:r.cobrado+r.proyectado}));
-  if(mode==='proyectado'){
-    rows = rows.filter(r=>r.proyectado);
-    rows.sort((a,b)=>b.proyectado-a.proyectado);
-  } else {
-    rows = rows.filter(r=>r.total);
-    rows.sort((a,b)=>b.total-a.total);
-  }
+  const sortKey = mode==='cobrado' ? 'cobrado' : mode==='proyectado' ? 'proyectado' : 'total';
+  rows = rows.filter(r=>r[sortKey]);
+  rows.sort((a,b)=>b[sortKey]-a[sortKey]);
+  rows.forEach(r=>r.comprobantes.sort((a,b)=>b[sortKey]-a[sortKey]));
   return rows;
 }
 
-// v27 — pinta (o esconde) el panel de detalle debajo de la fila de KPIs, según kpiDetailOpen.
+// v27/v28/v29 — pinta (o esconde) el panel de detalle debajo de la fila de KPIs, según kpiDetailOpen.
+// v29: cada cliente es un renglón limpio (solo el nombre, sin número ni cantidad de comprobantes
+// al lado) con una flechita — SIEMPRE desplegable, tenga uno o varios comprobantes detrás. Al
+// desplegar se ve el detalle comprobante por comprobante, con su NÚMERO de factura.
 function renderKpiDetail(){
   const card = document.getElementById('kpiDetailCard');
   if(!kpiDetailOpen){ card.style.display='none'; return; }
@@ -779,33 +789,61 @@ function renderKpiDetail(){
   const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
   const unidadTxt = unitFilter||'todas las unidades';
   const rows = vencClientDetail(kpiDetailOpen);
-  let thead, tbody, totalRow;
-  if(kpiDetailOpen==='cobrado'){
-    document.getElementById('kpiDetailTitle').innerHTML = 'Detalle de Cobrado &middot; por comprobante';
-    thead = '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th></tr>';
-    tbody = rows.map(r=>`<tr><td>${r.cliente}</td><td>${fmtFull(r.monto)}</td></tr>`).join('');
-    const tot = rows.reduce((s,r)=>s+r.monto,0);
-    totalRow = `<tr><td style="font-weight:700">Total (${rows.length} comprobante${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(tot)}</td></tr>`;
-  } else if(kpiDetailOpen==='proyectado'){
-    document.getElementById('kpiDetailTitle').innerHTML = 'Detalle de Proyectado &middot; por cliente';
-    thead = '<tr><th style="text-align:left">Cliente</th><th>Proyectado</th></tr>';
-    tbody = rows.map(r=>`<tr><td>${r.cliente}</td><td>${fmtFull(r.proyectado)}</td></tr>`).join('');
-    const tot = rows.reduce((s,r)=>s+r.proyectado,0);
-    totalRow = `<tr><td style="font-weight:700">Total (${rows.length} cliente${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(tot)}</td></tr>`;
-  } else {
-    document.getElementById('kpiDetailTitle').innerHTML = 'Detalle de Total del mes &middot; por cliente';
-    thead = '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th><th>Proyectado</th><th>Total</th></tr>';
-    tbody = rows.map(r=>`<tr><td>${r.cliente}</td><td>${fmtFull(r.cobrado)}</td><td>${fmtFull(r.proyectado)}</td><td style="font-weight:600">${fmtFull(r.total)}</td></tr>`).join('');
-    const totC = rows.reduce((s,r)=>s+r.cobrado,0), totP = rows.reduce((s,r)=>s+r.proyectado,0);
-    totalRow = `<tr><td style="font-weight:700">Total (${rows.length} cliente${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(totC)}</td><td style="font-weight:700">${fmtFull(totP)}</td><td style="font-weight:700">${fmtFull(totC+totP)}</td></tr>`;
-  }
+  const titles = {
+    cobrado: 'Detalle de Cobrado &middot; por cliente',
+    proyectado: 'Detalle de Proyectado &middot; por cliente',
+    total: 'Detalle de Total del mes &middot; por cliente',
+  };
+  document.getElementById('kpiDetailTitle').innerHTML = titles[kpiDetailOpen];
   document.getElementById('kpiDetailNote').innerHTML = `vencimiento ${periodoTxt} &middot; ${unidadTxt}`;
+
+  const cols = kpiDetailOpen==='total' ? 4 : 2;
+  const thead = kpiDetailOpen==='cobrado' ? '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th></tr>'
+    : kpiDetailOpen==='proyectado' ? '<tr><th style="text-align:left">Cliente</th><th>Proyectado</th></tr>'
+    : '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th><th>Proyectado</th><th>Total</th></tr>';
+
+  // arma un <tr> para el modo activo (2 columnas en cobrado/proyectado, 4 en total).
+  // attrs: string HTML ya armado (class/data-*) para insertar en el <tr>. tdStyle: estilo inline
+  // repetido en cada <td> (se usa para poner en negrita el renglón de Total).
+  const fila = (label, c, p, t, attrs, tdStyle) => {
+    const td = tdStyle ? `<td style="${tdStyle}">` : '<td>';
+    if(kpiDetailOpen==='cobrado') return `<tr${attrs}>${td}${label}</td>${td}${fmtFull(c)}</td></tr>`;
+    if(kpiDetailOpen==='proyectado') return `<tr${attrs}>${td}${label}</td>${td}${fmtFull(p)}</td></tr>`;
+    return `<tr${attrs}>${td}${label}</td>${td}${fmtFull(c)}</td>${td}${fmtFull(p)}</td>${td}${fmtFull(t)}</td></tr>`;
+  };
+
+  let body = '';
   if(!rows.length){
-    const cols = kpiDetailOpen==='total'?4:2;
-    tbody = `<tr><td colspan="${cols}" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>`;
-    totalRow = '';
+    body = `<tr><td colspan="${cols}" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>`;
+  } else {
+    // v29: TODAS las filas de cliente son desplegables ahora (antes, un cliente con un solo
+    // comprobante se mostraba fijo con el número al lado, sin flechita) — a pedido de Nahuel, para
+    // que el nombre del cliente quede limpio (sin cantidad de comprobantes ni número al lado) y el
+    // detalle de comprobantes se vea únicamente al desplegar, sin importar cuántos tenga.
+    rows.forEach((r,i)=>{
+      const key = kpiDetailOpen+'::'+i+'::'+r.cliente;
+      const expanded = kpiDetailExpanded.has(key);
+      const label = `<span class="kpi-caret">${expanded?'&#9662;':'&#9656;'}</span> ${r.cliente}`;
+      body += fila(label, r.cobrado, r.proyectado, r.total, ` class="cli-row" data-key="${key}"`, '');
+      r.comprobantes.forEach(c=>{
+        const subLabel = `&#8618; Comprobante N&deg; ${c.numero}`;
+        const subAttrs = ` class="sub-row${expanded?'':' hidden'}" data-parent="${key}"`;
+        body += fila(subLabel, c.cobrado, c.proyectado, c.total, subAttrs, '');
+      });
+    });
+    const totC = rows.reduce((s,r)=>s+r.cobrado,0), totP = rows.reduce((s,r)=>s+r.proyectado,0);
+    body += fila(`Total (${rows.length} cliente${rows.length===1?'':'s'})`, totC, totP, totC+totP, ' class="tot-row"', 'font-weight:700');
   }
-  document.getElementById('kpiDetailTable').innerHTML = `<thead>${thead}</thead><tbody>${tbody}${totalRow}</tbody>`;
+  document.getElementById('kpiDetailTable').innerHTML = `<thead>${thead}</thead><tbody>${body}</tbody>`;
+
+  document.querySelectorAll('#kpiDetailTable tr.cli-row').forEach(tr=>{
+    tr.onclick = () => {
+      const key = tr.dataset.key;
+      if(kpiDetailExpanded.has(key)) kpiDetailExpanded.delete(key);
+      else kpiDetailExpanded.add(key);
+      renderKpiDetail();
+    };
+  });
 }
 const A=()=>document.body.classList.contains('light')?'#2563eb':'#b8ff36';
 
@@ -860,6 +898,10 @@ function getPrevMonth(m){
 function render(){
   updateColor();
   buildMesSeg();
+  // v28: cualquier render() completo (cambio de período/unidad/tema, o abrir/cerrar una tarjeta)
+  // vuelve a colapsar los clientes desplegados — expandir/colapsar un cliente puntual NO pasa por
+  // acá (llama a renderKpiDetail() directo), así que no se pierde al tipear dentro del mismo panel.
+  kpiDetailExpanded.clear();
   // v26: "Promedio diario" ahora es 100% regla de Graciela, igual que todo lo demás del tablero:
   // el monto es Cobrado+Proyectado del período elegido (lo mismo que muestra "Total del mes"),
   // dividido por días HÁBILES (lunes a viernes) — el mes completo si ya terminó, o solo los ya
