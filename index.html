@@ -257,26 +257,6 @@ svg{display:block;width:100%;overflow:visible}
   .agtbl th,.agtbl td{padding:6px 5px;font-size:11px}
 }
 
-/* ===== Sección Semáforo de gerencia (agregada en esta versión) ===== */
-.mgmt-section{margin-top:14px}
-.mgmt-body{border-radius:14px;padding:0;overflow:hidden}
-.mgmt-legend{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px 22px;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--mut);border-bottom:1px solid rgba(127,127,127,.18)}
-.mgmt-legend .mgmt-legend-right{margin-left:auto;display:flex;gap:14px;font-weight:500;letter-spacing:0;text-transform:none}
-.mgmt-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
-.mgmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:18px 22px}
-@media(max-width:820px){.mgmt-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.mgmt-grid{grid-template-columns:1fr}}
-.mgmt-tile{border-radius:10px;overflow:hidden;background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:5px solid transparent}
-.mgmt-tile.franja-naranja{border-left-color:#f59e0b}
-.mgmt-tile.franja-teal{border-left-color:#14b8a6}
-.mgmt-tile-top{height:5px}
-.mgmt-tile-body{padding:14px 16px 16px;position:relative}
-.mgmt-tile-lbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--mut);text-transform:uppercase;padding-right:20px}
-.mgmt-tile-dot{position:absolute;top:14px;right:14px;width:12px;height:12px;border-radius:50%}
-.mgmt-tile-val{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:700;margin-top:10px;color:var(--tx)}
-.mgmt-tile-val.tbd{font-size:16px;color:var(--mut);font-weight:600;font-family:inherit}
-.mgmt-tile-target{font-size:11.5px;color:var(--mut);margin-top:6px}
-.mgmt-foot{padding:12px 22px;font-size:11.5px;font-style:italic;color:var(--mut);background:rgba(127,127,127,.06)}
 </style>
 </head>
 <body class="light">
@@ -434,26 +414,6 @@ svg{display:block;width:100%;overflow:visible}
     <span><span class="sw" style="background:#94a3b8"></span>Otro</span>
   </div>
   <div class="dcol" id="agingClienteChart"></div>
-</div>
-
-<!-- ===== Sección Semáforo de gerencia (agregada en esta versión, fuente de datos independiente) ===== -->
-<div class="mgmt-section">
-  <div class="card mgmt-body">
-    <div class="mgmt-legend">
-      <span>SEMAFORO DEL MES</span>
-      <span id="mgmtErrorNote" style="color:#f87171;font-weight:600;text-transform:none;letter-spacing:0"></span>
-      <div class="mgmt-legend-right">
-        <span><span class="mgmt-dot" style="background:#22c55e"></span>Verde = en rango</span>
-        <span><span class="mgmt-dot" style="background:#f59e0b"></span>Amarillo = atenci&oacute;n</span>
-        <span><span class="mgmt-dot" style="background:#ef4444"></span>Rojo = acci&oacute;n inmediata</span>
-      </div>
-    </div>
-    <div class="mgmt-grid" id="mgmtGrid"></div>
-    <div class="mgmt-foot" id="mgmtFoot">
-      Cta. Cte. en Calle: franja naranja&nbsp;=&nbsp;Papeleras &middot; franja teal&nbsp;=&nbsp;Caterings &middot; sin franja&nbsp;=&nbsp;Especiales (agrupa CDH + VyMat + Cliente/Proveedor + Otros/Ajustes del tablero de arriba &mdash; a confirmar con Graciela). NC Emitidas incluye comprobantes NCR y NCE.
-      Calculado en vivo desde la pesta&ntilde;a "Aging". Pendientes de definici&oacute;n con Graciela: DSO, CEI&nbsp;48hs, Deuda incobrable, Tasa disputada, Cheques rechazados.
-    </div>
-  </div>
 </div>
 
 </div>
@@ -733,13 +693,16 @@ function buildFromRaw(raw){
     byDate[t.date].total += t.amount;
   });
   DATA = Object.values(byDate).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  const mesesSet = new Set(DATA.map(d=>d.m));
-  // v20: además de los meses con actividad "combinada" (lógica anterior — desde v26 ya no la usa
-  // NINGUNA tarjeta ni gráfico para calcular valores, solo sirve acá para no perder del selector
-  // un mes que tuviera actividad exclusivamente bajo ese criterio viejo), se agregan los meses que
-  // tengan comprobantes según FECHA DE VENCIMIENTO (regla de Graciela, usada por TODO: Cobrado/
-  // Proyectado/Total del mes/Promedio diario/Aging/Mix/Ranking/Evolución/Mapa) — así el selector
-  // de período siempre deja elegir un mes aunque no tenga actividad bajo el criterio viejo.
+  // v35: el selector de período ahora se construye SOLO a partir de VENC_TX (TIPO=Mercadería,
+  // la misma base que usan Cobrado/Proyectado/Total del mes/Mix/Ranking/Evolución/Mapa/Aging).
+  // Antes también se agregaban los meses de DATA (lógica vieja de parseCSV, que no filtra por
+  // TIPO), y eso hacía aparecer en el selector meses que NO tenían ningún comprobante de
+  // Mercadería real detrás — ej.: dic/2026, que solo existía porque dos comprobantes de LEO FILM
+  // TIPO=Iva (ya cobrados, SALDO=$0) tenían cargada una FECHA COBRANZA de diciembre/2026 pese a
+  // vencer en mayo/2026. Al elegir ese mes el tablero quedaba completamente vacío porque
+  // Cobrado/Proyectado/Mix/etc. sólo miran VENC_TX (Mercadería). Ahora el selector nunca ofrece
+  // un mes sin actividad real de Mercadería detrás.
+  const mesesSet = new Set();
   VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
   // v30: también se agregan los meses de FECHA COBRANZA (t.cobradoMonth) — con la fecha de
   // cobranza mandando sobre el vencimiento para "Cobrado", un comprobante puede aportar a un mes
@@ -1559,120 +1522,6 @@ async function agReloadAndRender(){
 }
 (async function initAging(){
   await agReloadAndRender();
-})();
-
-// ================================================================
-// ===== Semáforo de gerencia (agregada en esta versión) =========
-// Fuente de datos independiente de las dos secciones de arriba: lee la MISMA
-// pestaña "Aging" cruda (SHEET_CSV_URL) pero con su propio parser simple,
-// para no depender de la lógica de fechas estimadas del tablero principal.
-// Sólo calcula en vivo lo que hay dato confirmado para calcular (NC Emitidas,
-// Cta Cte en Calle por bloque); el resto queda "a definir" hasta que Graciela
-// confirme fórmula y fuente (ver nota al pie de la sección).
-// ================================================================
-// Nota v10: el tablero principal (arriba) le dio su propio bucket a "Cliente / proveedor" en vez
-// de dejarlo caer en "Otros/Ajustes". Acá en el semáforo de gerencia, por decisión de Nahuel, esto
-// NO cambia: se mantienen las 3 franjas actuales (Papeleras/Caterings/Especiales) y "Cliente /
-// proveedor" sigue agrupado dentro de "Especiales" junto con CDH, Vymat y Otros/Ajustes.
-function mgmtMapUnitBucket(tipoCliente){
-  const t = (tipoCliente||'').trim().toLowerCase();
-  if(t==='papelera' || t==='pepelera') return 'Papeleras';
-  if(t==='catering') return 'Caterings';
-  return 'Especiales'; // Otros/CHD (CDH), Vymat, Cliente/proveedor, vacío, etc.
-}
-
-async function mgmtLoadAndCompute(){
-  const text = await getSheetText(); // v22: fetch compartido (ver comentario junto a SHEET_CSV_URL)
-  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
-  if(!lines.length) throw new Error('el CSV no tiene filas');
-  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
-  const idx = name => header.findIndex(h=>h===name);
-  const iCobrado = idx('COBRADO / DESCONTADO');
-  const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
-  const iSaldo = idx('SALDO');
-  const iImporte = idx('IMPORTE');
-  const iNumero = idx('NUMERO');
-  const iFechaEmision = idx('FECHA DE EMISION');
-  const iFechaEntrega = idx('FECHA DE ENTREGA DE PRODUCTOS');
-  if([iCobrado,iTipoCliente,iSaldo,iImporte,iNumero,iFechaEmision,iFechaEntrega].some(i=>i<0)){
-    throw new Error('no encontré alguna columna esperada en la pestaña "Aging"');
-  }
-  const hoy = new Date();
-  const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
-  const ctaCte = {Papeleras:0, Caterings:0, Especiales:0};
-  let ncEmitidas = 0, cateringsOverdue = 0;
-  for(let i=1;i<lines.length;i++){
-    const c = splitCSVLine(lines[i]);
-    const first = (c[0]||'').trim();
-    if(first.toLowerCase()==='total') continue;
-    if(!c.some(v=>v && v.trim())) continue;
-    const cobrado = first.toUpperCase()==='TRUE' || first.toUpperCase()==='VERDADERO'; // v10: idem parseCSV
-    const bucket = mgmtMapUnitBucket(c[iTipoCliente]);
-    if(!cobrado){
-      const saldo = agNum(c[iSaldo]);
-      ctaCte[bucket] += saldo;
-      if(bucket==='Caterings'){
-        const entrega = agParseDateFlexible(c[iFechaEntrega]);
-        if(entrega && (hoy - entrega)/86400000 > 7) cateringsOverdue += saldo;
-      }
-    }
-    const numero = c[iNumero]||'';
-    if(/NCR|NCE/i.test(numero)){ // v10: se descubrió el tipo "NCE" (misma familia de Notas de Crédito que NCR) — Nahuel confirmó sumarlo acá también
-      const emision = agParseDateFlexible(c[iFechaEmision]);
-      const emisionKey = emision ? (emision.getUTCFullYear()+'-'+(emision.getUTCMonth()+1).toString().padStart(2,'0')) : null;
-      if(emisionKey===hoyKey) ncEmitidas += Math.abs(agNum(c[iImporte]));
-    }
-  }
-  return {ctaCte, ncEmitidas, cateringsOverdue};
-}
-
-function mgmtErrorClear(){
-  document.getElementById('mgmtErrorNote').textContent = '';
-}
-function mgmtShowError(msg){
-  document.getElementById('mgmtErrorNote').textContent = msg;
-  document.getElementById('mgmtGrid').innerHTML = '';
-}
-
-function mgmtTile(label, value, target, statusColor, franjaClass){
-  const isTbd = value==='a definir';
-  return `<div class="mgmt-tile ${franjaClass||''}">
-    <div class="mgmt-tile-top" style="background:${statusColor||'transparent'}"></div>
-    <div class="mgmt-tile-body">
-      <div class="mgmt-tile-lbl">${label}</div>
-      ${statusColor?`<div class="mgmt-tile-dot" style="background:${statusColor}"></div>`:''}
-      <div class="mgmt-tile-val${isTbd?' tbd':''}">${value}</div>
-      <div class="mgmt-tile-target">Target: ${target}</div>
-    </div>
-  </div>`;
-}
-
-function mgmtRenderAll(d){
-  const VERDE='#22c55e', ROJO='#ef4444', GRIS='#94a3b8';
-  const fmtMgmtM = n => '$'+(n/1e6).toLocaleString('es-AR',{maximumFractionDigits:1});
-  document.getElementById('mgmtGrid').innerHTML = [
-    mgmtTile('DSO &mdash; D&iacute;as de cobro', 'a definir', '&le; 60 d', GRIS),
-    mgmtTile('CEI 48hs &mdash; Efic. cobranza %', 'a definir', '100%', GRIS),
-    mgmtTile('NC Emitidas ($M) &middot; este mes', fmtMgmtM(d.ncEmitidas), 'a definir', GRIS),
-    mgmtTile('Cta Cte en Calle &mdash; Papeleras ($M)', fmtMgmtM(d.ctaCte.Papeleras), '$0 (cobro al entregado)', d.ctaCte.Papeleras>0?ROJO:VERDE, 'franja-naranja'),
-    mgmtTile('Cta Cte en Calle &mdash; Caterings ($M)', fmtMgmtM(d.ctaCte.Caterings), '&le; 1 sem. entregado', d.cateringsOverdue>0?ROJO:VERDE, 'franja-teal'),
-    mgmtTile('Deuda incobrable', 'a definir', '0 clientes &middot; $0', GRIS),
-    mgmtTile('Tasa disputada %', 'a definir', 'a definir', GRIS),
-    mgmtTile('Cta Cte en Calle &mdash; Especiales ($M)', fmtMgmtM(d.ctaCte.Especiales), '$0 (cobro al entregado)', d.ctaCte.Especiales>0?ROJO:VERDE),
-    mgmtTile('Cheques rechazados', 'a definir', 'a definir', GRIS),
-  ].join('');
-}
-
-let MGMT_DATA = null;
-(async function initMgmt(){
-  try{
-    mgmtErrorClear();
-    MGMT_DATA = await mgmtLoadAndCompute();
-    mgmtRenderAll(MGMT_DATA);
-  }catch(err){
-    console.error(err);
-    mgmtShowError('No pude calcular el sem&aacute;foro desde la pesta&ntilde;a "Aging". Detalle: ' + err.message);
-  }
 })();
 </script>
 </body>
