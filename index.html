@@ -556,9 +556,12 @@ function parseCSV(text){
 // 4 secciones no se tocaron a prop&oacute;sito (para no meter cambios de m&aacute;s), pero eso dejó
 // un tablero con dos maneras distintas de sumar lo mismo y n&uacute;meros que no cerraban entre
 // secciones (ej.: $147,9M ahí vs $76,9M en "Total del mes" para agosto/2026, mismo mes). Ahora
-// las 4 usan exactamente la misma base que Cobrado/Proyectado/Total del mes/Aging. DATA/MESES
-// (parseCSV/buildFromRaw) se mantienen SOLO para "Promedio diario" (cantidad de d&iacute;as con
-// actividad), que no fue parte de este pedido — ver nota en render().
+// las 4 usan exactamente la misma base que Cobrado/Proyectado/Total del mes/Aging.
+// v26: "Promedio diario" (la única tarjeta que hasta acá seguía usando DATA/lógica vieja) también
+// migró a Graciela — ver businessDaysForMonth() y la nota en render(). DATA/MESES (parseCSV/
+// buildFromRaw) ya no se usan para calcular NINGÚN valor mostrado en el tablero; MESES los sigue
+// usando únicamente para no perder, del selector de período, un mes que solo tuviera actividad
+// bajo la lógica vieja (ver comentario en buildFromRaw).
 function parseVencTx(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) return [];
@@ -654,11 +657,12 @@ function buildFromRaw(raw){
   });
   DATA = Object.values(byDate).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
   const mesesSet = new Set(DATA.map(d=>d.m));
-  // v20: además de los meses con actividad "combinada" (lógica anterior, la que desde v25 solo
-  // sigue usando "Promedio diario" para su cantidad de días con actividad), se agregan los meses
-  // que tengan comprobantes según FECHA DE VENCIMIENTO (regla de Graciela, usada desde v25 por
-  // TODO lo demás: Cobrado/Proyectado/Total del mes/Aging/Mix/Ranking/Evolución/Mapa) — así el
-  // selector de período siempre deja elegir un mes aunque no tenga actividad bajo el criterio viejo.
+  // v20: además de los meses con actividad "combinada" (lógica anterior — desde v26 ya no la usa
+  // NINGUNA tarjeta ni gráfico para calcular valores, solo sirve acá para no perder del selector
+  // un mes que tuviera actividad exclusivamente bajo ese criterio viejo), se agregan los meses que
+  // tengan comprobantes según FECHA DE VENCIMIENTO (regla de Graciela, usada por TODO: Cobrado/
+  // Proyectado/Total del mes/Promedio diario/Aging/Mix/Ranking/Evolución/Mapa) — así el selector
+  // de período siempre deja elegir un mes aunque no tenga actividad bajo el criterio viejo.
   VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
   MESES = [...mesesSet].sort();
   MLBL = {};
@@ -708,10 +712,24 @@ const fmtPct=n=>n.toFixed(1)+'%';
 let mesFilter=null, unitFilter=null;
 const A=()=>document.body.classList.contains('light')?'#2563eb':'#b8ff36';
 
-function rows(){
-  let r=DATA;
-  if(mesFilter) r=r.filter(d=>d.m===mesFilter);
-  return r;
+// v26: reemplaza a la vieja rows()/DATA que usaba "Promedio diario" para su total y su cantidad
+// de "días con actividad" (18 en agosto/2026, mezcla rara de fechas de la lógica vieja que podían
+// caer en fin de semana y a la vez dejar afuera días hábiles reales — ver detalle charlado con
+// Nahuel). Ahora "Promedio diario" cuenta DÍAS HÁBILES (lunes a viernes) del mes elegido, y si el
+// mes elegido es el mes en curso, cuenta solo los ya transcurridos (no el mes completo).
+function businessDaysForMonth(mesKey, hoy){
+  if(!mesKey) return 0;
+  const [y,mo] = mesKey.split('-').map(Number);
+  const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
+  if(mesKey > hoyKey) return 0; // mes futuro: todavía no transcurrió ningún día hábil
+  const lastDay = new Date(y, mo, 0).getDate(); // cantidad de días que tiene ese mes
+  const endDay = (mesKey === hoyKey) ? hoy.getDate() : lastDay;
+  let count = 0;
+  for(let d=1; d<=endDay; d++){
+    const wd = new Date(y, mo-1, d).getDay(); // 0=domingo, 6=sábado
+    if(wd!==0 && wd!==6) count++;
+  }
+  return count;
 }
 
 const tip=document.getElementById('tip');
@@ -745,15 +763,22 @@ function getPrevMonth(m){
 function render(){
   updateColor();
   buildMesSeg();
-  // v25: "Promedio diario" es la ÚNICA tarjeta que sigue leyendo DATA/rows() (lógica vieja,
-  // combinada) — no fue parte de este pedido, así que se deja tal cual (con su nota de "días
-  // con actividad" agregada en v24). Todo lo demás de acá para abajo (Mix/Ranking/Evolución/
-  // Mapa/Mejor unidad) ya usa VENC_TX (regla de Graciela), ver vencUnitBreakdown/vencByMonthUnit.
-  const R=rows();
-  const totalPeriodo = R.reduce((s,d)=>s+(unitFilter?d[unitFilter]:d.total),0);
-  const diasConDatos = R.length;
-  const promedioDiario = diasConDatos>0?totalPeriodo/diasConDatos:0;
+  // v26: "Promedio diario" ahora es 100% regla de Graciela, igual que todo lo demás del tablero:
+  // el monto es Cobrado+Proyectado del período elegido (lo mismo que muestra "Total del mes"),
+  // dividido por días HÁBILES (lunes a viernes) — el mes completo si ya terminó, o solo los ya
+  // transcurridos si es el mes en curso. Antes (hasta v25) salía de DATA/rows() (lógica vieja) y
+  // contaba "días con datos" en vez de días hábiles.
   const {real: totalReal, proy: totalProy} = realProyectadoTotals();
+  const hoy = new Date();
+  const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
+  const diasHabiles = mesFilter ? businessDaysForMonth(mesFilter, hoy) : MESES.reduce((s,m)=>s+businessDaysForMonth(m, hoy), 0);
+  const promedioDiario = diasHabiles>0 ? (totalReal+totalProy)/diasHabiles : 0;
+  const diasPlural = diasHabiles===1?'d&iacute;a h&aacute;bil':'d&iacute;as h&aacute;biles';
+  const diasSub = !mesFilter
+    ? `sobre ${diasHabiles} ${diasPlural} transcurridos (todo el per&iacute;odo)`
+    : (mesFilter===hoyKey
+        ? `sobre ${diasHabiles} ${diasPlural} transcurridos de ${MLBL[mesFilter]}`
+        : `sobre ${diasHabiles} ${diasPlural} de ${MLBL[mesFilter]}`);
 
   document.getElementById('scope').textContent = unitFilter||'Todas';
   document.getElementById('clearUnitBtn').classList.toggle('hide', !unitFilter);
@@ -815,7 +840,7 @@ function render(){
       </div></div>
     <div class="kpi"><div class="k-lbl">Promedio diario</div>
       <div class="k-val">${fmtM(promedioDiario)}</div>
-      <div class="k-sub">sobre ${diasConDatos} d&iacute;a${diasConDatos===1?'':'s'} con actividad</div></div>
+      <div class="k-sub">${diasSub}</div></div>
     <div class="kpi"><div class="k-lbl">Mejor unidad</div>
       <div class="k-val" style="color:${COLOR[bestUnit]};font-size:clamp(15px,1.8vw,22px)">${bestUnit}</div>
       <div class="k-sub">${fmtPct(bestPct)} del total cobrado</div></div>`;
