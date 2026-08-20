@@ -316,6 +316,10 @@ svg{display:block;width:100%;overflow:visible}
 <div class="aging-head">
   <h2>Aging de <b>cartera</b></h2>
   <div class="scope">
+    <div class="lbl">Per&iacute;odo (vencimiento)</div>
+    <div class="who" id="agingPeriodNote">todo el per&iacute;odo</div>
+  </div>
+  <div class="scope">
     <div class="lbl">Actualizado</div>
     <div class="who" id="agingUpdated">&mdash;</div>
   </div>
@@ -427,6 +431,35 @@ svg{display:block;width:100%;overflow:visible}
 //     (antes solo "NCR") — parecen ser la misma familia de Notas de Crédito.
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJXSOuDH9QTf-i7czJt-5l9TsdoNWgLHr55blzpWWfwG4ivbMnaJaKgs92yNJSSfubAzq713apwyd8/pub?gid=457164138&single=true&output=csv';
 
+// v22: el tablero principal, la sección Aging y el semáforo de gerencia leen la MISMA pestaña
+// "Aging" — antes cada uno hacía su propio fetch() al mismo link publicado, y los 3 (a veces 4,
+// contando alguna carrera entre el primer render de Aging y un re-render disparado por el
+// período) salían casi al mismo instante en la carga de la página. Eso a veces le hacía pedir
+// demasiado rápido/seguido al link publicado de Sheets, que respondía HTTP 400 a alguno de esos
+// pedidos simultáneos aunque los otros sí funcionaran (por eso el tablero principal fallaba pero
+// el Aging de la misma página, o el VERIFICADOR en otra pestaña, cargaban bien). Ahora hay un
+// solo fetch() compartido: el primero que lo pide dispara el pedido real a Sheets, y cualquier
+// otro que lo pida mientras ese pedido está en curso (o ya terminó) reutiliza el mismo resultado
+// en vez de disparar un pedido nuevo.
+let SHEET_TEXT = null;
+let SHEET_FETCH_PROMISE = null;
+async function getSheetText(){
+  if(SHEET_TEXT) return SHEET_TEXT;
+  if(SHEET_FETCH_PROMISE) return SHEET_FETCH_PROMISE;
+  SHEET_FETCH_PROMISE = (async () => {
+    const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    SHEET_TEXT = await res.text();
+    return SHEET_TEXT;
+  })();
+  try{
+    return await SHEET_FETCH_PROMISE;
+  } finally {
+    SHEET_FETCH_PROMISE = null;
+  }
+}
+
 let DATA = [], MESES = [], MLBL = {};
 
 // v14 — BUG CORREGIDO: esta función asumía que un año de 4 dígitos significaba formato
@@ -508,33 +541,72 @@ function parseCSV(text){
   return out;
 }
 
-// Guarda las transacciones sin agregar (con el flag "cobrado" de cada una), para poder separar
-// "real" (ya cobrado) de "proyectado" (pendiente, fecha estimada) en la tarjeta de KPIs sin
-// tener que tocar DATA/MESES ni el ranking, la matriz o el gráfico mensual, que siguen usando
-// el total combinado como hasta ahora.
-let RAW_TX = [];
+// v20: regla nueva acordada con Graciela para "Cobrado" y "Proyectado" (reemplaza la lógica
+// anterior de COBRADO/DESCONTADO=VERDADERO/FALSO + cadena de fechas estimada→entrega→vencimiento,
+// que era dif&iacute;cil de reconciliar a mano contra el Sheet). Ahora, para CADA comprobante,
+// sin importar la columna COBRADO/DESCONTADO:
+//   - el mes al que pertenece lo da &uacute;nicamente FECHA DE VENCIMIENTO.
+//   - "Cobrado" (neto) = IMPORTE − SALDO de ese comprobante (lo ya cobrado a la fecha,
+//     incluye cobros parciales de facturas todav&iacute;a abiertas).
+//   - "Proyectado" = SALDO de ese comprobante (lo que falta cobrar). Cobrado + Proyectado = IMPORTE.
+// Importante: esto NO toca "Mix por unidad de negocio", "Ranking por unidad" ni "Evoluci&oacute;n
+// mensual" — esos tres siguen usando DATA/MESES tal como antes (parseCSV/buildFromRaw, sin
+// cambios), porque Graciela no pidi&oacute; modificarlos.
+function parseVencTx(text){
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
+  if(!lines.length) return [];
+  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
+  const idx = name => header.findIndex(h=>h===name);
+  const iFechaVenc = idx('FECHA DE VENCIMIENTO');
+  const iImporte = idx('IMPORTE');
+  const iSaldo = idx('SALDO');
+  const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
+  if([iFechaVenc,iImporte,iSaldo,iTipoCliente].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE) para calcular Cobrado/Proyectado');
+  }
+  const out=[];
+  for(let i=1;i<lines.length;i++){
+    const c = splitCSVLine(lines[i]);
+    const first = (c[0]||'').trim();
+    if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
+    if(!c.some(v=>v && v.trim())) continue; // fila vacía
+    const dateObj = agParseDateFlexible(c[iFechaVenc]);
+    const importe = agNum(c[iImporte]);
+    const saldo = agNum(c[iSaldo]);
+    out.push({
+      month: dateObj ? agToISO(dateObj).slice(0,7) : null, // null = sin FECHA DE VENCIMIENTO usable
+      cobrado: importe - saldo,
+      proyectado: saldo,
+      unit: mapTipoClienteToUnit(c[iTipoCliente]),
+    });
+  }
+  return out;
+}
+
+// Transacciones re-derivadas para Cobrado/Proyectado (regla Graciela, ver arriba). Si no hay
+// filtro de mes ("todo el período"), se suma todo aunque falte FECHA DE VENCIMIENTO (month=null);
+// si hay un mes elegido, esas filas sin fecha usable no se pueden ubicar y quedan afuera.
+let VENC_TX = [];
 function realProyectadoTotals(){
   let real=0, proy=0;
-  RAW_TX.forEach(t=>{
-    if(mesFilter && t.date.slice(0,7)!==mesFilter) return;
+  VENC_TX.forEach(t=>{
+    if(mesFilter && t.month!==mesFilter) return;
     if(unitFilter && t.unit!==unitFilter) return;
-    if(t.cobrado) real+=t.amount; else proy+=t.amount;
+    real += t.cobrado;
+    proy += t.proyectado;
   });
   return {real, proy};
 }
 
 async function loadData(){
-  const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
+  const text = await getSheetText(); // v22: fetch compartido (ver comentario junto a SHEET_CSV_URL)
   const raw = parseCSV(text);
   if(!raw.length) throw new Error('el CSV no tiene filas de datos válidas');
+  VENC_TX = parseVencTx(text); // v20: base independiente para Cobrado/Proyectado (regla Graciela)
   return raw;
 }
 
 function buildFromRaw(raw){
-  RAW_TX = raw;
   const byDate = {};
   raw.forEach(t=>{
     if(!byDate[t.date]){
@@ -546,7 +618,13 @@ function buildFromRaw(raw){
     byDate[t.date].total += t.amount;
   });
   DATA = Object.values(byDate).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  MESES = [...new Set(DATA.map(d=>d.m))].sort();
+  const mesesSet = new Set(DATA.map(d=>d.m));
+  // v20: además de los meses con actividad "combinada" (lógica anterior, la que sigue usando
+  // Mix/Ranking/Evolución mensual), se agregan los meses que tengan comprobantes según FECHA DE
+  // VENCIMIENTO (regla de Graciela para Cobrado/Proyectado/Aging) — así el selector de período
+  // siempre deja elegir un mes aunque no tenga actividad bajo el criterio anterior.
+  VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
+  MESES = [...mesesSet].sort();
   MLBL = {};
   MESES.forEach(m=>{const [y,mo]=m.split('-'); MLBL[m]=mnAbbr[parseInt(mo)-1]+" '"+y.slice(2);});
 }
@@ -664,10 +742,10 @@ function render(){
   document.getElementById('kpis').innerHTML =
     `<div class="kpi acc"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
       <div class="k-val full">${fmtFull(totalReal)}</div>
-      <div class="k-sub">Real (ya cobrado) &middot; ${unitFilter||'todas las unidades'} &middot; ${diasConDatos} d&iacute;as h&aacute;biles</div></div>
+      <div class="k-sub">Neto (Importe &minus; Saldo) &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi mrg"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
       <div class="k-val full">${fmtFull(totalProy)}</div>
-      <div class="k-sub">Pendiente de cobro &middot; ${unitFilter||'todas las unidades'} &middot; ${diasConDatos} d&iacute;as h&aacute;biles</div></div>
+      <div class="k-sub">Saldo pendiente &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
       <div class="k-val ${momCls}" style="font-size:clamp(16px,2vw,26px)">${momSign}</div>
       <div class="mom-bars">
@@ -699,6 +777,11 @@ function render(){
 
   document.getElementById('mixNote').textContent = mesFilter?MLBL[mesFilter]:'período completo';
   document.getElementById('evNote').textContent = unitFilter||'todas las unidades';
+
+  // v20: la sección de Aging de cartera también respeta el período elegido acá arriba
+  // (regla de Graciela) — se recalcula (sin volver a pedirle el CSV a Sheets) cada vez
+  // que cambia mesFilter, para que Deuda total/Venta real/No real queden siempre en sincro.
+  if(typeof agReloadAndRender==='function') agReloadAndRender();
 }
 
 function renderUnidades(unitTot,total){
@@ -850,10 +933,11 @@ function toggleTheme(){
 // v12: Nahuel elimin&oacute; esa pesta&ntilde;a del Sheet, as&iacute; que esta secci&oacute;n ahora se reconstruye
 // enteramente a partir de la MISMA pesta&ntilde;a "Aging" cruda (SHEET_CSV_URL) que usan el tablero
 // principal y el sem&aacute;foro de gerencia — sigue siendo una lectura/agregaci&oacute;n independiente
-// de esas dos (si algo cambia acá, no rompe las otras secciones, y viceversa). Definiciones
-// acordadas con Nahuel:
-//  - "Deuda total" = suma de SALDO de los comprobantes TODAV&Iacute;A NO cobrados (COBRADO/DESCONTADO=FALSO).
-//    Lo ya cobrado no se considera "deuda en la calle".
+// de esas dos (si algo cambia acá, no rompe las otras secciones, y viceversa).
+// v20 (regla de Graciela, reemplaza la definici&oacute;n anterior basada en COBRADO/DESCONTADO):
+//  - "Deuda total" = suma de SALDO de los comprobantes cuya FECHA DE VENCIMIENTO cae en el
+//    per&iacute;odo elegido arriba (o de TODOS si est&aacute; en "Todo el per&iacute;odo"). Ya no se
+//    usa la columna COBRADO/DESCONTADO/FALSO para decidir qu&eacute; entra.
 //  - "Venta real" vs "No real" = columna TIPO: "Mercaderia" es venta real; "Iva" (y comprobantes
 //    sin TIPO, t&iacute;picamente notas de cr&eacute;dito/d&eacute;bito) es "no real".
 //  - Vencido / En plazo / Cumplido (tabla y gr&aacute;fico de Clientes) = tal cual la columna
@@ -906,11 +990,13 @@ const agFmtFull=n=>{
 // cruda (comprobante por comprobante), en vez de leerlo ya calculado de "Resumen Aging"
 // (que ya no existe). Busca columnas por nombre, no por posición, para no romperse si el
 // Sheet cambia de forma con el tiempo.
-async function loadAgingFromRaw(){
-  const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
+// v20: regla de Graciela — esta sección ahora respeta el mismo período (mes) elegido arriba,
+// usando FECHA DE VENCIMIENTO (ya no la columna COBRADO/DESCONTADO) para decidir qué comprobantes
+// entran. Si arriba está en "Todo el período" (mesFilter=null), se ve la cartera completa, igual
+// que antes.
+// v22: usa el fetch compartido getSheetText() en vez de pedir su propio CSV — ver el comentario
+// junto a SHEET_CSV_URL (esto es lo que causaba el HTTP 400 intermitente).
+function computeAgingFromText(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) throw new Error('el CSV no tiene filas');
   const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
@@ -921,7 +1007,8 @@ async function loadAgingFromRaw(){
   const iAnalista = idx('ANALISTA');
   const iVendedor = idx('VENDEDOR');
   const iRazon = idx('RAZON SOCIAL CLIENTE');
-  if([iSaldo,iTipo,iEstadoVenc,iAnalista,iVendedor,iRazon].some(i=>i<0)){
+  const iFechaVenc = idx('FECHA DE VENCIMIENTO');
+  if([iSaldo,iTipo,iEstadoVenc,iAnalista,iVendedor,iRazon,iFechaVenc].some(i=>i<0)){
     throw new Error('no encontré alguna de las columnas esperadas en la pestaña "Aging" (revisá si cambiaron los encabezados)');
   }
   const analistaAgg={}, vendedorAgg={}, clienteAgg={};
@@ -931,8 +1018,11 @@ async function loadAgingFromRaw(){
     const first = (c[0]||'').trim();
     if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
     if(!c.some(v=>v && v.trim())) continue; // fila vacía
-    const cobrado = first.toUpperCase()==='TRUE' || first.toUpperCase()==='VERDADERO';
-    if(cobrado) continue; // "Deuda total" = solo lo pendiente de cobro (acordado con Nahuel)
+    if(mesFilter){
+      const vencObj = agParseDateFlexible(c[iFechaVenc]);
+      const vencMes = vencObj ? agToISO(vencObj).slice(0,7) : null;
+      if(vencMes!==mesFilter) continue; // fuera del período elegido arriba (o sin fecha de vencimiento usable)
+    }
     const saldo = agNum(c[iSaldo]);
     const tipo = (c[iTipo]||'').trim().toLowerCase();
     const esReal = tipo==='mercaderia'; // "no real" = "Iva" o sin TIPO (NC/ND), acordado con Nahuel
@@ -976,6 +1066,13 @@ async function loadAgingFromRaw(){
   };
 }
 
+// v22: usa getSheetText() (fetch compartido) — primera vez pide a Sheets, después sólo
+// recalcula en el cliente con el mismo texto ya cacheado, sin pegarle otra vez a Sheets.
+async function loadAgingFromRaw(){
+  const text = await getSheetText();
+  return computeAgingFromText(text);
+}
+
 function showAgingError(msg){
   ['agingKpis','agingAnalistaChart','agingVendedorChart','agingClienteChart'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML='';
@@ -991,17 +1088,20 @@ function showAgingError(msg){
 
 // v18: se agrega una breve descripción (k-sub) debajo del total de cada tarjeta,
 // igual que en las tarjetas KPI de la parte superior del tablero (Cobrado, Proyectado, etc.)
+// v20: las descripciones ahora aclaran que el criterio es la FECHA DE VENCIMIENTO del período
+// elegido arriba (regla de Graciela), en vez de "toda la cartera" sin distinción de fecha.
 function agRenderKpis(kpi){
   const pct = kpi.total>0? kpi.ventaReal/kpi.total*100 : 0;
+  const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
   document.getElementById('agingKpis').innerHTML =
     `<div class="kpi acc"><div class="k-lbl">Deuda total</div><div class="k-val">${agFmtFull(kpi.total)}</div>
-      <div class="k-sub">saldo pendiente de toda la cartera (Aging)</div></div>
+      <div class="k-sub">saldo pendiente &middot; vencimiento ${periodoTxt}</div></div>
      <div class="kpi"><div class="k-lbl">Venta real</div><div class="k-val" style="color:var(--acc)">${agFmtFull(kpi.ventaReal)}</div>
-      <div class="k-sub">comprobantes con TIPO = Mercader&iacute;a</div></div>
+      <div class="k-sub">TIPO = Mercader&iacute;a &middot; vencimiento ${periodoTxt}</div></div>
      <div class="kpi mrg"><div class="k-lbl">No real</div><div class="k-val">${agFmtFull(kpi.noReal)}</div>
-      <div class="k-sub">comprobantes con TIPO = Iva</div></div>
+      <div class="k-sub">TIPO = Iva &middot; vencimiento ${periodoTxt}</div></div>
      <div class="kpi"><div class="k-lbl">% venta real</div><div class="k-val">${fmtPct(pct)}</div>
-      <div class="k-sub">venta real sobre la deuda total</div></div>`;
+      <div class="k-sub">venta real sobre la deuda total del per&iacute;odo</div></div>`;
 }
 
 // v12: tabla genérica de N columnas numéricas + Total deuda (antes admitía sólo 2
@@ -1063,11 +1163,16 @@ function agRenderAll(ag){
 }
 
 let AGING_DATA = null;
-(async function initAging(){
+// v20: se llama de nuevo cada vez que cambia el período (mesFilter) arriba, para que
+// Deuda total / Venta real / No real (y sus tablas/gráficos) queden siempre en sincro con
+// el período elegido. v22: usa getSheetText() (fetch compartido) — sólo pide a Sheets la
+// primera vez que hace falta; las siguientes veces recalcula con el texto ya cacheado.
+async function agReloadAndRender(){
   document.getElementById('agingUpdated').textContent = 'Cargando…';
   try{
     AGING_DATA = await loadAgingFromRaw();
     agRenderAll(AGING_DATA);
+    document.getElementById('agingPeriodNote').textContent = mesFilter?MLBL[mesFilter]:'todo el período';
     document.getElementById('agingUpdated').textContent =
       new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
   }catch(err){
@@ -1075,6 +1180,9 @@ let AGING_DATA = null;
     document.getElementById('agingUpdated').textContent = 'Error';
     showAgingError('No pude calcular el Aging desde la pesta&ntilde;a "Aging" de Google Sheets. Revis&aacute; que el link de publicaci&oacute;n siga activo. Detalle: ' + err.message);
   }
+}
+(async function initAging(){
+  await agReloadAndRender();
 })();
 
 // ================================================================
@@ -1098,10 +1206,7 @@ function mgmtMapUnitBucket(tipoCliente){
 }
 
 async function mgmtLoadAndCompute(){
-  const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
+  const text = await getSheetText(); // v22: fetch compartido (ver comentario junto a SHEET_CSV_URL)
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) throw new Error('el CSV no tiene filas');
   const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
