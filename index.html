@@ -120,6 +120,13 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .kpi .k-split span{white-space:nowrap}
 .kpi .k-split-real{color:var(--teal)}
 .kpi .k-split-proy{color:var(--mut2)}
+/* v27 — tarjetas Cobrado/Proyectado/Total del mes: despliegan un detalle al hacer clic */
+.kpi-clickable{cursor:pointer;transition:border-color .15s,transform .1s}
+.kpi-clickable:hover{border-color:var(--acc)}
+.kpi-clickable.active{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.kpi-caret{font-size:9px;color:var(--mut2);margin-left:2px}
+.kpi-clickable.active .kpi-caret{color:var(--acc)}
+#kpiDetailCard .agtbl{min-width:420px}
 .grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}
 .card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);
   border-radius:var(--r);padding:18px 20px 20px;position:relative}
@@ -275,6 +282,15 @@ svg{display:block;width:100%;overflow:visible}
 </div>
 
 <div class="kpis kpis6" id="kpis"></div>
+
+<!-- v27: detalle desplegable de Cobrado/Proyectado/Total del mes (clic en la tarjeta) -->
+<div class="card" id="kpiDetailCard" style="margin-bottom:14px;display:none">
+  <div class="c-head">
+    <span class="c-title" id="kpiDetailTitle"></span>
+    <span class="c-note" id="kpiDetailNote"></span>
+  </div>
+  <div style="overflow-x:auto"><table class="agtbl" id="kpiDetailTable"></table></div>
+</div>
 
 <div class="card" style="margin-bottom:14px">
   <div class="c-head">
@@ -571,8 +587,9 @@ function parseVencTx(text){
   const iImporte = idx('IMPORTE');
   const iSaldo = idx('SALDO');
   const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
-  if([iFechaVenc,iImporte,iSaldo,iTipoCliente].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE) para calcular Cobrado/Proyectado');
+  const iCliente = idx('RAZON SOCIAL CLIENTE'); // v27: para el detalle desplegable por cliente
+  if([iFechaVenc,iImporte,iSaldo,iTipoCliente,iCliente].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE) para calcular Cobrado/Proyectado');
   }
   const out=[];
   for(let i=1;i<lines.length;i++){
@@ -588,6 +605,7 @@ function parseVencTx(text){
       cobrado: importe - saldo,
       proyectado: saldo,
       unit: mapTipoClienteToUnit(c[iTipoCliente]),
+      cliente: (c[iCliente]||'').trim() || '(sin cliente)',
     });
   }
   return out;
@@ -674,6 +692,8 @@ function showError(msg){
   document.getElementById('mesSeg').innerHTML = '';
   ['unidades','ranking','monthChart'].forEach(id=>document.getElementById(id).innerHTML='');
   document.getElementById('matrix').innerHTML='';
+  kpiDetailOpen = null; // v27: si falla la carga, cerramos cualquier detalle que hubiera quedado abierto
+  document.getElementById('kpiDetailCard').style.display='none';
   const wrap = document.querySelector('.wrap');
   let box = document.getElementById('errorBox');
   if(!box){
@@ -710,6 +730,83 @@ const fmtM=n=>{
 const fmtPct=n=>n.toFixed(1)+'%';
 
 let mesFilter=null, unitFilter=null;
+let kpiDetailOpen=null; // v27: 'cobrado' | 'proyectado' | 'total' | null — qué tarjeta tiene el detalle abierto
+
+// v27 — desglose para el panel desplegable de Cobrado/Proyectado/Total del mes, siempre sobre
+// VENC_TX (regla de Graciela) y respetando el mesFilter/unitFilter elegidos arriba (el mismo
+// filtro que ya usan esas 3 tarjetas):
+//  - 'cobrado': una fila POR COMPROBANTE (cliente + monto cobrado = Importe−Saldo), sin agregar
+//    por cliente — así se puede rastrear cada comprobante individualmente.
+//  - 'proyectado': agregado POR CLIENTE (suma de Saldo pendiente de todos sus comprobantes).
+//  - 'total': agregado POR CLIENTE con 3 columnas (Cobrado, Proyectado, Total = la suma).
+// Orden: siempre de mayor a menor según el importe relevante de cada tarjeta (para 'total', por
+// la columna Total).
+function vencClientDetail(mode){
+  const pasaFiltro = t => (!mesFilter || t.month===mesFilter) && (!unitFilter || t.unit===unitFilter);
+  if(mode==='cobrado'){
+    const rows = [];
+    VENC_TX.forEach(t=>{
+      if(!pasaFiltro(t)) return;
+      if(!t.cobrado) return; // este comprobante no aportó nada cobrado en el período
+      rows.push({cliente:t.cliente, monto:t.cobrado});
+    });
+    rows.sort((a,b)=>b.monto-a.monto);
+    return rows;
+  }
+  const byClient = {};
+  VENC_TX.forEach(t=>{
+    if(!pasaFiltro(t)) return;
+    if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, cobrado:0, proyectado:0};
+    byClient[t.cliente].cobrado += t.cobrado;
+    byClient[t.cliente].proyectado += t.proyectado;
+  });
+  let rows = Object.values(byClient).map(r=>({...r, total:r.cobrado+r.proyectado}));
+  if(mode==='proyectado'){
+    rows = rows.filter(r=>r.proyectado);
+    rows.sort((a,b)=>b.proyectado-a.proyectado);
+  } else {
+    rows = rows.filter(r=>r.total);
+    rows.sort((a,b)=>b.total-a.total);
+  }
+  return rows;
+}
+
+// v27 — pinta (o esconde) el panel de detalle debajo de la fila de KPIs, según kpiDetailOpen.
+function renderKpiDetail(){
+  const card = document.getElementById('kpiDetailCard');
+  if(!kpiDetailOpen){ card.style.display='none'; return; }
+  card.style.display='';
+  const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
+  const unidadTxt = unitFilter||'todas las unidades';
+  const rows = vencClientDetail(kpiDetailOpen);
+  let thead, tbody, totalRow;
+  if(kpiDetailOpen==='cobrado'){
+    document.getElementById('kpiDetailTitle').innerHTML = 'Detalle de Cobrado &middot; por comprobante';
+    thead = '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th></tr>';
+    tbody = rows.map(r=>`<tr><td>${r.cliente}</td><td>${fmtFull(r.monto)}</td></tr>`).join('');
+    const tot = rows.reduce((s,r)=>s+r.monto,0);
+    totalRow = `<tr><td style="font-weight:700">Total (${rows.length} comprobante${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(tot)}</td></tr>`;
+  } else if(kpiDetailOpen==='proyectado'){
+    document.getElementById('kpiDetailTitle').innerHTML = 'Detalle de Proyectado &middot; por cliente';
+    thead = '<tr><th style="text-align:left">Cliente</th><th>Proyectado</th></tr>';
+    tbody = rows.map(r=>`<tr><td>${r.cliente}</td><td>${fmtFull(r.proyectado)}</td></tr>`).join('');
+    const tot = rows.reduce((s,r)=>s+r.proyectado,0);
+    totalRow = `<tr><td style="font-weight:700">Total (${rows.length} cliente${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(tot)}</td></tr>`;
+  } else {
+    document.getElementById('kpiDetailTitle').innerHTML = 'Detalle de Total del mes &middot; por cliente';
+    thead = '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th><th>Proyectado</th><th>Total</th></tr>';
+    tbody = rows.map(r=>`<tr><td>${r.cliente}</td><td>${fmtFull(r.cobrado)}</td><td>${fmtFull(r.proyectado)}</td><td style="font-weight:600">${fmtFull(r.total)}</td></tr>`).join('');
+    const totC = rows.reduce((s,r)=>s+r.cobrado,0), totP = rows.reduce((s,r)=>s+r.proyectado,0);
+    totalRow = `<tr><td style="font-weight:700">Total (${rows.length} cliente${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(totC)}</td><td style="font-weight:700">${fmtFull(totP)}</td><td style="font-weight:700">${fmtFull(totC+totP)}</td></tr>`;
+  }
+  document.getElementById('kpiDetailNote').innerHTML = `vencimiento ${periodoTxt} &middot; ${unidadTxt}`;
+  if(!rows.length){
+    const cols = kpiDetailOpen==='total'?4:2;
+    tbody = `<tr><td colspan="${cols}" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>`;
+    totalRow = '';
+  }
+  document.getElementById('kpiDetailTable').innerHTML = `<thead>${thead}</thead><tbody>${tbody}${totalRow}</tbody>`;
+}
 const A=()=>document.body.classList.contains('light')?'#2563eb':'#b8ff36';
 
 // v26: reemplaza a la vieja rows()/DATA que usaba "Promedio diario" para su total y su cantidad
@@ -815,13 +912,13 @@ function render(){
   const curBarCol = momDelta===null?'rgba(255,255,255,.18)':momDelta>=0?A():'#f87171';
 
   document.getElementById('kpis').innerHTML =
-    `<div class="kpi acc"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
+    `<div class="kpi acc kpi-clickable${kpiDetailOpen==='cobrado'?' active':''}" data-detail="cobrado"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='cobrado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal)}</div>
       <div class="k-sub">Neto (Importe &minus; Saldo) &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
-    <div class="kpi mrg"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'}</div>
+    <div class="kpi mrg kpi-clickable${kpiDetailOpen==='proyectado'?' active':''}" data-detail="proyectado"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='proyectado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalProy)}</div>
       <div class="k-sub">Saldo pendiente &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
-    <div class="kpi"><div class="k-lbl">Total del mes</div>
+    <div class="kpi kpi-clickable${kpiDetailOpen==='total'?' active':''}" data-detail="total"><div class="k-lbl">Total del mes <span class="kpi-caret">${kpiDetailOpen==='total'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal+totalProy)}</div>
       <div class="k-sub">Cobrado + Proyectado &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
@@ -844,6 +941,15 @@ function render(){
     <div class="kpi"><div class="k-lbl">Mejor unidad</div>
       <div class="k-val" style="color:${COLOR[bestUnit]};font-size:clamp(15px,1.8vw,22px)">${bestUnit}</div>
       <div class="k-sub">${fmtPct(bestPct)} del total cobrado</div></div>`;
+
+  // v27: clic en Cobrado/Proyectado/Total del mes abre/cierra su detalle debajo de la fila de KPIs
+  document.querySelectorAll('#kpis .kpi[data-detail]').forEach(el=>{
+    el.onclick = () => {
+      kpiDetailOpen = (kpiDetailOpen===el.dataset.detail) ? null : el.dataset.detail;
+      render();
+    };
+  });
+  renderKpiDetail();
 
   const byMonthUnit = vencByMonthUnit(); // v25: base común (VENC_TX) para Evolución mensual y el Mapa
   renderUnidades(unitTot, totalAllUnits);
