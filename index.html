@@ -100,6 +100,13 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
    cortos (un valor abreviado o un nombre de unidad) y no necesitan tanto lugar, así que se
    achican para compensarle ancho al resto. */
 .kpis.kpis6{grid-template-columns:1.3fr 1.3fr 1.35fr 1.05fr .75fr .8fr}
+/* v37: se agrega una 7ª tarjeta ("Sin fecha concreta", también número completo en pesos) a la
+   fila de KPIs. Se le da un ancho similar a Cobrado/Proyectado/Total del mes (las 4 primeras
+   columnas), achicando aún más "vs. mes anterior"/"Promedio diario"/"Mejor unidad" (que muestran
+   textos cortos) para compensar. Probado con números de hasta 10 cifras (~$2.000.000.000) sin
+   recortarse — ver también el wrap de respaldo en .k-val.full más abajo, por si algún importe
+   futuro fuera todavía más largo. */
+.kpis.kpis7{grid-template-columns:1.2fr 1.2fr 1.25fr 1.15fr .72fr .5fr .78fr}
 /* v17: la fila de KPIs de Aging tiene 4 tarjetas (no 5 ni 6) — sin esta clase heredaba
    la grilla de 5 columnas de .kpis base y quedaba una columna vacía a la derecha,
    por eso las tarjetas se veían corridas a la izquierda / no ocupaban el ancho completo. */
@@ -118,8 +125,12 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .kpi .k-lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2)}
 .kpi .k-val{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:clamp(22px,2.9vw,33px);margin-top:9px;letter-spacing:-.03em}
 /* v31: tope bajado de 28px a 25px (con el ancho de columna ganado arriba alcanza de sobra, y deja
-   margen para números todavía más largos sin volver a recortarse) */
-.kpi .k-val.full{font-size:clamp(15px,1.85vw,25px);line-height:1.05;white-space:nowrap}
+   margen para números todavía más largos sin volver a recortarse).
+   v37: se cambia white-space:nowrap por normal+overflow-wrap — con la 7ª tarjeta ("Sin fecha
+   concreta") ya no queda tanto ancho de sobra por columna, así que un importe realmente extremo
+   (varios miles de millones) ahora se envuelve en dos líneas en vez de recortarse contra
+   .kpi{overflow:hidden}. Con los montos reales de hoy sigue entrando en una sola línea. */
+.kpi .k-val.full{font-size:clamp(15px,1.85vw,25px);line-height:1.15;white-space:normal;overflow-wrap:break-word}
 .kpi.acc .k-val{color:var(--acc)}
 .kpi.mrg .k-val{color:var(--teal)}
 .kpi .k-sub{font-size:12px;color:var(--mut);margin-top:5px}
@@ -198,10 +209,10 @@ svg{display:block;width:100%;overflow:visible}
   border-radius:10px;padding:10px 14px;font-size:13px;opacity:0;transition:opacity .12s;z-index:999;max-width:280px}
 .t-v{color:var(--acc);font-family:"IBM Plex Mono",monospace}
 @media(max-width:1200px){
-  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(3,1fr)}
+  .kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:860px){
-  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(2,1fr)}
+  .kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:repeat(2,1fr)}
   .grid{grid-template-columns:1fr}
   .card.full{grid-column:1}
   .row{grid-template-columns:110px 1fr auto auto}
@@ -211,7 +222,7 @@ svg{display:block;width:100%;overflow:visible}
   header{flex-direction:column;align-items:flex-start;gap:6px}
   .scope{text-align:left}
   .brand h1{font-size:clamp(26px,8vw,38px)}
-  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr 1fr}
+  .kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:1fr 1fr}
   .kpi{padding:14px 14px}
   .kpi .k-val{font-size:clamp(18px,5vw,26px)}
   .tipos{grid-template-columns:1fr!important}
@@ -223,7 +234,7 @@ svg{display:block;width:100%;overflow:visible}
   .row .pct{display:none}
   .row .amt{min-width:60px;font-size:11.5px}
 }
-@media(max-width:380px){.kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr}}
+@media(max-width:380px){.kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:1fr}}
 
 /* ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n) ===== */
 /* v17: las 4 tarjetas de KPI de Aging quedan centradas (texto y separación) dentro de su propia fila */
@@ -285,7 +296,7 @@ svg{display:block;width:100%;overflow:visible}
   <button class="clear-btn hide" id="clearUnitBtn">&times; Quitar unidad</button>
 </div>
 
-<div class="kpis kpis6" id="kpis"></div>
+<div class="kpis kpis7" id="kpis"></div>
 
 <!-- v27: detalle desplegable de Cobrado/Proyectado/Total del mes (clic en la tarjeta) -->
 <div class="card" id="kpiDetailCard" style="margin-bottom:14px;display:none">
@@ -596,21 +607,42 @@ function parseCSV(text){
 //  Por eso cada transacción ahora guarda DOS meses distintos: "month" (vencimiento, para
 //  Proyectado) y "cobradoMonth" (cobranza o vencimiento si no hay, para Cobrado) — pueden diferir
 //  para el mismo comprobante.
+// v37 — nueva unificación de criterio con Graciela, reemplaza TODO lo de v30 sobre qué fecha
+// determina el mes de Cobrado/Proyectado (el filtro TIPO=Mercadería de v30, más arriba, sigue
+// igual, sin cambios):
+//  1) "Cobrado" (gestión de cobranza del mes) ya NO usa FECHA COBRANZA. Ahora usa FECHA RECIBO
+//     (columna R): la fecha en que se cargó el recibo, que es la acción de cobranza real de ese
+//     mes — a diferencia de FECHA COBRANZA (fecha de acreditación/vencimiento del cheque, que le
+//     sirve a Graciela para calcular el desvío de pago, no para saber en qué mes gestionó el
+//     cobro). Monto = Importe − Saldo (igual que antes, coincide con SALDO PARCIAL APLICADO).
+//  2) "Proyectado" (el saldo pendiente) ya NO usa FECHA DE VENCIMIENTO. Ahora usa FECHA COBRANZA
+//     (columna B): la fecha en la que se espera/está previsto que se acredite ese saldo pendiente
+//     (ej.: un cheque a fecha ya recibido pero que todavía no se cobró). Monto = SALDO (sin
+//     cambios).
+//  3) Ninguna de las dos tiene ya un respaldo en FECHA DE VENCIMIENTO: si un comprobante no tiene
+//     FECHA RECIBO cargada, su Cobrado no entra en ningún mes; si no tiene FECHA COBRANZA
+//     cargada, su Proyectado no entra en ningún mes. En esos casos "month"/"cobradoMonth" quedan
+//     en null a propósito — Nahuel pidió que esos importes se muestren aparte, en una tarjeta
+//     nueva "Sin fecha concreta" (ver vencSinFechaTotals()/vencClientDetail('sinfecha') y la
+//     tarjeta agregada en render()), en vez de caer disimuladamente en el mes de vencimiento como
+//     pasaba antes. Esto es intencional aunque haga crecer bastante esa tarjeta nueva: gran parte
+//     del saldo genuinamente pendiente (facturas sin nada cobrado todavía) no tiene FECHA
+//     COBRANZA cargada porque todavía no hay ningún cheque/pago en camino.
 function parseVencTx(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) return [];
   const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
   const idx = name => header.findIndex(h=>h===name);
-  const iFechaVenc = idx('FECHA DE VENCIMIENTO');
   const iImporte = idx('IMPORTE');
   const iSaldo = idx('SALDO');
   const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
   const iCliente = idx('RAZON SOCIAL CLIENTE'); // v27: para el detalle desplegable por cliente
   const iNumero = idx('NUMERO'); // v28: número de comprobante, para el detalle desplegable por factura
   const iTipo = idx('TIPO'); // v30: para filtrar solo Mercadería
-  const iFechaCobranza = idx('FECHA COBRANZA'); // v30: manda sobre vencimiento para "Cobrado", si existe
-  if([iFechaVenc,iImporte,iSaldo,iTipoCliente,iCliente,iNumero,iTipo,iFechaCobranza].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas (FECHA DE VENCIMIENTO / IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO / TIPO / FECHA COBRANZA) para calcular Cobrado/Proyectado');
+  const iFechaCobranza = idx('FECHA COBRANZA'); // v37: determina el mes de "Proyectado" (antes determinaba "Cobrado")
+  const iFechaRecibo = idx('FECHA RECIBO'); // v37: determina el mes de "Cobrado" (columna R)
+  if([iImporte,iSaldo,iTipoCliente,iCliente,iNumero,iTipo,iFechaCobranza,iFechaRecibo].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas (IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO / TIPO / FECHA COBRANZA / FECHA RECIBO) para calcular Cobrado/Proyectado');
   }
   const out=[];
   for(let i=1;i<lines.length;i++){
@@ -620,15 +652,16 @@ function parseVencTx(text){
     if(!c.some(v=>v && v.trim())) continue; // fila vacía
     const tipo = (c[iTipo]||'').trim().toLowerCase();
     if(tipo!=='mercaderia') continue; // v30: fuera todo lo que no sea venta real (Iva, otros, vacío)
-    const vencObj = agParseDateFlexible(c[iFechaVenc]);
-    const vencMes = vencObj ? agToISO(vencObj).slice(0,7) : null; // null = sin FECHA DE VENCIMIENTO usable
+    // v37: sin respaldo en vencimiento — si no hay fecha cargada, queda en null ("sin fecha concreta")
     const cobObj = agParseDateFlexible(c[iFechaCobranza]);
-    const cobradoMes = cobObj ? agToISO(cobObj).slice(0,7) : vencMes; // v30: fecha de cobranza manda; si no hay, cae a vencimiento
+    const proyectadoMes = cobObj ? agToISO(cobObj).slice(0,7) : null; // fecha cobranza (o null)
+    const reciboObj = agParseDateFlexible(c[iFechaRecibo]);
+    const cobradoMes = reciboObj ? agToISO(reciboObj).slice(0,7) : null; // fecha recibo (o null)
     const importe = agNum(c[iImporte]);
     const saldo = agNum(c[iSaldo]);
     out.push({
-      month: vencMes, // vencimiento: determina el mes de "Proyectado"
-      cobradoMonth: cobradoMes, // cobranza (o vencimiento si no hay): determina el mes de "Cobrado"
+      month: proyectadoMes, // v37: FECHA COBRANZA (o null = sin fecha concreta): determina el mes de "Proyectado"
+      cobradoMonth: cobradoMes, // v37: FECHA RECIBO (o null = sin fecha concreta): determina el mes de "Cobrado"
       cobrado: importe - saldo,
       proyectado: saldo,
       unit: mapTipoClienteToUnit(c[iTipoCliente]),
@@ -639,38 +672,45 @@ function parseVencTx(text){
   return out;
 }
 
-// Transacciones re-derivadas para Cobrado/Proyectado (regla Graciela + ajuste v30, ver arriba).
-// Si no hay filtro de mes ("todo el período"), se suma todo; si hay un mes elegido, "Cobrado" se
-// filtra por t.cobradoMonth y "Proyectado" por t.month (vencimiento) — son independientes, un
-// mismo comprobante puede aportar Cobrado a un mes y Proyectado a otro distinto.
+// Transacciones re-derivadas para Cobrado/Proyectado (regla Graciela + ajuste v37, ver arriba).
+// Si no hay filtro de mes ("todo el período"), se suma todo lo que SÍ tiene mes asignado; si hay
+// un mes elegido, "Cobrado" se filtra por t.cobradoMonth y "Proyectado" por t.month (fecha
+// cobranza) — son independientes, un mismo comprobante puede aportar Cobrado a un mes y
+// Proyectado a otro distinto. v37: t.cobradoMonth/t.month pueden ser null (sin FECHA RECIBO/
+// FECHA COBRANZA cargada) — esos casos NUNCA entran acá (ni siquiera en "todo el período"),
+// quedan exclusivamente en la tarjeta "Sin fecha concreta" (ver vencSinFechaTotals()), para no
+// duplicar el mismo importe en dos tarjetas distintas.
 let VENC_TX = [];
 function realProyectadoTotals(){
   let real=0, proy=0;
   VENC_TX.forEach(t=>{
     if(unitFilter && t.unit!==unitFilter) return;
-    if(!mesFilter || t.cobradoMonth===mesFilter) real += t.cobrado;
-    if(!mesFilter || t.month===mesFilter) proy += t.proyectado;
+    if(t.cobradoMonth && (!mesFilter || t.cobradoMonth===mesFilter)) real += t.cobrado;
+    if(t.month && (!mesFilter || t.month===mesFilter)) proy += t.proyectado;
   });
   return {real, proy};
 }
 
-// v25 (ajustado en v30 para el split Cobrado/Proyectado por mes distinto) — misma base (VENC_TX)
-// para "Mix por unidad", "Ranking por unidad" y la tarjeta "Mejor unidad": desglosa por unidad
-// para un mes dado (o para TODO el período si mes es null/''), sin filtrar por unitFilter (siempre
-// las 6 unidades, el filtro de unidad solo resalta/selecciona, igual que antes con DATA).
+// v25 (ajustado en v30 y v37 para el split Cobrado/Proyectado por mes distinto, sin fallback a
+// vencimiento) — misma base (VENC_TX) para "Mix por unidad", "Ranking por unidad" y la tarjeta
+// "Mejor unidad": desglosa por unidad para un mes dado (o para TODO el período si mes es null/''),
+// sin filtrar por unitFilter (siempre las 6 unidades, el filtro de unidad solo resalta/selecciona,
+// igual que antes con DATA). v37: los comprobantes sin mes asignado (null) no entran acá.
 function vencUnitBreakdown(mes){
   const unitTot={};
   UNIT_NAMES.forEach(u=>unitTot[u]=0);
   VENC_TX.forEach(t=>{
-    if(!mes || t.cobradoMonth===mes) unitTot[t.unit] += t.cobrado;
-    if(!mes || t.month===mes) unitTot[t.unit] += t.proyectado;
+    if(t.cobradoMonth && (!mes || t.cobradoMonth===mes)) unitTot[t.unit] += t.cobrado;
+    if(t.month && (!mes || t.month===mes)) unitTot[t.unit] += t.proyectado;
   });
   return unitTot;
 }
 
-// v25 (ajustado en v30) — tabla unidad×mes para "Evolución mensual" y el "Mapa mensual", a partir
-// de VENC_TX. El Cobrado de cada comprobante cae en el bucket de t.cobradoMonth y su Proyectado en
-// el de t.month (vencimiento) — pueden ser meses distintos del mismo comprobante.
+// v25 (ajustado en v30 y v37) — tabla unidad×mes para "Evolución mensual" y el "Mapa mensual", a
+// partir de VENC_TX. El Cobrado de cada comprobante cae en el bucket de t.cobradoMonth (fecha
+// recibo) y su Proyectado en el de t.month (fecha cobranza) — pueden ser meses distintos del mismo
+// comprobante. Ya venía filtrando null correctamente (byMonthUnit[null] es undefined), así que los
+// comprobantes "sin fecha concreta" quedan afuera de esta tabla sin necesidad de cambios.
 function vencByMonthUnit(){
   const byMonthUnit = {};
   MESES.forEach(m=>{ byMonthUnit[m]={}; UNIT_NAMES.forEach(u=>byMonthUnit[m][u]=0); });
@@ -710,11 +750,12 @@ function buildFromRaw(raw){
   // vencer en mayo/2026. Al elegir ese mes el tablero quedaba completamente vacío porque
   // Cobrado/Proyectado/Mix/etc. sólo miran VENC_TX (Mercadería). Ahora el selector nunca ofrece
   // un mes sin actividad real de Mercadería detrás.
+  // v37: t.month es ahora el mes de FECHA COBRANZA (Proyectado) y t.cobradoMonth el de FECHA
+  // RECIBO (Cobrado) — ninguno de los dos tiene ya respaldo en vencimiento, así que pueden venir
+  // null (sin fecha concreta cargada); el guard "if(t.month)"/"if(t.cobradoMonth)" ya los deja
+  // afuera del selector de período, sin necesidad de cambios extra acá.
   const mesesSet = new Set();
   VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
-  // v30: también se agregan los meses de FECHA COBRANZA (t.cobradoMonth) — con la fecha de
-  // cobranza mandando sobre el vencimiento para "Cobrado", un comprobante puede aportar a un mes
-  // que no tenga ningún vencimiento propio en esa misma tanda de datos.
   VENC_TX.forEach(t=>{ if(t.cobradoMonth) mesesSet.add(t.cobradoMonth); });
   MESES = [...mesesSet].sort();
   MLBL = {};
@@ -781,16 +822,26 @@ let mixDetailExpanded=new Set(); // v33: claves "unidad::i::cliente" de los clie
 // v28: ahora las 3 vistas agrupan SIEMPRE por cliente (antes "cobrado" listaba un renglón por
 // comprobante suelto). Cada cliente trae además su lista de comprobantes (con NÚMERO), para que
 // el renglón se pueda desplegar y ver de qué factura sale el total — ver renderKpiDetail().
-// v30: "Cobrado" de un comprobante se ubica por t.cobradoMonth y su "Proyectado" por t.month
-// (vencimiento) — pueden ser meses distintos. Por eso cada comprobante se evalúa dos veces (una
-// vez para cuánto aporta a Cobrado en el mes elegido, otra para cuánto aporta a Proyectado), y
-// solo entra en la lista si algo de eso es relevante para el modo que se está mirando.
+// v30: "Cobrado" de un comprobante se ubica por t.cobradoMonth y su "Proyectado" por t.month —
+// pueden ser meses distintos. Por eso cada comprobante se evalúa dos veces (una vez para cuánto
+// aporta a Cobrado en el mes elegido, otra para cuánto aporta a Proyectado), y solo entra en la
+// lista si algo de eso es relevante para el modo que se está mirando.
+// v37: nuevo modo 'sinfecha' para la tarjeta "Sin fecha concreta" — junta los comprobantes cuyo
+// Cobrado no tiene FECHA RECIBO (t.cobradoMonth null) y/o cuyo Proyectado no tiene FECHA COBRANZA
+// (t.month null). A diferencia de los otros 3 modos, ignora mesFilter por completo (por
+// definición esos importes no pertenecen a ningún mes), pero sigue respetando unitFilter.
 function vencClientDetail(mode){
   const byClient = {};
   VENC_TX.forEach(t=>{
     if(unitFilter && t.unit!==unitFilter) return;
-    const cobradoAporte = (!mesFilter || t.cobradoMonth===mesFilter) ? t.cobrado : 0;
-    const proyectadoAporte = (!mesFilter || t.month===mesFilter) ? t.proyectado : 0;
+    let cobradoAporte, proyectadoAporte;
+    if(mode==='sinfecha'){
+      cobradoAporte = (!t.cobradoMonth) ? t.cobrado : 0;
+      proyectadoAporte = (!t.month) ? t.proyectado : 0;
+    } else {
+      cobradoAporte = (t.cobradoMonth && (!mesFilter || t.cobradoMonth===mesFilter)) ? t.cobrado : 0;
+      proyectadoAporte = (t.month && (!mesFilter || t.month===mesFilter)) ? t.proyectado : 0;
+    }
     const relevante = mode==='cobrado' ? !!cobradoAporte : mode==='proyectado' ? !!proyectadoAporte : !!(cobradoAporte||proyectadoAporte);
     if(!relevante) return;
     if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, cobrado:0, proyectado:0, comprobantes:[]};
@@ -799,28 +850,44 @@ function vencClientDetail(mode){
     byClient[t.cliente].comprobantes.push({numero:t.numero, cobrado:cobradoAporte, proyectado:proyectadoAporte, total:cobradoAporte+proyectadoAporte});
   });
   let rows = Object.values(byClient).map(r=>({...r, total:r.cobrado+r.proyectado}));
-  const sortKey = mode==='cobrado' ? 'cobrado' : mode==='proyectado' ? 'proyectado' : 'total';
+  const sortKey = mode==='cobrado' ? 'cobrado' : mode==='proyectado' ? 'proyectado' : 'total'; // 'sinfecha' y 'total' comparten el criterio de orden
   rows = rows.filter(r=>r[sortKey]);
   rows.sort((a,b)=>b[sortKey]-a[sortKey]);
   rows.forEach(r=>r.comprobantes.sort((a,b)=>b[sortKey]-a[sortKey]));
   return rows;
 }
 
+// v37 — totales para la tarjeta nueva "Sin fecha concreta": comprobantes de Mercadería cuyo
+// Cobrado no tiene FECHA RECIBO cargada (t.cobradoMonth null) y/o cuyo Proyectado no tiene FECHA
+// COBRANZA cargada (t.month null). No se filtra por mesFilter (por definición no pertenecen a
+// ningún mes), pero sí respeta unitFilter, igual que el resto de las tarjetas.
+function vencSinFechaTotals(){
+  let cobrado=0, proyectado=0;
+  VENC_TX.forEach(t=>{
+    if(unitFilter && t.unit!==unitFilter) return;
+    if(!t.cobradoMonth) cobrado += t.cobrado;
+    if(!t.month) proyectado += t.proyectado;
+  });
+  return {cobrado, proyectado, total: cobrado+proyectado};
+}
+
 // v33 — detalle de "Mix por unidad de negocio" agrupado POR CLIENTE (antes v32 listaba un
 // renglón por comprobante suelto). Cada cliente trae su lista de comprobantes (número + importe)
 // para desplegar, igual que vencClientDetail() de las tarjetas Cobrado/Proyectado/Total del mes.
 // "Importe" es la misma magnitud que ya muestra el chip de esa unidad (Cobrado+Proyectado del
-// período elegido, regla de Graciela con el ajuste v30: la parte Cobrado por t.cobradoMonth, la
-// parte Proyectado por t.month/vencimiento) — no el IMPORTE crudo de la factura. Ignora unitFilter
-// a propósito: el Mix siempre desglosa las 6 unidades sin filtrar por unidad (igual que
-// vencUnitBreakdown), así que el detalle de una unidad puntual debe mostrar sus comprobantes sin
-// importar qué unidad esté seleccionada en el resto del tablero.
+// período elegido, regla de Graciela con el ajuste v37: la parte Cobrado por t.cobradoMonth/fecha
+// recibo, la parte Proyectado por t.month/fecha cobranza) — no el IMPORTE crudo de la factura.
+// Ignora unitFilter a propósito: el Mix siempre desglosa las 6 unidades sin filtrar por unidad
+// (igual que vencUnitBreakdown), así que el detalle de una unidad puntual debe mostrar sus
+// comprobantes sin importar qué unidad esté seleccionada en el resto del tablero. v37: excluye los
+// comprobantes sin fecha concreta (t.cobradoMonth/t.month null), igual que vencUnitBreakdown, para
+// que el detalle siga sumando exactamente lo mismo que el chip.
 function vencUnitDetail(unit){
   const byClient = {};
   VENC_TX.forEach(t=>{
     if(t.unit!==unit) return;
-    const cobradoAporte = (!mesFilter || t.cobradoMonth===mesFilter) ? t.cobrado : 0;
-    const proyectadoAporte = (!mesFilter || t.month===mesFilter) ? t.proyectado : 0;
+    const cobradoAporte = (t.cobradoMonth && (!mesFilter || t.cobradoMonth===mesFilter)) ? t.cobrado : 0;
+    const proyectadoAporte = (t.month && (!mesFilter || t.month===mesFilter)) ? t.proyectado : 0;
     const importe = cobradoAporte + proyectadoAporte;
     if(!importe) return;
     if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, importe:0, comprobantes:[]};
@@ -844,7 +911,7 @@ function renderMixDetail(){
   const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
   const rows = vencUnitDetail(mixDetailOpen);
   document.getElementById('mixDetailTitle').innerHTML = `Detalle de <span style="color:${COLOR[mixDetailOpen]}">${mixDetailOpen}</span> &middot; por cliente`;
-  document.getElementById('mixDetailNote').innerHTML = `fecha de cobranza + vencimiento &middot; ${periodoTxt}`;
+  document.getElementById('mixDetailNote').innerHTML = `fecha de recibo + fecha de cobranza &middot; ${periodoTxt}`;
   let body = '';
   if(!rows.length){
     body = '<tr><td colspan="2" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>';
@@ -883,23 +950,28 @@ function renderKpiDetail(){
   const card = document.getElementById('kpiDetailCard');
   if(!kpiDetailOpen){ card.style.display='none'; return; }
   card.style.display='';
-  const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
+  // v37: "Sin fecha concreta" ignora el período elegido (por definición no pertenece a ningún
+  // mes) — el resto de las tarjetas sigue mostrando el período/unidad elegidos arriba.
+  const periodoTxt = kpiDetailOpen==='sinfecha' ? 'sin importar el per&iacute;odo elegido' : (mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo');
   const unidadTxt = unitFilter||'todas las unidades';
   const rows = vencClientDetail(kpiDetailOpen);
   const titles = {
     cobrado: 'Detalle de Cobrado &middot; por cliente',
     proyectado: 'Detalle de Proyectado &middot; por cliente',
     total: 'Detalle de Total del mes &middot; por cliente',
+    sinfecha: 'Detalle de Sin fecha concreta &middot; por cliente',
   };
   document.getElementById('kpiDetailTitle').innerHTML = titles[kpiDetailOpen];
-  // v30: el criterio de fecha ya no es siempre "vencimiento" — Cobrado usa fecha de cobranza (o
-  // vencimiento si no hay), Proyectado sigue por vencimiento, y Total del mes combina las dos.
-  const criterioTxt = kpiDetailOpen==='cobrado' ? 'fecha de cobranza (o vencimiento si no hay)'
-    : kpiDetailOpen==='proyectado' ? 'vencimiento'
-    : 'fecha de cobranza + vencimiento';
+  // v37: Cobrado usa fecha de recibo (columna R), Proyectado usa fecha de cobranza (columna B) —
+  // ya sin respaldo en vencimiento. "Sin fecha concreta" junta lo que quedó sin ninguna de esas
+  // dos fechas cargadas.
+  const criterioTxt = kpiDetailOpen==='cobrado' ? 'fecha de recibo'
+    : kpiDetailOpen==='proyectado' ? 'fecha de cobranza'
+    : kpiDetailOpen==='sinfecha' ? 'sin fecha de recibo (cobrado) y/o sin fecha de cobranza (proyectado)'
+    : 'fecha de recibo + fecha de cobranza';
   document.getElementById('kpiDetailNote').innerHTML = `${criterioTxt} &middot; ${periodoTxt} &middot; ${unidadTxt}`;
 
-  const cols = kpiDetailOpen==='total' ? 4 : 2;
+  const cols = (kpiDetailOpen==='total' || kpiDetailOpen==='sinfecha') ? 4 : 2;
   const thead = kpiDetailOpen==='cobrado' ? '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th></tr>'
     : kpiDetailOpen==='proyectado' ? '<tr><th style="text-align:left">Cliente</th><th>Proyectado</th></tr>'
     : '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th><th>Proyectado</th><th>Total</th></tr>';
@@ -1010,6 +1082,9 @@ function render(){
   // transcurridos si es el mes en curso. Antes (hasta v25) salía de DATA/rows() (lógica vieja) y
   // contaba "días con datos" en vez de días hábiles.
   const {real: totalReal, proy: totalProy} = realProyectadoTotals();
+  // v37: total de la tarjeta nueva "Sin fecha concreta" — no depende de mesFilter (ver
+  // vencSinFechaTotals()), se recalcula en cada render() para respetar unitFilter.
+  const sinFecha = vencSinFechaTotals();
   const hoy = new Date();
   const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
   const diasHabiles = mesFilter ? businessDaysForMonth(mesFilter, hoy) : MESES.reduce((s,m)=>s+businessDaysForMonth(m, hoy), 0);
@@ -1024,8 +1099,9 @@ function render(){
   document.getElementById('scope').textContent = unitFilter||'Todas';
   document.getElementById('clearUnitBtn').classList.toggle('hide', !unitFilter);
 
-  // v25: desglose por unidad (Mix/Ranking/Mejor unidad) según VENC_TX (Cobrado+Proyectado,
-  // vencimiento), respetando el mes elegido arriba — reemplaza el desglose anterior basado en DATA.
+  // v25/v37: desglose por unidad (Mix/Ranking/Mejor unidad) según VENC_TX (Cobrado por fecha de
+  // recibo, Proyectado por fecha de cobranza), respetando el mes elegido arriba — reemplaza el
+  // desglose anterior basado en DATA.
   const unitTot = vencUnitBreakdown(mesFilter);
   const totalAllUnits = UNIT_NAMES.reduce((s,u)=>s+unitTot[u],0);
   const bestUnit = UNIT_NAMES.reduce((a,b)=>unitTot[b]>unitTot[a]?b:a, UNIT_NAMES[0]);
@@ -1040,9 +1116,10 @@ function render(){
   // vencByMonthUnit más arriba.)
   const curMesKey = mesFilter||MESES[MESES.length-1];
   const prevMesKey = getPrevMonth(curMesKey);
-  // v30: Cobrado entra si t.cobradoMonth===mes, Proyectado si t.month(vencimiento)===mes — igual
-  // criterio que realProyectadoTotals()/vencUnitBreakdown(), un comprobante puede aportar una
-  // pieza a un mes y otra pieza a otro.
+  // v30/v37: Cobrado entra si t.cobradoMonth(fecha recibo)===mes, Proyectado si
+  // t.month(fecha cobranza)===mes — igual criterio que realProyectadoTotals()/vencUnitBreakdown(),
+  // un comprobante puede aportar una pieza a un mes y otra pieza a otro. Los null (sin fecha
+  // concreta) nunca matchean un mes real, así que ya quedan afuera sin necesidad de guard extra.
   const totalDelMesVenc = mes => VENC_TX.reduce((s,t)=>{
     if(unitFilter && t.unit!==unitFilter) return s;
     let v = 0;
@@ -1063,13 +1140,16 @@ function render(){
   document.getElementById('kpis').innerHTML =
     `<div class="kpi acc kpi-clickable${kpiDetailOpen==='cobrado'?' active':''}" data-detail="cobrado"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='cobrado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal)}</div>
-      <div class="k-sub">Neto (Importe &minus; Saldo), TIPO=Mercader&iacute;a &middot; fecha de cobranza (o vencimiento si no hay) ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
+      <div class="k-sub">Neto (Importe &minus; Saldo), TIPO=Mercader&iacute;a &middot; fecha de recibo ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi mrg kpi-clickable${kpiDetailOpen==='proyectado'?' active':''}" data-detail="proyectado"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='proyectado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalProy)}</div>
-      <div class="k-sub">Saldo pendiente, TIPO=Mercader&iacute;a &middot; vencimiento ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
+      <div class="k-sub">Saldo pendiente, TIPO=Mercader&iacute;a &middot; fecha de cobranza ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi kpi-clickable${kpiDetailOpen==='total'?' active':''}" data-detail="total"><div class="k-lbl">Total del mes <span class="kpi-caret">${kpiDetailOpen==='total'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal+totalProy)}</div>
-      <div class="k-sub">Cobrado (fecha cobranza) + Proyectado (vencimiento) ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
+      <div class="k-sub">Cobrado (fecha de recibo) + Proyectado (fecha de cobranza) ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
+    <div class="kpi kpi-clickable${kpiDetailOpen==='sinfecha'?' active':''}" data-detail="sinfecha"><div class="k-lbl">Sin fecha concreta <span class="kpi-caret">${kpiDetailOpen==='sinfecha'?'&#9662;':'&#9656;'}</span></div>
+      <div class="k-val full">${fmtFull(sinFecha.total)}</div>
+      <div class="k-sub">Sin fecha de recibo (cobrado) y/o sin fecha de cobranza (proyectado) &middot; ${unitFilter||'todas las unidades'} &middot; no depende del per&iacute;odo elegido</div></div>
     <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
       <div class="k-val ${momCls}" style="font-size:${momDelta===null?'clamp(13px,1.35vw,18px)':'clamp(14px,1.6vw,22px)'}">${momSign}</div>
       <div class="mom-bars">
