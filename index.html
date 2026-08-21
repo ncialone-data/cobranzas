@@ -518,9 +518,17 @@ function parseCSV(text){
   const iFechaVenc = idx('FECHA DE VENCIMIENTO');
   const iCondVenta = idx('CONDICION DE VENTA')>=0 ? idx('CONDICION DE VENTA') : idx('CONDICIÓN DE VENTA');
   const iSaldo = idx('SALDO');
-  const iFechaEstimada = idx('FECHA ESTIMADA DE COBRANZA');
+  // v36: la columna "FECHA ESTIMADA DE COBRANZA" (col. R) fue renombrada en el Sheet a "FECHA
+  // RECIBO" (Graciela ya empezó a usarla para la nueva regla de Cobrado que estamos definiendo
+  // aparte). Esta función (parseCSV/DATA) es lógica heredada que desde v26 NO calcula ningún
+  // valor que se muestre en el tablero (ver comentario más abajo, junto a parseVencTx) — así que
+  // en vez de exigir esa columna con su nombre viejo (lo que rompía la carga de TODO el tablero
+  // apenas se renombró), simplemente se deja de exigirla: si no está, el fallback a FECHA DE
+  // ENTREGA DE PRODUCTOS + condición de venta (y por último FECHA DE VENCIMIENTO) sigue funcionando
+  // igual que antes cuando esa columna venía vacía.
+  const iFechaEstimada = idx('FECHA ESTIMADA DE COBRANZA'); // -1 si no existe (ver nota v36 arriba)
   const iFechaEntrega = idx('FECHA DE ENTREGA DE PRODUCTOS');
-  if([iCobrado,iFechaCobranza,iSaldoParcial,iTipoCliente,iFechaVenc,iCondVenta,iSaldo,iFechaEstimada,iFechaEntrega].some(i=>i<0)){
+  if([iCobrado,iFechaCobranza,iSaldoParcial,iTipoCliente,iFechaVenc,iCondVenta,iSaldo,iFechaEntrega].some(i=>i<0)){
     throw new Error('no encontré alguna de las columnas esperadas en la pestaña "Aging" (revisá si cambiaron los encabezados)');
   }
   const out=[];
