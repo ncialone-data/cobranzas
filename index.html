@@ -94,19 +94,17 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .clear-btn:hover{color:var(--tx);background:rgba(255,255,255,.09)}
 .clear-btn.hide{display:none}
 .kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-/* v31: las primeras 3 tarjetas (Cobrado/Proyectado/Total del mes) muestran números completos en
-   pesos y venían recortándose (overflow:hidden) contra 6 columnas iguales — "Total del mes" y
-   "Cobrado" son las que más ancho necesitan. "Promedio diario" y "Mejor unidad" muestran textos
-   cortos (un valor abreviado o un nombre de unidad) y no necesitan tanto lugar, así que se
-   achican para compensarle ancho al resto. */
-.kpis.kpis6{grid-template-columns:1.3fr 1.3fr 1.35fr 1.05fr .75fr .8fr}
-/* v37: se agrega una 7ª tarjeta ("Sin fecha concreta", también número completo en pesos) a la
-   fila de KPIs. Se le da un ancho similar a Cobrado/Proyectado/Total del mes (las 4 primeras
-   columnas), achicando aún más "vs. mes anterior"/"Promedio diario"/"Mejor unidad" (que muestran
-   textos cortos) para compensar. Probado con números de hasta 10 cifras (~$2.000.000.000) sin
-   recortarse — ver también el wrap de respaldo en .k-val.full más abajo, por si algún importe
-   futuro fuera todavía más largo. */
-.kpis.kpis7{grid-template-columns:1.2fr 1.2fr 1.25fr 1.15fr .72fr .5fr .78fr}
+/* v31: las tarjetas de número completo en pesos (Cobrado/Proyectado/Total del mes/Sin fecha
+   concreta desde v37) vienen recortándose (overflow:hidden) contra columnas iguales — son las
+   que más ancho necesitan. "Promedio diario" muestra un valor abreviado corto y no necesita tanto
+   lugar, así que se achica para compensarle ancho al resto.
+   v38: se quitó la tarjeta "Mejor unidad" (quedaba redundante con "Mix por unidad de negocio",
+   que ya muestra el % de cada unidad) — vuelven a ser 6 tarjetas, pero ya no las mismas 6 que
+   antes de v37 (ahora son Cobrado/Proyectado/Total del mes/Sin fecha concreta/vs. mes anterior/
+   Promedio diario). Se reparte entre las 4 tarjetas de pesos, con "vs. mes anterior" con un poco
+   más de aire que antes (ya no compite por espacio con "Mejor unidad") y "Promedio diario" igual
+   de angosta. Probado con números de hasta 10 cifras (~$2.000.000.000) sin recortarse. */
+.kpis.kpis6{grid-template-columns:1.3fr 1.3fr 1.35fr 1.25fr 1fr .8fr}
 /* v17: la fila de KPIs de Aging tiene 4 tarjetas (no 5 ni 6) — sin esta clase heredaba
    la grilla de 5 columnas de .kpis base y quedaba una columna vacía a la derecha,
    por eso las tarjetas se veían corridas a la izquierda / no ocupaban el ancho completo. */
@@ -209,10 +207,10 @@ svg{display:block;width:100%;overflow:visible}
   border-radius:10px;padding:10px 14px;font-size:13px;opacity:0;transition:opacity .12s;z-index:999;max-width:280px}
 .t-v{color:var(--acc);font-family:"IBM Plex Mono",monospace}
 @media(max-width:1200px){
-  .kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:repeat(3,1fr)}
+  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:860px){
-  .kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:repeat(2,1fr)}
+  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(2,1fr)}
   .grid{grid-template-columns:1fr}
   .card.full{grid-column:1}
   .row{grid-template-columns:110px 1fr auto auto}
@@ -222,7 +220,7 @@ svg{display:block;width:100%;overflow:visible}
   header{flex-direction:column;align-items:flex-start;gap:6px}
   .scope{text-align:left}
   .brand h1{font-size:clamp(26px,8vw,38px)}
-  .kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:1fr 1fr}
+  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr 1fr}
   .kpi{padding:14px 14px}
   .kpi .k-val{font-size:clamp(18px,5vw,26px)}
   .tipos{grid-template-columns:1fr!important}
@@ -234,7 +232,7 @@ svg{display:block;width:100%;overflow:visible}
   .row .pct{display:none}
   .row .amt{min-width:60px;font-size:11.5px}
 }
-@media(max-width:380px){.kpis, .kpis.kpis6, .kpis.kpis7, .kpis.kpis4{grid-template-columns:1fr}}
+@media(max-width:380px){.kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr}}
 
 /* ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n) ===== */
 /* v17: las 4 tarjetas de KPI de Aging quedan centradas (texto y separación) dentro de su propia fila */
@@ -296,7 +294,7 @@ svg{display:block;width:100%;overflow:visible}
   <button class="clear-btn hide" id="clearUnitBtn">&times; Quitar unidad</button>
 </div>
 
-<div class="kpis kpis7" id="kpis"></div>
+<div class="kpis kpis6" id="kpis"></div>
 
 <!-- v27: detalle desplegable de Cobrado/Proyectado/Total del mes (clic en la tarjeta) -->
 <div class="card" id="kpiDetailCard" style="margin-bottom:14px;display:none">
@@ -614,7 +612,8 @@ function parseCSV(text){
 //     (columna R): la fecha en que se cargó el recibo, que es la acción de cobranza real de ese
 //     mes — a diferencia de FECHA COBRANZA (fecha de acreditación/vencimiento del cheque, que le
 //     sirve a Graciela para calcular el desvío de pago, no para saber en qué mes gestionó el
-//     cobro). Monto = Importe − Saldo (igual que antes, coincide con SALDO PARCIAL APLICADO).
+//     cobro). Monto = Importe − Saldo (igual que antes, coincide con SALDO PARCIAL APLICADO). [v39:
+//     este monto cambió, ver nota v39 más abajo — ya no se calcula, se toma directo de la columna].
 //  2) "Proyectado" (el saldo pendiente) ya NO usa FECHA DE VENCIMIENTO. Ahora usa FECHA COBRANZA
 //     (columna B): la fecha en la que se espera/está previsto que se acredite ese saldo pendiente
 //     (ej.: un cheque a fecha ya recibido pero que todavía no se cobró). Monto = SALDO (sin
@@ -628,21 +627,30 @@ function parseCSV(text){
 //     pasaba antes. Esto es intencional aunque haga crecer bastante esa tarjeta nueva: gran parte
 //     del saldo genuinamente pendiente (facturas sin nada cobrado todavía) no tiene FECHA
 //     COBRANZA cargada porque todavía no hay ningún cheque/pago en camino.
+// v39 — a pedido de Nahuel, cambia SOLO el monto de "Cobrado" (el mes que le corresponde, fecha de
+// recibo/columna R, no cambió). Antes se calculaba como Importe (columna P) menos Saldo (columna
+// Q); ahora se toma directamente el valor ya cargado en la columna C, "SALDO PARCIAL APLICADO".
+// En la enorme mayoría de los comprobantes ambos valores coinciden (así se documentaba desde v25),
+// pero ya no se recalcula: se confía en lo que Graciela/el equipo carga a mano en esa columna, que
+// es la fuente de verdad para "cuánto se cobró de este comprobante". "Proyectado" (Saldo, columna
+// Q) no se tocó. Este cambio de monto se propaga a todo lo que ya usaba t.cobrado: la tarjeta
+// "Cobrado", "Total del mes", "Sin fecha concreta", Mix por unidad, Ranking, Evolución mensual,
+// Mapa mensual y "vs. mes anterior" — mismo alcance que tuvo el cambio de v37.
 function parseVencTx(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
   if(!lines.length) return [];
   const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
   const idx = name => header.findIndex(h=>h===name);
-  const iImporte = idx('IMPORTE');
   const iSaldo = idx('SALDO');
+  const iSaldoParcial = idx('SALDO PARCIAL APLICADO'); // v39: monto de "Cobrado" — columna C, ver nota v39 arriba de esta función
   const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
   const iCliente = idx('RAZON SOCIAL CLIENTE'); // v27: para el detalle desplegable por cliente
   const iNumero = idx('NUMERO'); // v28: número de comprobante, para el detalle desplegable por factura
   const iTipo = idx('TIPO'); // v30: para filtrar solo Mercadería
   const iFechaCobranza = idx('FECHA COBRANZA'); // v37: determina el mes de "Proyectado" (antes determinaba "Cobrado")
   const iFechaRecibo = idx('FECHA RECIBO'); // v37: determina el mes de "Cobrado" (columna R)
-  if([iImporte,iSaldo,iTipoCliente,iCliente,iNumero,iTipo,iFechaCobranza,iFechaRecibo].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas (IMPORTE / SALDO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO / TIPO / FECHA COBRANZA / FECHA RECIBO) para calcular Cobrado/Proyectado');
+  if([iSaldo,iSaldoParcial,iTipoCliente,iCliente,iNumero,iTipo,iFechaCobranza,iFechaRecibo].some(i=>i<0)){
+    throw new Error('no encontré alguna de las columnas esperadas (SALDO / SALDO PARCIAL APLICADO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO / TIPO / FECHA COBRANZA / FECHA RECIBO) para calcular Cobrado/Proyectado');
   }
   const out=[];
   for(let i=1;i<lines.length;i++){
@@ -657,12 +665,12 @@ function parseVencTx(text){
     const proyectadoMes = cobObj ? agToISO(cobObj).slice(0,7) : null; // fecha cobranza (o null)
     const reciboObj = agParseDateFlexible(c[iFechaRecibo]);
     const cobradoMes = reciboObj ? agToISO(reciboObj).slice(0,7) : null; // fecha recibo (o null)
-    const importe = agNum(c[iImporte]);
     const saldo = agNum(c[iSaldo]);
+    const saldoParcialAplicado = agNum(c[iSaldoParcial]); // v39: monto de "Cobrado", directo de la columna C
     out.push({
       month: proyectadoMes, // v37: FECHA COBRANZA (o null = sin fecha concreta): determina el mes de "Proyectado"
       cobradoMonth: cobradoMes, // v37: FECHA RECIBO (o null = sin fecha concreta): determina el mes de "Cobrado"
-      cobrado: importe - saldo,
+      cobrado: saldoParcialAplicado, // v39: antes era Importe−Saldo (ver nota v39 arriba de esta función)
       proyectado: saldo,
       unit: mapTipoClienteToUnit(c[iTipoCliente]),
       cliente: (c[iCliente]||'').trim() || '(sin cliente)',
@@ -692,10 +700,12 @@ function realProyectadoTotals(){
 }
 
 // v25 (ajustado en v30 y v37 para el split Cobrado/Proyectado por mes distinto, sin fallback a
-// vencimiento) — misma base (VENC_TX) para "Mix por unidad", "Ranking por unidad" y la tarjeta
-// "Mejor unidad": desglosa por unidad para un mes dado (o para TODO el período si mes es null/''),
-// sin filtrar por unitFilter (siempre las 6 unidades, el filtro de unidad solo resalta/selecciona,
-// igual que antes con DATA). v37: los comprobantes sin mes asignado (null) no entran acá.
+// vencimiento) — misma base (VENC_TX) para "Mix por unidad" y "Ranking por unidad" (hasta v37
+// también alimentaba la tarjeta "Mejor unidad", quitada en v38 por redundante con el % que ya
+// muestra cada chip del Mix): desglosa por unidad para un mes dado (o para TODO el período si mes
+// es null/''), sin filtrar por unitFilter (siempre las 6 unidades, el filtro de unidad solo
+// resalta/selecciona, igual que antes con DATA). v37: los comprobantes sin mes asignado (null) no
+// entran acá.
 function vencUnitBreakdown(mes){
   const unitTot={};
   UNIT_NAMES.forEach(u=>unitTot[u]=0);
@@ -813,7 +823,8 @@ let mixDetailExpanded=new Set(); // v33: claves "unidad::i::cliente" de los clie
 // v27 — desglose para el panel desplegable de Cobrado/Proyectado/Total del mes, siempre sobre
 // VENC_TX (regla de Graciela) y respetando el mesFilter/unitFilter elegidos arriba (el mismo
 // filtro que ya usan esas 3 tarjetas):
-//  - 'cobrado': una fila POR COMPROBANTE (cliente + monto cobrado = Importe−Saldo), sin agregar
+//  - 'cobrado': una fila POR COMPROBANTE (cliente + monto cobrado = columna C, Saldo parcial
+//    aplicado — ver nota v39 en parseVencTx()), sin agregar
 //    por cliente — así se puede rastrear cada comprobante individualmente.
 //  - 'proyectado': agregado POR CLIENTE (suma de Saldo pendiente de todos sus comprobantes).
 //  - 'total': agregado POR CLIENTE con 3 columnas (Cobrado, Proyectado, Total = la suma).
@@ -1099,13 +1110,13 @@ function render(){
   document.getElementById('scope').textContent = unitFilter||'Todas';
   document.getElementById('clearUnitBtn').classList.toggle('hide', !unitFilter);
 
-  // v25/v37: desglose por unidad (Mix/Ranking/Mejor unidad) según VENC_TX (Cobrado por fecha de
-  // recibo, Proyectado por fecha de cobranza), respetando el mes elegido arriba — reemplaza el
-  // desglose anterior basado en DATA.
+  // v25/v37: desglose por unidad (Mix/Ranking) según VENC_TX (Cobrado por fecha de recibo,
+  // Proyectado por fecha de cobranza), respetando el mes elegido arriba — reemplaza el desglose
+  // anterior basado en DATA. v38: "Mejor unidad" (bestUnit/bestPct) se quitó de acá — ese dato ya
+  // se ve en cada chip de "Mix por unidad de negocio" (con su % del total), la tarjeta KPI aparte
+  // quedaba redundante.
   const unitTot = vencUnitBreakdown(mesFilter);
   const totalAllUnits = UNIT_NAMES.reduce((s,u)=>s+unitTot[u],0);
-  const bestUnit = UNIT_NAMES.reduce((a,b)=>unitTot[b]>unitTot[a]?b:a, UNIT_NAMES[0]);
-  const bestPct = totalAllUnits>0? unitTot[bestUnit]/totalAllUnits*100:0;
 
   // MoM: mes seleccionado (o ultimo mes con datos) vs mes anterior
   // v24: antes esta comparación salía de DATA (la lógica "combinada" vieja, que hasta v25 también
@@ -1140,7 +1151,7 @@ function render(){
   document.getElementById('kpis').innerHTML =
     `<div class="kpi acc kpi-clickable${kpiDetailOpen==='cobrado'?' active':''}" data-detail="cobrado"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='cobrado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalReal)}</div>
-      <div class="k-sub">Neto (Importe &minus; Saldo), TIPO=Mercader&iacute;a &middot; fecha de recibo ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
+      <div class="k-sub">Columna C (Saldo parcial aplicado), TIPO=Mercader&iacute;a &middot; fecha de recibo ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
     <div class="kpi mrg kpi-clickable${kpiDetailOpen==='proyectado'?' active':''}" data-detail="proyectado"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='proyectado'?'&#9662;':'&#9656;'}</span></div>
       <div class="k-val full">${fmtFull(totalProy)}</div>
       <div class="k-sub">Saldo pendiente, TIPO=Mercader&iacute;a &middot; fecha de cobranza ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
@@ -1166,10 +1177,7 @@ function render(){
       </div></div>
     <div class="kpi"><div class="k-lbl">Promedio diario</div>
       <div class="k-val" style="font-size:clamp(16px,1.7vw,22px)">${fmtM(promedioDiario)}</div>
-      <div class="k-sub">${diasSub}</div></div>
-    <div class="kpi"><div class="k-lbl">Mejor unidad</div>
-      <div class="k-val" style="color:${COLOR[bestUnit]};font-size:clamp(13px,1.4vw,18px);white-space:normal;overflow-wrap:break-word;line-height:1.15">${bestUnit}</div>
-      <div class="k-sub">${fmtPct(bestPct)} del total cobrado</div></div>`;
+      <div class="k-sub">${diasSub}</div></div>`;
 
   // v27: clic en Cobrado/Proyectado/Total del mes abre/cierra su detalle debajo de la fila de KPIs
   document.querySelectorAll('#kpis .kpi[data-detail]').forEach(el=>{
