@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tablero de cobranzas &amp; aging</title>
+<title>Tablero de cobranzas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Outfit:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -23,12 +23,7 @@ body.light{
   --acc:#2563eb; --acc-d:#1d4ed8;
   --teal:#0891b2;
 }
-body.light{
-  background:
-    radial-gradient(900px 500px at 90% -5%, rgba(37,99,235,.06), transparent 60%),
-    radial-gradient(700px 500px at 0% 10%, rgba(8,145,178,.04), transparent 55%),
-    var(--bg);
-}
+body.light{background:radial-gradient(900px 500px at 90% -5%, rgba(37,99,235,.06), transparent 60%),radial-gradient(700px 500px at 0% 10%, rgba(8,145,178,.04), transparent 55%),var(--bg);}
 body.light .kpi{box-shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05)}
 body.light .card{box-shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05)}
 body.light .cutbar{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.08)}
@@ -36,39 +31,26 @@ body.light .seg{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
 body.light .seg button{color:var(--mut)}
 body.light .seg button.on{background:#1e3a5f;color:#fff;box-shadow:0 2px 8px rgba(30,58,95,.25)}
 body.light .clear-btn{color:var(--mut);background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
+body.light .xlsx-btn{background:#1e3a5f;color:#fff}
+body.light .xlsx-btn:hover{background:#2563eb}
 body.light .dot{background:var(--acc);box-shadow:0 0 8px rgba(37,99,235,.4)}
 body.light .brand h1 b{color:var(--acc)}
 body.light .scope .who{color:var(--teal)}
 body.light .row.on{background:rgba(37,99,235,.08);box-shadow:inset 0 0 0 1px rgba(37,99,235,.2)}
-body.light .mom-up{color:#2563eb}
-body.light .track{background:rgba(0,0,0,.07)}
-body.light .mom-bar-track{background:rgba(0,0,0,.07)}
-body.light .cell:not(.z){color:#12172a}
+body.light .tbl th{border-bottom-color:rgba(0,0,0,.1)}
+body.light .tbl td{border-bottom-color:rgba(0,0,0,.04)}
+body.light .tipo-chip{background:#f7f8fd;border-color:rgba(0,0,0,.09)}
+body.light header::before{opacity:.04}
 body.light #tip{background:rgba(255,255,255,.98);border-color:rgba(0,0,0,.12);color:#12172a}
 body.light .t-v{color:var(--acc)}
-body.light .tipo-chip{background:#f7f8fd;border-color:rgba(0,0,0,.09)}
-.theme-toggle{
-  background:var(--panel);border:1px solid var(--line2);
-  border-radius:20px;padding:6px 12px;cursor:pointer;
-  display:flex;align-items:center;gap:7px;
-  font-family:"Outfit",sans-serif;font-size:13px;color:var(--mut);
-  transition:all .2s;user-select:none;white-space:nowrap;
-}
+body.light .track{background:rgba(0,0,0,.07)}
+.theme-toggle{background:var(--panel);border:1px solid var(--line2);border-radius:20px;padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:"Outfit",sans-serif;font-size:13px;color:var(--mut);transition:all .2s;user-select:none;white-space:nowrap;}
 .theme-toggle:hover{color:var(--tx);border-color:var(--acc)}
 .theme-icon{font-size:15px;transition:transform .3s}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  background:
-    radial-gradient(900px 600px at 88% -8%, rgba(184,255,54,.10), transparent 60%),
-    radial-gradient(800px 600px at 0% 8%, rgba(52,227,198,.07), transparent 55%),
-    var(--bg);
-  color:var(--tx); font-family:"Outfit",sans-serif; min-height:100vh;
-  padding:clamp(14px,2.4vw,34px); -webkit-font-smoothing:antialiased;
-}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
-  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
-  background-size:46px 46px;mask-image:radial-gradient(circle at 50% 35%,#000,transparent 88%)}
+body{background:radial-gradient(900px 600px at 88% -8%, rgba(184,255,54,.10), transparent 60%),radial-gradient(800px 600px at 0% 8%, rgba(52,227,198,.07), transparent 55%),var(--bg);color:var(--tx); font-family:"Outfit",sans-serif; min-height:100vh;padding:clamp(14px,2.4vw,34px); -webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(circle at 50% 35%,#000,transparent 88%)}
 .wrap{max-width:1320px;margin:0 auto;position:relative;z-index:1}
 .num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:22px}
@@ -80,732 +62,297 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 .scope{text-align:right}
 .scope .lbl{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut2)}
 .scope .who{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(18px,2.4vw,26px);color:var(--teal);margin-top:2px}
-.cutbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;
-  background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);
-  border-radius:var(--r);padding:12px 16px}
+.cutbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
 .cut-lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2)}
 .seg{display:inline-flex;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:11px;padding:4px;gap:2px;flex-wrap:wrap}
-.seg button{font-family:"Outfit",sans-serif;font-size:13px;color:var(--mut);background:none;border:none;
-  padding:8px 15px;border-radius:8px;cursor:pointer;transition:.16s;white-space:nowrap}
+.seg button{font-family:"Outfit",sans-serif;font-size:13px;color:var(--mut);background:none;border:none;padding:8px 15px;border-radius:8px;cursor:pointer;transition:.16s;white-space:nowrap}
 .seg button:hover{color:var(--tx)}
 .seg button.on{background:var(--acc);color:#0a0b0f;font-weight:600;box-shadow:0 0 16px rgba(184,255,54,.3)}
-.clear-btn{font-family:"Outfit",sans-serif;font-size:12px;color:var(--mut);background:rgba(255,255,255,.05);
-  border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;transition:.16s}
+.clear-btn{font-family:"Outfit",sans-serif;font-size:12px;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;transition:.16s}
 .clear-btn:hover{color:var(--tx);background:rgba(255,255,255,.09)}
 .clear-btn.hide{display:none}
-.kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-/* v31: las tarjetas de número completo en pesos (Cobrado/Proyectado/Total del mes/Sin fecha
-   concreta desde v37) vienen recortándose (overflow:hidden) contra columnas iguales — son las
-   que más ancho necesitan. "Promedio diario" muestra un valor abreviado corto y no necesita tanto
-   lugar, así que se achica para compensarle ancho al resto.
-   v38: se quitó la tarjeta "Mejor unidad" (quedaba redundante con "Mix por unidad de negocio",
-   que ya muestra el % de cada unidad) — vuelven a ser 6 tarjetas, pero ya no las mismas 6 que
-   antes de v37 (ahora son Cobrado/Proyectado/Total del mes/Sin fecha concreta/vs. mes anterior/
-   Promedio diario). Se reparte entre las 4 tarjetas de pesos, con "vs. mes anterior" con un poco
-   más de aire que antes (ya no compite por espacio con "Mejor unidad") y "Promedio diario" igual
-   de angosta. Probado con números de hasta 10 cifras (~$2.000.000.000) sin recortarse. */
-.kpis.kpis6{grid-template-columns:1.3fr 1.3fr 1.35fr 1.25fr 1fr .8fr}
-/* v17: la fila de KPIs de Aging tiene 4 tarjetas (no 5 ni 6) — sin esta clase heredaba
-   la grilla de 5 columnas de .kpis base y quedaba una columna vacía a la derecha,
-   por eso las tarjetas se veían corridas a la izquierda / no ocupaban el ancho completo. */
-.kpis.kpis4{grid-template-columns:repeat(4,1fr)}
-.mom-up{color:#b8ff36}.mom-dn{color:#f87171}.mom-neu{color:var(--mut)}
-.mom-bars{margin-top:10px;display:flex;flex-direction:column;gap:5px}
-.mom-bar-row{display:grid;grid-template-columns:26px 1fr 46px;align-items:center;gap:6px}
-.mom-bar-lbl{font-size:10px;color:var(--mut2);text-align:right;font-family:"IBM Plex Mono",monospace}
-.mom-bar-track{height:9px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
-.mom-bar-fill{height:100%;border-radius:5px;transition:width 1s cubic-bezier(.22,1,.36,1)}
-.mom-bar-fill.prev-bar{background:rgba(255,255,255,.22)}
-.mom-bar-amt{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--mut);text-align:right;white-space:nowrap}
-.kpi{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);
-  border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden}
+.xlsx-btn{font-family:"Outfit",sans-serif;font-size:12px;color:#0a0b0f;background:var(--acc);border-radius:8px;padding:7px 14px;cursor:pointer;transition:.16s;font-weight:600;white-space:nowrap;user-select:none}
+.xlsx-btn:hover{background:var(--acc-d)}
+.xlsx-btn.loading{opacity:.6;pointer-events:none}
+.file-status{font-size:12px;color:var(--mut)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;align-items:stretch}
+.kpi{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .kpi::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 60%,rgba(184,255,54,.05));pointer-events:none}
-.kpi .k-lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2)}
-.kpi .k-val{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:clamp(22px,2.9vw,33px);margin-top:9px;letter-spacing:-.03em}
-/* v31: tope bajado de 28px a 25px (con el ancho de columna ganado arriba alcanza de sobra, y deja
-   margen para números todavía más largos sin volver a recortarse).
-   v37: se cambia white-space:nowrap por normal+overflow-wrap — con la 7ª tarjeta ("Sin fecha
-   concreta") ya no queda tanto ancho de sobra por columna, así que un importe realmente extremo
-   (varios miles de millones) ahora se envuelve en dos líneas en vez de recortarse contra
-   .kpi{overflow:hidden}. Con los montos reales de hoy sigue entrando en una sola línea. */
-.kpi .k-val.full{font-size:clamp(15px,1.85vw,25px);line-height:1.15;white-space:normal;overflow-wrap:break-word}
+.kpi .k-lbl{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2);min-height:2.1em;display:flex;align-items:flex-start}
+.kpi .k-val{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:clamp(17px,2.1vw,25px);margin-top:8px;letter-spacing:-.03em;word-break:break-word}
 .kpi.acc .k-val{color:var(--acc)}
 .kpi.mrg .k-val{color:var(--teal)}
-.kpi .k-sub{font-size:12px;color:var(--mut);margin-top:5px}
-.kpi .k-split{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;margin-top:7px}
-.kpi .k-split span{white-space:nowrap}
-.kpi .k-split-real{color:var(--teal)}
-.kpi .k-split-proy{color:var(--mut2)}
-/* v27 — tarjetas Cobrado/Proyectado/Total del mes: despliegan un detalle al hacer clic */
-.kpi-clickable{cursor:pointer;transition:border-color .15s,transform .1s}
-.kpi-clickable:hover{border-color:var(--acc)}
-.kpi-clickable.active{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
-.kpi-caret{font-size:9px;color:var(--mut2);margin-left:2px}
-.kpi-clickable.active .kpi-caret{color:var(--acc)}
-#kpiDetailCard .agtbl{min-width:420px}
-/* v28 — renglones de cliente desplegables (más de un comprobante) dentro del detalle */
-/* v33: mismas reglas para #mixDetailTable (Mix por unidad de negocio) — mismo estilo y
-   funcionalidad de renglón de cliente desplegable que en las tarjetas Cobrado/Proyectado/Total. */
-#kpiDetailTable tr.cli-row,#mixDetailTable tr.cli-row{cursor:pointer}
-#kpiDetailTable tr.cli-row:hover td,#mixDetailTable tr.cli-row:hover td{background:rgba(255,255,255,.05)}
-#kpiDetailTable tr.cli-row td:first-child .kpi-caret,#mixDetailTable tr.cli-row td:first-child .kpi-caret{font-size:10px;margin-right:2px}
-#kpiDetailTable tr.sub-row td,#mixDetailTable tr.sub-row td{background:rgba(255,255,255,.025);color:var(--mut);font-weight:400}
-#kpiDetailTable tr.sub-row td:first-child,#mixDetailTable tr.sub-row td:first-child{padding-left:26px;font-size:12px;white-space:normal}
-#kpiDetailTable tr.sub-row.hidden,#mixDetailTable tr.sub-row.hidden{display:none}
-#kpiDetailTable tr.tot-row td,#mixDetailTable tr.tot-row td{border-top:1px solid var(--line)}
-.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}
-.card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);
-  border-radius:var(--r);padding:18px 20px 20px;position:relative}
+.kpi.warn .k-val{color:#f59e0b}
+.kpi.bad .k-val{color:#f87171}
+.kpi .k-sub{font-size:11.5px;color:var(--mut);margin-top:5px}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px}
+.card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:18px 20px 20px;position:relative}
 .card.full{grid-column:1/-1}
-.c-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.c-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .c-title{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:17px;letter-spacing:-.01em}
 .c-note{font-size:12px;color:var(--mut)}
 .hint{font-size:11px;color:var(--mut2)}
-.bars{display:flex;flex-direction:column;gap:5px}
-.row{display:grid;grid-template-columns:132px 1fr auto auto;align-items:center;gap:10px;
-  padding:8px 8px;border-radius:9px;cursor:pointer;transition:background .18s}
-.row:hover{background:rgba(255,255,255,.04)}
-.row.on{background:rgba(184,255,54,.10);box-shadow:inset 0 0 0 1px rgba(184,255,54,.25)}
+.bars{display:flex;flex-direction:column;gap:3px}
+.row{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:12px;padding:7px 8px;border-radius:9px}
 .row .nm{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px}
 .swatch{width:9px;height:9px;border-radius:3px;flex:none}
-.track{height:14px;background:rgba(255,255,255,.05);border-radius:7px;overflow:hidden}
+.track{height:13px;background:rgba(255,255,255,.05);border-radius:7px;overflow:hidden}
 .fill{height:100%;border-radius:7px;width:0;transition:width .9s cubic-bezier(.22,1,.36,1)}
-.row .amt{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--tx);text-align:right;min-width:80px}
-.row .pct{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--mut);text-align:right;min-width:44px}
+.row .amt{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--tx);text-align:right;min-width:84px}
 .chartbox{width:100%}
 svg{display:block;width:100%;overflow:visible}
 .gridln{stroke:rgba(255,255,255,.06);stroke-width:1}
 .axn{fill:var(--mut2);font-family:"IBM Plex Mono",monospace;font-size:11px}
 .barv{transition:y .8s cubic-bezier(.22,1,.36,1),height .8s cubic-bezier(.22,1,.36,1),opacity .3s}
-.barlbl{fill:var(--mut);font-family:"IBM Plex Mono",monospace;font-size:9.5px;text-anchor:middle}
+.barlbl{fill:var(--mut);font-family:"IBM Plex Mono",monospace;font-size:10px;text-anchor:middle}
+.legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mut)}
+.legend .sw{width:9px;height:9px;border-radius:3px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2);font-weight:500;padding:0 8px 9px;border-bottom:1px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl th.r,.tbl td.r{text-align:right}
+.tbl td{padding:9px 8px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td.cl{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbar{position:relative}
+.cbar i{position:absolute;left:0;top:50%;transform:translateY(-50%);height:7px;border-radius:5px;background:linear-gradient(90deg,var(--teal),rgba(52,227,198,.25));opacity:.5}
+.tbl td .v{font-family:"IBM Plex Mono",monospace;position:relative}
+.rk{color:var(--mut2);font-family:"IBM Plex Mono",monospace;font-size:12px;width:22px}
 .tipos{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:stretch}
-.tipo-chip{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
-  display:flex;align-items:center;gap:10px;min-width:170px;flex:1 1 170px;max-width:240px;
-  cursor:pointer;transition:border-color .15s}
-.tipo-chip:hover{border-color:var(--acc)}
-.tipo-chip.active{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.tipo-chip{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;min-width:150px;flex:1 1 150px;max-width:230px}
 .tipo-dot{width:12px;height:12px;border-radius:50%;flex:none}
 .tipo-info{flex:1;min-width:0}
-.tipo-name{font-size:13.5px;font-weight:600;white-space:nowrap}
-.tipo-name .kpi-caret{font-size:9px;margin-left:2px}
+.tipo-name{font-size:12.5px;font-weight:600;white-space:nowrap}
 .tipo-val{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--tx);margin-top:4px}
 .tipo-sub{font-size:11px;color:var(--mut2);margin-top:2px}
-/* v32/v33 — detalle desplegable de "Mix por unidad de negocio" (clic en una unidad, agrupado por
-   cliente con comprobantes desplegables — mismas 2 columnas que Cliente/Importe) */
-#mixDetailCard .agtbl{min-width:340px}
-.matrix{overflow-x:auto}
-.mtbl{border-collapse:collapse;width:100%;min-width:760px}
-.mtbl th{font-size:10.5px;color:var(--mut2);font-weight:500;padding:6px 5px;text-align:center;white-space:nowrap}
-.mtbl th.first{text-align:left}
-.mtbl td{padding:3px 4px;text-align:center}
-.mtbl td.nm{text-align:left;font-size:12.5px;white-space:nowrap;cursor:pointer;font-weight:600}
-.mtbl td.nm:hover{color:var(--acc)}
-.cell{border-radius:6px;padding:6px 3px;font-family:"IBM Plex Mono",monospace;font-size:10px;color:#0a0b0f;font-weight:600;transition:transform .15s}
-.cell:hover{transform:scale(1.08)}
-.cell.z{color:var(--mut2);background:rgba(255,255,255,.03)!important;font-weight:400}
-#tip{position:fixed;pointer-events:none;background:rgba(10,11,16,.95);border:1px solid var(--line2);
-  border-radius:10px;padding:10px 14px;font-size:13px;opacity:0;transition:opacity .12s;z-index:999;max-width:280px}
+#tip{position:fixed;pointer-events:none;background:rgba(10,11,16,.95);border:1px solid var(--line2);border-radius:10px;padding:10px 14px;font-size:13px;opacity:0;transition:opacity .12s;z-index:999;max-width:280px}
 .t-v{color:var(--acc);font-family:"IBM Plex Mono",monospace}
-@media(max-width:1200px){
-  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:860px){
-  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:repeat(2,1fr)}
-  .grid{grid-template-columns:1fr}
-  .card.full{grid-column:1}
-  .row{grid-template-columns:110px 1fr auto auto}
-}
+.note-box{font-size:11.5px;color:var(--mut2);margin-top:10px;line-height:1.5}
+.kpi.clickable{cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.kpi.clickable:hover{border-color:var(--line2)}
+.kpi.clickable.active{box-shadow:inset 0 0 0 2px var(--acc);border-color:var(--acc)}
+.kpi.scrollto{cursor:pointer}
+@keyframes flashPulse{0%{box-shadow:0 0 0 0 rgba(184,255,54,.55)}70%{box-shadow:0 0 0 16px rgba(184,255,54,0)}100%{box-shadow:0 0 0 0 rgba(184,255,54,0)}}
+.card.flash{animation:flashPulse 1.1s ease-out 1}
+.detail-close{cursor:pointer}
+.detail-close:hover{color:var(--tx)}
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.card.full{grid-column:1}.row{grid-template-columns:120px 1fr auto}}
 @media(max-width:600px){
   body{padding:10px 10px 24px}
   header{flex-direction:column;align-items:flex-start;gap:6px}
   .scope{text-align:left}
   .brand h1{font-size:clamp(26px,8vw,38px)}
-  .kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr 1fr}
+  .kpis{grid-template-columns:1fr 1fr}
   .kpi{padding:14px 14px}
-  .kpi .k-val{font-size:clamp(18px,5vw,26px)}
+  .kpi .k-val{font-size:clamp(16px,5vw,22px)}
   .tipos{grid-template-columns:1fr!important}
   .cutbar{padding:10px 12px;gap:8px}
   .seg button{padding:6px 10px;font-size:12px}
   .c-title{font-size:15px}
   .card{padding:14px 12px 16px}
-  .row{grid-template-columns:90px 1fr auto;gap:6px}
-  .row .pct{display:none}
-  .row .amt{min-width:60px;font-size:11.5px}
+  .tbl td,.tbl th{padding:7px 5px}
+  .tbl td.cl{max-width:130px}
+  .row{grid-template-columns:100px 1fr auto;gap:8px}
+  .row .amt{min-width:55px;font-size:11.5px}
 }
-@media(max-width:380px){.kpis, .kpis.kpis6, .kpis.kpis4{grid-template-columns:1fr}}
-
-/* ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n) ===== */
-/* v17: las 4 tarjetas de KPI de Aging quedan centradas (texto y separación) dentro de su propia fila */
-#agingKpis .kpi{text-align:center}
-.aging-head{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);
-  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
-.aging-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(24px,3.6vw,38px);line-height:.95;letter-spacing:-.03em}
-.aging-head h2 b{color:var(--teal)}
-.agtbl{border-collapse:collapse;width:100%;min-width:480px}
-.agtbl th{font-size:10.5px;color:var(--mut2);font-weight:500;padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-.agtbl th:first-child{text-align:left}
-.agtbl td{padding:7px 8px;font-family:"IBM Plex Mono",monospace;font-size:12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-.agtbl td:first-child{font-family:"Outfit",sans-serif;font-size:13px;text-align:left;font-weight:600;white-space:normal}
-.agtbl tr:last-child td{border-bottom:none}
-.agtbl tbody tr:hover{background:rgba(255,255,255,.04)}
-.dlegend{display:flex;gap:16px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.dlegend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut)}
-.dlegend .sw{width:10px;height:10px;border-radius:3px;flex:none}
-.dcol{display:flex;flex-direction:column;gap:4px}
-.drow{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:10px;padding:6px 8px;border-radius:9px}
-.drow:hover{background:rgba(255,255,255,.04)}
-.drow .dnm{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dtrack{position:relative;height:14px;background:rgba(255,255,255,.05);border-radius:7px;overflow:hidden}
-.dseg{position:absolute;top:0;height:100%}
-.dzero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--line2);z-index:1}
-.drow .damt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--tx);text-align:right;min-width:100px}
-@media(max-width:600px){
-  .drow{grid-template-columns:96px 1fr auto;gap:6px}
-  .drow .dnm{font-size:11px}
-  .drow .damt{min-width:66px;font-size:10.5px}
-  .agtbl th,.agtbl td{padding:6px 5px;font-size:11px}
-}
-
 </style>
 </head>
-<body class="light">
+<body>
 <div class="wrap">
 
 <header>
   <div class="brand">
     <h1>Tablero de <b>cobranzas</b></h1>
-    <div class="sub"><span class="dot"></span><span id="periodo">Ene 2025 &ndash; Jul 2026</span></div>
+    <div class="sub"><span class="dot"></span><span id="periodo">Cargando datos…</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:14px">
     <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">
-      <span class="theme-icon" id="themeIcon">&#127769;</span>
-      <span id="themeLabel">Modo oscuro</span>
+      <span class="theme-icon" id="themeIcon">☀️</span>
+      <span id="themeLabel">Modo claro</span>
     </button>
     <div class="scope">
-      <div class="lbl">Unidad</div>
+      <div class="lbl">Empresa</div>
       <div class="who" id="scope">Todas</div>
     </div>
   </div>
 </header>
 
 <div class="cutbar">
-  <span class="cut-lbl">Per&iacute;odo</span>
+  <span class="cut-lbl">Período</span>
   <div class="seg" id="mesSeg"></div>
-  <button class="clear-btn hide" id="clearUnitBtn">&times; Quitar unidad</button>
+  <button class="xlsx-btn" id="sheetsBtn">↻ Actualizar datos</button>
+  <span id="fileStatus" class="file-status"></span>
+  <div style="flex-basis:100%;height:0"></div>
+  <span class="cut-lbl">Empresa</span>
+  <div class="seg" id="empSeg"></div>
+  <button class="clear-btn hide" id="clearEmpBtn">× Quitar empresa</button>
+  <div style="flex-basis:100%;height:0"></div>
+  <span class="cut-lbl">Rubro</span>
+  <div class="seg" id="rubSeg"></div>
+  <button class="clear-btn hide" id="clearRubBtn">× Quitar rubro</button>
 </div>
 
-<div class="kpis kpis6" id="kpis"></div>
-
-<!-- v27: detalle desplegable de Cobrado/Proyectado/Total del mes (clic en la tarjeta) -->
-<div class="card" id="kpiDetailCard" style="margin-bottom:14px;display:none">
-  <div class="c-head">
-    <span class="c-title" id="kpiDetailTitle"></span>
-    <span class="c-note" id="kpiDetailNote"></span>
-  </div>
-  <div style="overflow-x:auto"><table class="agtbl" id="kpiDetailTable"></table></div>
-</div>
+<div class="kpis" id="kpis"></div>
+<div id="kpiDetalleWrap"></div>
 
 <div class="card" style="margin-bottom:14px">
   <div class="c-head">
-    <span class="c-title">Mix por unidad de negocio</span>
-    <span class="c-note" id="mixNote"></span>
+    <span class="c-title">Antigüedad de saldos <span style="font-size:11px;color:var(--mut2);font-family:Outfit,sans-serif;font-weight:400">· bruto, según SALDO DEUDORES (sin netear anticipos)</span></span>
+    <span class="c-note" id="agingNote"></span>
   </div>
-  <div class="tipos" id="unidades"></div>
-  <!-- v32: detalle desplegable por comprobante (clic en una unidad) -->
-  <div id="mixDetailCard" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+  <div class="tipos" id="aging"></div>
+</div>
+
+<div class="grid" style="margin-bottom:14px">
+  <div class="card">
     <div class="c-head">
-      <span class="c-title" id="mixDetailTitle" style="font-size:14px"></span>
-      <span class="c-note" id="mixDetailNote"></span>
+      <span class="c-title">Evolución · a cobrar vs. cobrado</span>
+      <span class="legend">
+        <span class="li"><span class="sw" style="background:var(--acc)"></span>A cobrar</span>
+        <span class="li"><span class="sw" style="background:var(--teal)"></span>Cobrado</span>
+      </span>
     </div>
-    <div style="overflow-x:auto"><table class="agtbl" id="mixDetailTable"></table></div>
+    <div class="chartbox" id="evolChart"></div>
   </div>
+  <div class="card">
+    <div class="c-head">
+      <span class="c-title">Mix por rubro <span style="font-size:11px;color:var(--mut2);font-family:Outfit,sans-serif;font-weight:400">· a cobrar</span></span>
+      <span class="hint" id="rubHint"></span>
+    </div>
+    <div class="bars" id="mixRubro"></div>
+  </div>
+</div>
+
+<div class="grid" style="margin-bottom:14px">
+  <div class="card">
+    <div class="c-head">
+      <span class="c-title">Top deudores</span>
+      <span class="c-note">saldo neto (excl. incobrables / excluidos)</span>
+    </div>
+    <table class="tbl">
+      <thead><tr><th></th><th>Cliente</th><th class="r">Saldo</th><th class="r">%</th></tr></thead>
+      <tbody id="topDeudores"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="c-head">
+      <span class="c-title">Mix por empresa <span style="font-size:11px;color:var(--mut2);font-family:Outfit,sans-serif;font-weight:400">· cobrado</span></span>
+    </div>
+    <div class="bars" id="mixEmpresa"></div>
+  </div>
+</div>
+
+<div class="card full" style="margin-bottom:14px" id="chequesCard">
+  <div class="c-head">
+    <span class="c-title">Cheques de terceros por vencer</span>
+    <span class="c-note" id="chequesNote"></span>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Cliente</th><th>Comprobante</th><th class="r">Importe</th><th>Vence</th><th class="r">Días</th></tr></thead>
+    <tbody id="chequesTbl"></tbody>
+  </table>
 </div>
 
 <div class="grid">
+  <div class="card" id="incobCard">
+    <div class="c-head">
+      <span class="c-title">Incobrables</span>
+      <span class="c-note" id="incobNote"></span>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Cliente</th><th>Cobrador</th><th class="r">Saldo</th></tr></thead>
+      <tbody id="incobTbl"></tbody>
+    </table>
+  </div>
   <div class="card">
     <div class="c-head">
-      <span class="c-title">Ranking por unidad</span>
-      <span class="hint" id="rankHint">clic para filtrar</span>
+      <span class="c-title">Excluidos</span>
+      <span class="c-note" id="exclNote">facturas de IVA / préstamos, restados del saldo neto</span>
     </div>
-    <div class="bars" id="ranking"></div>
+    <table class="tbl">
+      <thead><tr><th>Cliente</th><th class="r">Monto excluido</th></tr></thead>
+      <tbody id="exclTbl"></tbody>
+    </table>
   </div>
-
-  <div class="card">
-    <div class="c-head">
-      <span class="c-title">Evoluci&oacute;n mensual</span>
-      <span class="c-note" id="evNote"></span>
-    </div>
-    <div class="chartbox" id="monthChart"></div>
-  </div>
-
-  <div class="card full">
-    <div class="c-head">
-      <span class="c-title">Mapa mensual &middot; unidad &times; mes</span>
-      <span class="hint">clic en la unidad para filtrar</span>
-    </div>
-    <div class="matrix">
-      <table class="mtbl" id="matrix"></table>
-    </div>
-  </div>
-</div>
-
-<!-- ===== Secci&oacute;n Aging (agregada en esta versi&oacute;n, fuente de datos independiente) ===== -->
-<div class="aging-head">
-  <h2>Aging de <b>cartera</b></h2>
-  <div class="scope">
-    <div class="lbl">Per&iacute;odo (vencimiento)</div>
-    <div class="who" id="agingPeriodNote">todo el per&iacute;odo</div>
-  </div>
-  <div class="scope">
-    <div class="lbl">Actualizado</div>
-    <div class="who" id="agingUpdated">&mdash;</div>
-  </div>
-</div>
-
-<div id="agingErrorBox"></div>
-
-<div class="kpis kpis4" id="agingKpis"></div>
-
-<div class="card" style="margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Cobrador / Analista</span>
-    <span class="c-note">venta real &middot; no real &middot; total deuda</span>
-  </div>
-  <div style="overflow-x:auto"><table class="agtbl" id="agingAnalistaTable"></table></div>
-</div>
-<div class="card" style="margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Cobrador / Analista &middot; gr&aacute;fico</span>
-    <span class="hint">venta real vs. no real por analista</span>
-  </div>
-  <div class="dlegend">
-    <span><span class="sw" style="background:var(--acc)"></span>Venta real</span>
-    <span><span class="sw" style="background:var(--teal)"></span>No real</span>
-  </div>
-  <div class="dcol" id="agingAnalistaChart"></div>
-</div>
-
-<div class="card" style="margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Vendedor</span>
-    <span class="c-note">venta real &middot; no real &middot; total deuda</span>
-  </div>
-  <div style="overflow-x:auto"><table class="agtbl" id="agingVendedorTable"></table></div>
-</div>
-<div class="card" style="margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Vendedor &middot; gr&aacute;fico</span>
-    <span class="hint">venta real vs. no real por vendedor</span>
-  </div>
-  <div class="dlegend">
-    <span><span class="sw" style="background:var(--acc)"></span>Venta real</span>
-    <span><span class="sw" style="background:var(--teal)"></span>No real</span>
-  </div>
-  <div class="dcol" id="agingVendedorChart"></div>
-</div>
-
-<div class="card" style="margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Clientes: por estado de vencimiento</span>
-    <span class="c-note">deuda por cliente &middot; columna ESTADO VENCIMIENTO de la pesta&ntilde;a Aging</span>
-  </div>
-  <div style="overflow-x:auto"><table class="agtbl" id="agingClienteTable"></table></div>
-</div>
-<div class="card" style="margin-bottom:14px">
-  <div class="c-head">
-    <span class="c-title">Clientes &middot; gr&aacute;fico</span>
-    <span class="hint">vencido / en plazo / cumplido por cliente</span>
-  </div>
-  <div class="dlegend">
-    <span><span class="sw" style="background:#f87171"></span>Vencido</span>
-    <span><span class="sw" style="background:var(--acc)"></span>En plazo</span>
-    <span><span class="sw" style="background:var(--teal)"></span>Cumplido</span>
-    <span><span class="sw" style="background:#94a3b8"></span>Otro</span>
-  </div>
-  <div class="dcol" id="agingClienteChart"></div>
 </div>
 
 </div>
 <div id="tip"></div>
 <script>
-// FUENTE DE DATOS (v7): el Sheet viejo (fila=día, 5 columnas de unidad) fue borrado por el
-// usuario y daba HTTP 410. Este tablero ahora reconstruye las mismas unidades a partir de la
-// pestaña "Aging" (comprobante por comprobante) del Sheet "Aging", publicada como CSV.
-// Criterio acordado con Nahuel/Graciela para ubicar cada comprobante en el calendario:
-//  - Si ya se cobró (COBRADO / DESCONTADO = TRUE/VERDADERO): fecha = FECHA COBRANZA, monto = SALDO PARCIAL APLICADO.
-//  - Si todavía no se cobró: fecha = FECHA ESTIMADA DE COBRANZA; si está vacía, FECHA DE ENTREGA DE
-//    PRODUCTOS + días de CONDICION DE VENTA; si tampoco hay entrega, FECHA DE VENCIMIENTO. Monto = SALDO.
-// Unidad = columna TIO DE CLIENTE, mapeada a las 6 categorías existentes (ver mapTipoClienteToUnit).
-// Este dashboard SIEMPRE lee de acá — no tiene datos embebidos ni fallback local.
-// Si esto está vacío, o si falla la lectura, se muestra un error en vez del dashboard.
-//
-// AJUSTES v10 (el Sheet cambió de idioma/agregó un tipo de cliente nuevo):
-//  1) La columna COBRADO / DESCONTADO pasó de mostrar "TRUE"/"FALSE" a "VERDADERO"/"FALSO"
-//     (cambio de idioma del Sheet). Se acepta cualquiera de los dos por resiliencia.
-//  2) Apareció un nuevo valor de TIPO DE CLIENTE, "Cliente / proveedor" (antes cualquier valor
-//     no reconocido caía en "Otros/Ajustes"). A pedido de Nahuel ahora tiene su propio bucket.
-//  3) En el semáforo de gerencia, "NC Emitidas" ahora también cuenta comprobantes "NCE"
-//     (antes solo "NCR") — parecen ser la misma familia de Notas de Crédito.
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJXSOuDH9QTf-i7czJt-5l9TsdoNWgLHr55blzpWWfwG4ivbMnaJaKgs92yNJSSfubAzq713apwyd8/pub?gid=457164138&single=true&output=csv';
+// ───────────────────────── Config ─────────────────────────
+const PUB_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQl4iptNKqm4MbhXx9Q9-GwYNw7plVS36FUtWNAtTneof38AiTWnl0Bn6aEzL8RuUXZva9cPn02rYmJ/pub";
+const GIDS = { CASH:1582829322, PAGOS:1556582415, SALDO:91335494, INCOB:237200917, EXCL:1432335214 };
+const EMP_GRUPOS = {
+  'LUSTRAMAX': ['LMX','LMX II','LST1','LST2'],
+  'VYMAT': ['VMT','VMT II','VMT_1','VMT_2'],
+  'CIA. DE HIGIENE': ['CDH','CDH1']
+};
+const EMP_GRUPO_OF = {};
+Object.entries(EMP_GRUPOS).forEach(([g,arr])=>arr.forEach(e=>EMP_GRUPO_OF[e]=g));
+const DETALLE_EXCL = /PRESTAMO|PR[ÉE]STAMO|FACTURA DE IVA/i;
+const PAL_ACC = ()=>document.body.classList.contains('light')?'#2563eb':'#b8ff36';
+const PAL_TEAL = ()=>document.body.classList.contains('light')?'#0891b2':'#34e3c6';
 
-// v22: el tablero principal, la sección Aging y el semáforo de gerencia leen la MISMA pestaña
-// "Aging" — antes cada uno hacía su propio fetch() al mismo link publicado, y los 3 (a veces 4,
-// contando alguna carrera entre el primer render de Aging y un re-render disparado por el
-// período) salían casi al mismo instante en la carga de la página. Eso a veces le hacía pedir
-// demasiado rápido/seguido al link publicado de Sheets, que respondía HTTP 400 a alguno de esos
-// pedidos simultáneos aunque los otros sí funcionaran (por eso el tablero principal fallaba pero
-// el Aging de la misma página, o el VERIFICADOR en otra pestaña, cargaban bien). Ahora hay un
-// solo fetch() compartido: el primero que lo pide dispara el pedido real a Sheets, y cualquier
-// otro que lo pida mientras ese pedido está en curso (o ya terminó) reutiliza el mismo resultado
-// en vez de disparar un pedido nuevo.
-let SHEET_TEXT = null;
-let SHEET_FETCH_PROMISE = null;
-async function getSheetText(){
-  if(SHEET_TEXT) return SHEET_TEXT;
-  if(SHEET_FETCH_PROMISE) return SHEET_FETCH_PROMISE;
-  SHEET_FETCH_PROMISE = (async () => {
-    const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?')?'&':'?') + '_ts=' + Date.now();
-    const res = await fetch(url, {cache:'no-store'});
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    SHEET_TEXT = await res.text();
-    return SHEET_TEXT;
-  })();
-  try{
-    return await SHEET_FETCH_PROMISE;
-  } finally {
-    SHEET_FETCH_PROMISE = null;
-  }
-}
+// ───────────────────────── State ─────────────────────────
+let CASH=[], PAGOS=[], SALDO=[], INCOB=[], EXCL=[];
+let MESES=[]; // union of month keys 'YYYY-MM' present in CASH.fecha / PAGOS.fechaRecibo
+let mesFilter=null, empGrupoFilter=null, rubFilter=null;
+let kpiActiveCard=null;
 
-let DATA = [], MESES = [], MLBL = {};
-
-// v14 — BUG CORREGIDO: esta función asumía que un año de 4 dígitos significaba formato
-// M/D/AAAA (mes primero, "americano"), reservando D/M/AA (día primero, es-AR) solo para
-// año de 2 dígitos. Esa distinción nunca fue real: TODAS las columnas de fecha de la
-// pestaña "Aging" son día/mes/año (es-AR), sea el año de 2 o de 4 dígitos — el Sheet viene
-// migrando de a poco filas de 2 a 4 dígitos de año, mezclando ambos formatos en la misma
-// columna. Con la lógica vieja, una fecha como "31/07/2026" se leía como mes=31, lo cual
-// desborda meses (31 → +2 años, +6 meses) y terminaba mostrando comprobantes en 2027/2028
-// que no existen en el Sheet. Detectado por Nahuel. Ahora se interpreta SIEMPRE como
-// día/mes/año, sin importar cuántos dígitos tenga el año.
-function agParseDateFlexible(s){
-  s = (s==null?'':String(s)).trim();
-  if(!s) return null;
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
-  if(!m) return null;
-  const day=parseInt(m[1],10), month=parseInt(m[2],10), yRaw=parseInt(m[3],10);
-  const year = yRaw<100 ? 2000+yRaw : yRaw; // año de 2 dígitos -> 20XX; de 4 dígitos, tal cual
-  if(!day||!month||!year) return null;
-  if(day<1||day>31||month<1||month>12) return null; // defensivo: nunca forzar una fecha imposible
-  const d = new Date(Date.UTC(year, month-1, day));
-  return isNaN(d.getTime())? null : d;
-}
-const agToISO = d => d ? `${d.getUTCFullYear()}-${(d.getUTCMonth()+1).toString().padStart(2,'0')}-${d.getUTCDate().toString().padStart(2,'0')}` : null;
-function agAddDays(d, days){ const r=new Date(d.getTime()); r.setUTCDate(r.getUTCDate()+(days||0)); return r; }
-
-// Mapeo TIO DE CLIENTE -> las 6 unidades del tablero (confirmado con Nahuel: "Otros / CHD" = CDH;
-// "Cliente / proveedor" tiene su propio bucket desde v10 — antes caía en Otros/Ajustes).
-function mapTipoClienteToUnit(tipoCliente){
-  const t = (tipoCliente||'').trim().toLowerCase();
-  if(t==='papelera' || t==='pepelera') return 'Papeleras CC';
-  if(t==='catering') return 'Catering';
-  if(t==='otros / chd' || t==='otros/chd') return 'CDH';
-  if(t==='vymat') return 'VyMat';
-  if(t==='cliente / proveedor' || t==='cliente/proveedor') return 'Cliente/Proveedor';
-  return 'Otros/Ajustes'; // vacío, o cualquier otro valor no reconocido
-}
-
+// ───────────────────────── Helpers ─────────────────────────
 function parseCSV(text){
-  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
-  if(!lines.length) return [];
-  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
-  const idx = name => header.findIndex(h=>h===name);
-  const iCobrado = idx('COBRADO / DESCONTADO');
-  const iFechaCobranza = idx('FECHA COBRANZA');
-  const iSaldoParcial = idx('SALDO PARCIAL APLICADO');
-  const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
-  const iFechaVenc = idx('FECHA DE VENCIMIENTO');
-  const iCondVenta = idx('CONDICION DE VENTA')>=0 ? idx('CONDICION DE VENTA') : idx('CONDICIÓN DE VENTA');
-  const iSaldo = idx('SALDO');
-  // v36: la columna "FECHA ESTIMADA DE COBRANZA" (col. R) fue renombrada en el Sheet a "FECHA
-  // RECIBO" (Graciela ya empezó a usarla para la nueva regla de Cobrado que estamos definiendo
-  // aparte). Esta función (parseCSV/DATA) es lógica heredada que desde v26 NO calcula ningún
-  // valor que se muestre en el tablero (ver comentario más abajo, junto a parseVencTx) — así que
-  // en vez de exigir esa columna con su nombre viejo (lo que rompía la carga de TODO el tablero
-  // apenas se renombró), simplemente se deja de exigirla: si no está, el fallback a FECHA DE
-  // ENTREGA DE PRODUCTOS + condición de venta (y por último FECHA DE VENCIMIENTO) sigue funcionando
-  // igual que antes cuando esa columna venía vacía.
-  const iFechaEstimada = idx('FECHA ESTIMADA DE COBRANZA'); // -1 si no existe (ver nota v36 arriba)
-  const iFechaEntrega = idx('FECHA DE ENTREGA DE PRODUCTOS');
-  if([iCobrado,iFechaCobranza,iSaldoParcial,iTipoCliente,iFechaVenc,iCondVenta,iSaldo,iFechaEntrega].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas en la pestaña "Aging" (revisá si cambiaron los encabezados)');
-  }
-  const out=[];
-  for(let i=1;i<lines.length;i++){
-    const c = splitCSVLine(lines[i]);
-    const first = (c[0]||'').trim();
-    if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
-    if(!c.some(v=>v && v.trim())) continue; // fila vacía
-    const cobrado = first.toUpperCase()==='TRUE' || first.toUpperCase()==='VERDADERO'; // v10: el Sheet ahora usa "VERDADERO"/"FALSO" (antes TRUE/FALSE)
-    let dateObj, amount;
-    if(cobrado){
-      dateObj = agParseDateFlexible(c[iFechaCobranza]);
-      amount = agNum(c[iSaldoParcial]);
-    } else {
-      dateObj = agParseDateFlexible(c[iFechaEstimada]);
-      if(!dateObj){
-        const entrega = agParseDateFlexible(c[iFechaEntrega]);
-        if(entrega) dateObj = agAddDays(entrega, parseInt(c[iCondVenta],10)||0);
-      }
-      if(!dateObj) dateObj = agParseDateFlexible(c[iFechaVenc]);
-      amount = agNum(c[iSaldo]);
+  const rows=[]; let row=[],field='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){ if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else inQ=false;} else field+=c; }
+    else{
+      if(c==='"') inQ=true;
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\r'){}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else field+=c;
     }
-    if(!dateObj) continue; // sin ninguna fecha usable, no se puede ubicar en el calendario
-    out.push({date: agToISO(dateObj), unit: mapTipoClienteToUnit(c[iTipoCliente]), amount, cobrado});
   }
-  return out;
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(r=>r.length>1||r[0]!=='');
 }
-
-// v20: regla nueva acordada con Graciela para "Cobrado" y "Proyectado" (reemplaza la lógica
-// anterior de COBRADO/DESCONTADO=VERDADERO/FALSO + cadena de fechas estimada→entrega→vencimiento,
-// que era dif&iacute;cil de reconciliar a mano contra el Sheet). Ahora, para CADA comprobante,
-// sin importar la columna COBRADO/DESCONTADO:
-//   - el mes al que pertenece lo da &uacute;nicamente FECHA DE VENCIMIENTO.
-//   - "Cobrado" (neto) = IMPORTE − SALDO de ese comprobante (lo ya cobrado a la fecha,
-//     incluye cobros parciales de facturas todav&iacute;a abiertas).
-//   - "Proyectado" = SALDO de ese comprobante (lo que falta cobrar). Cobrado + Proyectado = IMPORTE.
-// v25: "Mix por unidad de negocio", "Ranking por unidad", "Evoluci&oacute;n mensual" y el
-// "Mapa mensual · unidad &times; mes" ahora TAMBI&Eacute;N se calculan a partir de VENC_TX (misma
-// regla de Graciela: mes = FECHA DE VENCIMIENTO, monto = Cobrado+Proyectado = IMPORTE de cada
-// comprobante), en vez de DATA/MESES (parseCSV/buildFromRaw, la l&oacute;gica vieja). Antes esas
-// 4 secciones no se tocaron a prop&oacute;sito (para no meter cambios de m&aacute;s), pero eso dejó
-// un tablero con dos maneras distintas de sumar lo mismo y n&uacute;meros que no cerraban entre
-// secciones (ej.: $147,9M ahí vs $76,9M en "Total del mes" para agosto/2026, mismo mes). Ahora
-// las 4 usan exactamente la misma base que Cobrado/Proyectado/Total del mes/Aging.
-// v26: "Promedio diario" (la única tarjeta que hasta acá seguía usando DATA/lógica vieja) también
-// migró a Graciela — ver businessDaysForMonth() y la nota en render(). DATA/MESES (parseCSV/
-// buildFromRaw) ya no se usan para calcular NINGÚN valor mostrado en el tablero; MESES los sigue
-// usando únicamente para no perder, del selector de período, un mes que solo tuviera actividad
-// bajo la lógica vieja (ver comentario en buildFromRaw).
-// v30 — dos cambios de fondo pedidos por Nahuel/Graciela sobre la base de esta función:
-//  1) Solo entran comprobantes con TIPO = "Mercaderia" (columna W). Los de TIPO "Iva" (notas de
-//     crédito/débito) y cualquier otro valor quedan afuera de Cobrado/Proyectado/Total del mes por
-//     completo — no son venta real, igual que ya los excluye la sección de Aging ("venta real" vs
-//     "no real"). Se descartó incluirlos: en un caso puntual (cliente LEO FILM, TIPO=Iva) el saldo
-//     ya estaba en $0 pero la FECHA COBRANZA cargada era varios meses A FUTURO, lo que habría hecho
-//     "desaparecer" collections ya reconocidas de sus meses reales.
-//  2) El mes de "Cobrado" ya NO es siempre el de FECHA DE VENCIMIENTO: si el comprobante tiene una
-//     FECHA COBRANZA cargada, esa fecha manda (sea ANTES o DESPUÉS del vencimiento) — así un cobro
-//     adelantado (contra una factura que vence en un mes posterior) se contabiliza en el mes real
-//     en que efectivamente entró el dinero, no en el mes de vencimiento. Si no hay FECHA COBRANZA
-//     cargada (pasa en ~1 de cada 3 comprobantes con algo cobrado), se sigue usando FECHA DE
-//     VENCIMIENTO como hasta ahora (único dato disponible).
-//  "Proyectado" (el saldo pendiente) sigue exclusivamente por FECHA DE VENCIMIENTO, sin cambios —
-//  es lo que todavía falta cobrar, tiene sentido seguir mostrándolo en el mes en que vence.
-//  Por eso cada transacción ahora guarda DOS meses distintos: "month" (vencimiento, para
-//  Proyectado) y "cobradoMonth" (cobranza o vencimiento si no hay, para Cobrado) — pueden diferir
-//  para el mismo comprobante.
-// v37 — nueva unificación de criterio con Graciela, reemplaza TODO lo de v30 sobre qué fecha
-// determina el mes de Cobrado/Proyectado (el filtro TIPO=Mercadería de v30, más arriba, sigue
-// igual, sin cambios):
-//  1) "Cobrado" (gestión de cobranza del mes) ya NO usa FECHA COBRANZA. Ahora usa FECHA RECIBO
-//     (columna R): la fecha en que se cargó el recibo, que es la acción de cobranza real de ese
-//     mes — a diferencia de FECHA COBRANZA (fecha de acreditación/vencimiento del cheque, que le
-//     sirve a Graciela para calcular el desvío de pago, no para saber en qué mes gestionó el
-//     cobro). Monto = Importe − Saldo (igual que antes, coincide con SALDO PARCIAL APLICADO). [v39:
-//     este monto cambió, ver nota v39 más abajo — ya no se calcula, se toma directo de la columna].
-//  2) "Proyectado" (el saldo pendiente) ya NO usa FECHA DE VENCIMIENTO. Ahora usa FECHA COBRANZA
-//     (columna B): la fecha en la que se espera/está previsto que se acredite ese saldo pendiente
-//     (ej.: un cheque a fecha ya recibido pero que todavía no se cobró). Monto = SALDO (sin
-//     cambios).
-//  3) Ninguna de las dos tiene ya un respaldo en FECHA DE VENCIMIENTO: si un comprobante no tiene
-//     FECHA RECIBO cargada, su Cobrado no entra en ningún mes; si no tiene FECHA COBRANZA
-//     cargada, su Proyectado no entra en ningún mes. En esos casos "month"/"cobradoMonth" quedan
-//     en null a propósito — Nahuel pidió que esos importes se muestren aparte, en una tarjeta
-//     nueva "Sin fecha concreta" (ver vencSinFechaTotals()/vencClientDetail('sinfecha') y la
-//     tarjeta agregada en render()), en vez de caer disimuladamente en el mes de vencimiento como
-//     pasaba antes. Esto es intencional aunque haga crecer bastante esa tarjeta nueva: gran parte
-//     del saldo genuinamente pendiente (facturas sin nada cobrado todavía) no tiene FECHA
-//     COBRANZA cargada porque todavía no hay ningún cheque/pago en camino.
-// v39 — a pedido de Nahuel, cambia SOLO el monto de "Cobrado" (el mes que le corresponde, fecha de
-// recibo/columna R, no cambió). Antes se calculaba como Importe (columna P) menos Saldo (columna
-// Q); ahora se toma directamente el valor ya cargado en la columna C, "SALDO PARCIAL APLICADO".
-// En la enorme mayoría de los comprobantes ambos valores coinciden (así se documentaba desde v25),
-// pero ya no se recalcula: se confía en lo que Graciela/el equipo carga a mano en esa columna, que
-// es la fuente de verdad para "cuánto se cobró de este comprobante". "Proyectado" (Saldo, columna
-// Q) no se tocó. Este cambio de monto se propaga a todo lo que ya usaba t.cobrado: la tarjeta
-// "Cobrado", "Total del mes", "Sin fecha concreta", Mix por unidad, Ranking, Evolución mensual,
-// Mapa mensual y "vs. mes anterior" — mismo alcance que tuvo el cambio de v37.
-function parseVencTx(text){
-  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
-  if(!lines.length) return [];
-  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
-  const idx = name => header.findIndex(h=>h===name);
-  const iSaldo = idx('SALDO');
-  const iSaldoParcial = idx('SALDO PARCIAL APLICADO'); // v39: monto de "Cobrado" — columna C, ver nota v39 arriba de esta función
-  const iTipoCliente = idx('TIO DE CLIENTE')>=0 ? idx('TIO DE CLIENTE') : idx('TIPO DE CLIENTE');
-  const iCliente = idx('RAZON SOCIAL CLIENTE'); // v27: para el detalle desplegable por cliente
-  const iNumero = idx('NUMERO'); // v28: número de comprobante, para el detalle desplegable por factura
-  const iTipo = idx('TIPO'); // v30: para filtrar solo Mercadería
-  const iFechaCobranza = idx('FECHA COBRANZA'); // v37: determina el mes de "Proyectado" (antes determinaba "Cobrado")
-  const iFechaRecibo = idx('FECHA RECIBO'); // v37: determina el mes de "Cobrado" (columna R)
-  if([iSaldo,iSaldoParcial,iTipoCliente,iCliente,iNumero,iTipo,iFechaCobranza,iFechaRecibo].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas (SALDO / SALDO PARCIAL APLICADO / TIO DE CLIENTE / RAZON SOCIAL CLIENTE / NUMERO / TIPO / FECHA COBRANZA / FECHA RECIBO) para calcular Cobrado/Proyectado');
+function toObjs(text){
+  const rows=parseCSV(text); if(!rows.length) return [];
+  const headers=rows[0];
+  return rows.slice(1).map(r=>{const o={};headers.forEach((h,i)=>o[h]=r[i]??'');return o;});
+}
+function toNum(str){
+  if(str==null) return 0;
+  let s=String(str).trim();
+  if(s===''||s==='-'||s==='$ -'||s==='$-') return 0;
+  s=s.replace(/\$/g,'').trim();
+  let neg=false;
+  if(s.startsWith('-')){neg=true;s=s.slice(1).trim();}
+  const lastComma=s.lastIndexOf(','), lastDot=s.lastIndexOf('.');
+  let n;
+  if(lastComma===-1&&lastDot===-1){ n=parseFloat(s)||0; }
+  else{
+    const decPos=Math.max(lastComma,lastDot);
+    const intPart=s.slice(0,decPos).replace(/[.,]/g,'');
+    const fracPart=s.slice(decPos+1).replace(/[^0-9]/g,'');
+    n=parseFloat((intPart||'0')+'.'+(fracPart||'0'))||0;
   }
-  const out=[];
-  for(let i=1;i<lines.length;i++){
-    const c = splitCSVLine(lines[i]);
-    const first = (c[0]||'').trim();
-    if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
-    if(!c.some(v=>v && v.trim())) continue; // fila vacía
-    const tipo = (c[iTipo]||'').trim().toLowerCase();
-    if(tipo!=='mercaderia') continue; // v30: fuera todo lo que no sea venta real (Iva, otros, vacío)
-    // v37: sin respaldo en vencimiento — si no hay fecha cargada, queda en null ("sin fecha concreta")
-    const cobObj = agParseDateFlexible(c[iFechaCobranza]);
-    const proyectadoMes = cobObj ? agToISO(cobObj).slice(0,7) : null; // fecha cobranza (o null)
-    const reciboObj = agParseDateFlexible(c[iFechaRecibo]);
-    const cobradoMes = reciboObj ? agToISO(reciboObj).slice(0,7) : null; // fecha recibo (o null)
-    const saldo = agNum(c[iSaldo]);
-    const saldoParcialAplicado = agNum(c[iSaldoParcial]); // v39: monto de "Cobrado", directo de la columna C
-    out.push({
-      month: proyectadoMes, // v37: FECHA COBRANZA (o null = sin fecha concreta): determina el mes de "Proyectado"
-      cobradoMonth: cobradoMes, // v37: FECHA RECIBO (o null = sin fecha concreta): determina el mes de "Cobrado"
-      cobrado: saldoParcialAplicado, // v39: antes era Importe−Saldo (ver nota v39 arriba de esta función)
-      proyectado: saldo,
-      unit: mapTipoClienteToUnit(c[iTipoCliente]),
-      cliente: (c[iCliente]||'').trim() || '(sin cliente)',
-      numero: (c[iNumero]||'').trim() || '&mdash;',
-    });
-  }
-  return out;
+  return neg?-n:n;
 }
-
-// Transacciones re-derivadas para Cobrado/Proyectado (regla Graciela + ajuste v37, ver arriba).
-// Si no hay filtro de mes ("todo el período"), se suma todo lo que SÍ tiene mes asignado; si hay
-// un mes elegido, "Cobrado" se filtra por t.cobradoMonth y "Proyectado" por t.month (fecha
-// cobranza) — son independientes, un mismo comprobante puede aportar Cobrado a un mes y
-// Proyectado a otro distinto. v37: t.cobradoMonth/t.month pueden ser null (sin FECHA RECIBO/
-// FECHA COBRANZA cargada) — esos casos NUNCA entran acá (ni siquiera en "todo el período"),
-// quedan exclusivamente en la tarjeta "Sin fecha concreta" (ver vencSinFechaTotals()), para no
-// duplicar el mismo importe en dos tarjetas distintas.
-let VENC_TX = [];
-function realProyectadoTotals(){
-  let real=0, proy=0;
-  VENC_TX.forEach(t=>{
-    if(unitFilter && t.unit!==unitFilter) return;
-    if(t.cobradoMonth && (!mesFilter || t.cobradoMonth===mesFilter)) real += t.cobrado;
-    if(t.month && (!mesFilter || t.month===mesFilter)) proy += t.proyectado;
-  });
-  return {real, proy};
+function parseDate(s){
+  if(!s) return null;
+  s=String(s).trim().replace(/\.$/,'');
+  const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(!m) return null;
+  let [,d,mo,y]=m; d=+d; mo=+mo; y=+y; if(y<100) y+=2000;
+  const dt=new Date(y,mo-1,d);
+  return isNaN(dt)?null:dt;
 }
-
-// v25 (ajustado en v30 y v37 para el split Cobrado/Proyectado por mes distinto, sin fallback a
-// vencimiento) — misma base (VENC_TX) para "Mix por unidad" y "Ranking por unidad" (hasta v37
-// también alimentaba la tarjeta "Mejor unidad", quitada en v38 por redundante con el % que ya
-// muestra cada chip del Mix): desglosa por unidad para un mes dado (o para TODO el período si mes
-// es null/''), sin filtrar por unitFilter (siempre las 6 unidades, el filtro de unidad solo
-// resalta/selecciona, igual que antes con DATA). v37: los comprobantes sin mes asignado (null) no
-// entran acá.
-function vencUnitBreakdown(mes){
-  const unitTot={};
-  UNIT_NAMES.forEach(u=>unitTot[u]=0);
-  VENC_TX.forEach(t=>{
-    if(t.cobradoMonth && (!mes || t.cobradoMonth===mes)) unitTot[t.unit] += t.cobrado;
-    if(t.month && (!mes || t.month===mes)) unitTot[t.unit] += t.proyectado;
-  });
-  return unitTot;
-}
-
-// v25 (ajustado en v30 y v37) — tabla unidad×mes para "Evolución mensual" y el "Mapa mensual", a
-// partir de VENC_TX. El Cobrado de cada comprobante cae en el bucket de t.cobradoMonth (fecha
-// recibo) y su Proyectado en el de t.month (fecha cobranza) — pueden ser meses distintos del mismo
-// comprobante. Ya venía filtrando null correctamente (byMonthUnit[null] es undefined), así que los
-// comprobantes "sin fecha concreta" quedan afuera de esta tabla sin necesidad de cambios.
-function vencByMonthUnit(){
-  const byMonthUnit = {};
-  MESES.forEach(m=>{ byMonthUnit[m]={}; UNIT_NAMES.forEach(u=>byMonthUnit[m][u]=0); });
-  VENC_TX.forEach(t=>{
-    if(t.cobradoMonth && byMonthUnit[t.cobradoMonth]) byMonthUnit[t.cobradoMonth][t.unit] += t.cobrado;
-    if(t.month && byMonthUnit[t.month]) byMonthUnit[t.month][t.unit] += t.proyectado;
-  });
-  return byMonthUnit;
-}
-
-async function loadData(){
-  const text = await getSheetText(); // v22: fetch compartido (ver comentario junto a SHEET_CSV_URL)
-  const raw = parseCSV(text);
-  if(!raw.length) throw new Error('el CSV no tiene filas de datos válidas');
-  VENC_TX = parseVencTx(text); // v20: base independiente para Cobrado/Proyectado (regla Graciela)
-  return raw;
-}
-
-function buildFromRaw(raw){
-  const byDate = {};
-  raw.forEach(t=>{
-    if(!byDate[t.date]){
-      const o={date:t.date, m:t.date.slice(0,7), total:0};
-      UNIT_NAMES.forEach(u=>o[u]=0);
-      byDate[t.date]=o;
-    }
-    byDate[t.date][t.unit] += t.amount;
-    byDate[t.date].total += t.amount;
-  });
-  DATA = Object.values(byDate).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  // v35: el selector de período ahora se construye SOLO a partir de VENC_TX (TIPO=Mercadería,
-  // la misma base que usan Cobrado/Proyectado/Total del mes/Mix/Ranking/Evolución/Mapa/Aging).
-  // Antes también se agregaban los meses de DATA (lógica vieja de parseCSV, que no filtra por
-  // TIPO), y eso hacía aparecer en el selector meses que NO tenían ningún comprobante de
-  // Mercadería real detrás — ej.: dic/2026, que solo existía porque dos comprobantes de LEO FILM
-  // TIPO=Iva (ya cobrados, SALDO=$0) tenían cargada una FECHA COBRANZA de diciembre/2026 pese a
-  // vencer en mayo/2026. Al elegir ese mes el tablero quedaba completamente vacío porque
-  // Cobrado/Proyectado/Mix/etc. sólo miran VENC_TX (Mercadería). Ahora el selector nunca ofrece
-  // un mes sin actividad real de Mercadería detrás.
-  // v37: t.month es ahora el mes de FECHA COBRANZA (Proyectado) y t.cobradoMonth el de FECHA
-  // RECIBO (Cobrado) — ninguno de los dos tiene ya respaldo en vencimiento, así que pueden venir
-  // null (sin fecha concreta cargada); el guard "if(t.month)"/"if(t.cobradoMonth)" ya los deja
-  // afuera del selector de período, sin necesidad de cambios extra acá.
-  const mesesSet = new Set();
-  VENC_TX.forEach(t=>{ if(t.month) mesesSet.add(t.month); });
-  VENC_TX.forEach(t=>{ if(t.cobradoMonth) mesesSet.add(t.cobradoMonth); });
-  MESES = [...mesesSet].sort();
-  MLBL = {};
-  MESES.forEach(m=>{const [y,mo]=m.split('-'); MLBL[m]=mnAbbr[parseInt(mo)-1]+" '"+y.slice(2);});
-}
-
-function showError(msg){
-  document.getElementById('kpis').innerHTML = '';
-  document.getElementById('mesSeg').innerHTML = '';
-  ['unidades','ranking','monthChart'].forEach(id=>document.getElementById(id).innerHTML='');
-  document.getElementById('matrix').innerHTML='';
-  kpiDetailOpen = null; // v27: si falla la carga, cerramos cualquier detalle que hubiera quedado abierto
-  document.getElementById('kpiDetailCard').style.display='none';
-  const wrap = document.querySelector('.wrap');
-  let box = document.getElementById('errorBox');
-  if(!box){
-    box = document.createElement('div');
-    box.id='errorBox';
-    box.className='card';
-    box.style.cssText='border-color:#f87171;margin-bottom:16px';
-    wrap.insertBefore(box, wrap.children[2]);
-  }
-  box.innerHTML = '<div class="c-title" style="color:#f87171">No se pudo cargar la información</div>'+
-    '<div class="c-note" style="margin-top:8px;color:var(--tx)">'+msg+'</div>';
-}
-
-const UNIT_NAMES=['Papeleras CC','Catering','CDH','VyMat','Cliente/Proveedor','Otros/Ajustes'];
-const PAL_DARK=['#5fb8ff','#34e3c6','#f59e0b','#9d7bff','#e879f9','#6b7280'];
-const PAL_LIGHT=['#1d4ed8','#0891b2','#d97706','#7c3aed','#a21caf','#64748b'];
-const COLOR={};
-function updateColor(){
-  const pal = document.body.classList.contains('light')?PAL_LIGHT:PAL_DARK;
-  UNIT_NAMES.forEach((u,i)=>COLOR[u]=pal[i]);
-}
-updateColor();
-
-const mnAbbr=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-const fmt=n=>Math.round(n).toLocaleString('es-AR',{maximumFractionDigits:0});
-const fmtFull=n=>'$'+Math.round(n).toLocaleString('es-AR',{maximumFractionDigits:0});
+function mesKey(dt){ return dt? dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0') : null; }
+const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function mesLbl(k){ if(!k) return ''; const [y,m]=k.split('-'); return MN[+m-1]+' '+y.slice(2); }
+const fmtFull=n=>(n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString('es-AR');
 const fmtM=n=>{
   const m=n/1e6;
   if(Math.abs(m)>=1000) return (m/1000).toLocaleString('es-AR',{maximumFractionDigits:2})+' MM';
@@ -813,244 +360,7 @@ const fmtM=n=>{
   return (n/1e3).toLocaleString('es-AR',{maximumFractionDigits:0})+' K';
 };
 const fmtPct=n=>n.toFixed(1)+'%';
-
-let mesFilter=null, unitFilter=null;
-let kpiDetailOpen=null; // v27: 'cobrado' | 'proyectado' | 'total' | null — qué tarjeta tiene el detalle abierto
-let kpiDetailExpanded=new Set(); // v28: claves "modo::i::cliente" de los clientes desplegados (más de 1 comprobante)
-let mixDetailOpen=null; // v32: nombre de la unidad con el detalle abierto en "Mix por unidad de negocio", o null
-let mixDetailExpanded=new Set(); // v33: claves "unidad::i::cliente" de los clientes desplegados dentro de ese detalle
-
-// v27 — desglose para el panel desplegable de Cobrado/Proyectado/Total del mes, siempre sobre
-// VENC_TX (regla de Graciela) y respetando el mesFilter/unitFilter elegidos arriba (el mismo
-// filtro que ya usan esas 3 tarjetas):
-//  - 'cobrado': una fila POR COMPROBANTE (cliente + monto cobrado = columna C, Saldo parcial
-//    aplicado — ver nota v39 en parseVencTx()), sin agregar
-//    por cliente — así se puede rastrear cada comprobante individualmente.
-//  - 'proyectado': agregado POR CLIENTE (suma de Saldo pendiente de todos sus comprobantes).
-//  - 'total': agregado POR CLIENTE con 3 columnas (Cobrado, Proyectado, Total = la suma).
-// Orden: siempre de mayor a menor según el importe relevante de cada tarjeta (para 'total', por
-// la columna Total).
-// v28: ahora las 3 vistas agrupan SIEMPRE por cliente (antes "cobrado" listaba un renglón por
-// comprobante suelto). Cada cliente trae además su lista de comprobantes (con NÚMERO), para que
-// el renglón se pueda desplegar y ver de qué factura sale el total — ver renderKpiDetail().
-// v30: "Cobrado" de un comprobante se ubica por t.cobradoMonth y su "Proyectado" por t.month —
-// pueden ser meses distintos. Por eso cada comprobante se evalúa dos veces (una vez para cuánto
-// aporta a Cobrado en el mes elegido, otra para cuánto aporta a Proyectado), y solo entra en la
-// lista si algo de eso es relevante para el modo que se está mirando.
-// v37: nuevo modo 'sinfecha' para la tarjeta "Sin fecha concreta" — junta los comprobantes cuyo
-// Cobrado no tiene FECHA RECIBO (t.cobradoMonth null) y/o cuyo Proyectado no tiene FECHA COBRANZA
-// (t.month null). A diferencia de los otros 3 modos, ignora mesFilter por completo (por
-// definición esos importes no pertenecen a ningún mes), pero sigue respetando unitFilter.
-function vencClientDetail(mode){
-  const byClient = {};
-  VENC_TX.forEach(t=>{
-    if(unitFilter && t.unit!==unitFilter) return;
-    let cobradoAporte, proyectadoAporte;
-    if(mode==='sinfecha'){
-      cobradoAporte = (!t.cobradoMonth) ? t.cobrado : 0;
-      proyectadoAporte = (!t.month) ? t.proyectado : 0;
-    } else {
-      cobradoAporte = (t.cobradoMonth && (!mesFilter || t.cobradoMonth===mesFilter)) ? t.cobrado : 0;
-      proyectadoAporte = (t.month && (!mesFilter || t.month===mesFilter)) ? t.proyectado : 0;
-    }
-    const relevante = mode==='cobrado' ? !!cobradoAporte : mode==='proyectado' ? !!proyectadoAporte : !!(cobradoAporte||proyectadoAporte);
-    if(!relevante) return;
-    if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, cobrado:0, proyectado:0, comprobantes:[]};
-    byClient[t.cliente].cobrado += cobradoAporte;
-    byClient[t.cliente].proyectado += proyectadoAporte;
-    byClient[t.cliente].comprobantes.push({numero:t.numero, cobrado:cobradoAporte, proyectado:proyectadoAporte, total:cobradoAporte+proyectadoAporte});
-  });
-  let rows = Object.values(byClient).map(r=>({...r, total:r.cobrado+r.proyectado}));
-  const sortKey = mode==='cobrado' ? 'cobrado' : mode==='proyectado' ? 'proyectado' : 'total'; // 'sinfecha' y 'total' comparten el criterio de orden
-  rows = rows.filter(r=>r[sortKey]);
-  rows.sort((a,b)=>b[sortKey]-a[sortKey]);
-  rows.forEach(r=>r.comprobantes.sort((a,b)=>b[sortKey]-a[sortKey]));
-  return rows;
-}
-
-// v37 — totales para la tarjeta nueva "Sin fecha concreta": comprobantes de Mercadería cuyo
-// Cobrado no tiene FECHA RECIBO cargada (t.cobradoMonth null) y/o cuyo Proyectado no tiene FECHA
-// COBRANZA cargada (t.month null). No se filtra por mesFilter (por definición no pertenecen a
-// ningún mes), pero sí respeta unitFilter, igual que el resto de las tarjetas.
-function vencSinFechaTotals(){
-  let cobrado=0, proyectado=0;
-  VENC_TX.forEach(t=>{
-    if(unitFilter && t.unit!==unitFilter) return;
-    if(!t.cobradoMonth) cobrado += t.cobrado;
-    if(!t.month) proyectado += t.proyectado;
-  });
-  return {cobrado, proyectado, total: cobrado+proyectado};
-}
-
-// v33 — detalle de "Mix por unidad de negocio" agrupado POR CLIENTE (antes v32 listaba un
-// renglón por comprobante suelto). Cada cliente trae su lista de comprobantes (número + importe)
-// para desplegar, igual que vencClientDetail() de las tarjetas Cobrado/Proyectado/Total del mes.
-// "Importe" es la misma magnitud que ya muestra el chip de esa unidad (Cobrado+Proyectado del
-// período elegido, regla de Graciela con el ajuste v37: la parte Cobrado por t.cobradoMonth/fecha
-// recibo, la parte Proyectado por t.month/fecha cobranza) — no el IMPORTE crudo de la factura.
-// Ignora unitFilter a propósito: el Mix siempre desglosa las 6 unidades sin filtrar por unidad
-// (igual que vencUnitBreakdown), así que el detalle de una unidad puntual debe mostrar sus
-// comprobantes sin importar qué unidad esté seleccionada en el resto del tablero. v37: excluye los
-// comprobantes sin fecha concreta (t.cobradoMonth/t.month null), igual que vencUnitBreakdown, para
-// que el detalle siga sumando exactamente lo mismo que el chip.
-function vencUnitDetail(unit){
-  const byClient = {};
-  VENC_TX.forEach(t=>{
-    if(t.unit!==unit) return;
-    const cobradoAporte = (t.cobradoMonth && (!mesFilter || t.cobradoMonth===mesFilter)) ? t.cobrado : 0;
-    const proyectadoAporte = (t.month && (!mesFilter || t.month===mesFilter)) ? t.proyectado : 0;
-    const importe = cobradoAporte + proyectadoAporte;
-    if(!importe) return;
-    if(!byClient[t.cliente]) byClient[t.cliente]={cliente:t.cliente, importe:0, comprobantes:[]};
-    byClient[t.cliente].importe += importe;
-    byClient[t.cliente].comprobantes.push({numero:t.numero, importe});
-  });
-  const rows = Object.values(byClient).filter(r=>r.importe);
-  rows.sort((a,b)=>b.importe-a.importe);
-  rows.forEach(r=>r.comprobantes.sort((a,b)=>b.importe-a.importe));
-  return rows;
-}
-
-// v32/v33 — pinta (o esconde) el panel de detalle dentro de la tarjeta "Mix por unidad de
-// negocio". v33: mismo estilo y funcionalidad que renderKpiDetail() — cada cliente es un renglón
-// SIEMPRE desplegable (flechita, sin número ni cantidad de comprobantes al lado) que al abrirse
-// muestra el detalle comprobante por comprobante, con su NÚMERO de factura.
-function renderMixDetail(){
-  const card = document.getElementById('mixDetailCard');
-  if(!mixDetailOpen){ card.style.display='none'; return; }
-  card.style.display='';
-  const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
-  const rows = vencUnitDetail(mixDetailOpen);
-  document.getElementById('mixDetailTitle').innerHTML = `Detalle de <span style="color:${COLOR[mixDetailOpen]}">${mixDetailOpen}</span> &middot; por cliente`;
-  document.getElementById('mixDetailNote').innerHTML = `fecha de recibo + fecha de cobranza &middot; ${periodoTxt}`;
-  let body = '';
-  if(!rows.length){
-    body = '<tr><td colspan="2" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>';
-  } else {
-    rows.forEach((r,i)=>{
-      const key = mixDetailOpen+'::'+i+'::'+r.cliente;
-      const expanded = mixDetailExpanded.has(key);
-      const label = `<span class="kpi-caret">${expanded?'&#9662;':'&#9656;'}</span> ${r.cliente}`;
-      body += `<tr class="cli-row" data-key="${key}"><td>${label}</td><td>${fmtFull(r.importe)}</td></tr>`;
-      r.comprobantes.forEach(c=>{
-        const subLabel = `&#8618; Comprobante N&deg; ${c.numero}`;
-        body += `<tr class="sub-row${expanded?'':' hidden'}" data-parent="${key}"><td>${subLabel}</td><td>${fmtFull(c.importe)}</td></tr>`;
-      });
-    });
-    const tot = rows.reduce((s,r)=>s+r.importe,0);
-    body += `<tr class="tot-row"><td style="font-weight:700">Total (${rows.length} cliente${rows.length===1?'':'s'})</td><td style="font-weight:700">${fmtFull(tot)}</td></tr>`;
-  }
-  document.getElementById('mixDetailTable').innerHTML =
-    `<thead><tr><th style="text-align:left">Cliente</th><th>Importe</th></tr></thead><tbody>${body}</tbody>`;
-
-  document.querySelectorAll('#mixDetailTable tr.cli-row').forEach(tr=>{
-    tr.onclick = () => {
-      const key = tr.dataset.key;
-      if(mixDetailExpanded.has(key)) mixDetailExpanded.delete(key);
-      else mixDetailExpanded.add(key);
-      renderMixDetail();
-    };
-  });
-}
-
-// v27/v28/v29 — pinta (o esconde) el panel de detalle debajo de la fila de KPIs, según kpiDetailOpen.
-// v29: cada cliente es un renglón limpio (solo el nombre, sin número ni cantidad de comprobantes
-// al lado) con una flechita — SIEMPRE desplegable, tenga uno o varios comprobantes detrás. Al
-// desplegar se ve el detalle comprobante por comprobante, con su NÚMERO de factura.
-function renderKpiDetail(){
-  const card = document.getElementById('kpiDetailCard');
-  if(!kpiDetailOpen){ card.style.display='none'; return; }
-  card.style.display='';
-  // v37: "Sin fecha concreta" ignora el período elegido (por definición no pertenece a ningún
-  // mes) — el resto de las tarjetas sigue mostrando el período/unidad elegidos arriba.
-  const periodoTxt = kpiDetailOpen==='sinfecha' ? 'sin importar el per&iacute;odo elegido' : (mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo');
-  const unidadTxt = unitFilter||'todas las unidades';
-  const rows = vencClientDetail(kpiDetailOpen);
-  const titles = {
-    cobrado: 'Detalle de Cobrado &middot; por cliente',
-    proyectado: 'Detalle de Proyectado &middot; por cliente',
-    total: 'Detalle de Total del mes &middot; por cliente',
-    sinfecha: 'Detalle de Sin fecha concreta &middot; por cliente',
-  };
-  document.getElementById('kpiDetailTitle').innerHTML = titles[kpiDetailOpen];
-  // v37: Cobrado usa fecha de recibo (columna R), Proyectado usa fecha de cobranza (columna B) —
-  // ya sin respaldo en vencimiento. "Sin fecha concreta" junta lo que quedó sin ninguna de esas
-  // dos fechas cargadas.
-  const criterioTxt = kpiDetailOpen==='cobrado' ? 'fecha de recibo'
-    : kpiDetailOpen==='proyectado' ? 'fecha de cobranza'
-    : kpiDetailOpen==='sinfecha' ? 'sin fecha de recibo (cobrado) y/o sin fecha de cobranza (proyectado)'
-    : 'fecha de recibo + fecha de cobranza';
-  document.getElementById('kpiDetailNote').innerHTML = `${criterioTxt} &middot; ${periodoTxt} &middot; ${unidadTxt}`;
-
-  const cols = (kpiDetailOpen==='total' || kpiDetailOpen==='sinfecha') ? 4 : 2;
-  const thead = kpiDetailOpen==='cobrado' ? '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th></tr>'
-    : kpiDetailOpen==='proyectado' ? '<tr><th style="text-align:left">Cliente</th><th>Proyectado</th></tr>'
-    : '<tr><th style="text-align:left">Cliente</th><th>Cobrado</th><th>Proyectado</th><th>Total</th></tr>';
-
-  // arma un <tr> para el modo activo (2 columnas en cobrado/proyectado, 4 en total).
-  // attrs: string HTML ya armado (class/data-*) para insertar en el <tr>. tdStyle: estilo inline
-  // repetido en cada <td> (se usa para poner en negrita el renglón de Total).
-  const fila = (label, c, p, t, attrs, tdStyle) => {
-    const td = tdStyle ? `<td style="${tdStyle}">` : '<td>';
-    if(kpiDetailOpen==='cobrado') return `<tr${attrs}>${td}${label}</td>${td}${fmtFull(c)}</td></tr>`;
-    if(kpiDetailOpen==='proyectado') return `<tr${attrs}>${td}${label}</td>${td}${fmtFull(p)}</td></tr>`;
-    return `<tr${attrs}>${td}${label}</td>${td}${fmtFull(c)}</td>${td}${fmtFull(p)}</td>${td}${fmtFull(t)}</td></tr>`;
-  };
-
-  let body = '';
-  if(!rows.length){
-    body = `<tr><td colspan="${cols}" style="text-align:center;color:var(--mut)">Sin comprobantes en este per&iacute;odo.</td></tr>`;
-  } else {
-    // v29: TODAS las filas de cliente son desplegables ahora (antes, un cliente con un solo
-    // comprobante se mostraba fijo con el número al lado, sin flechita) — a pedido de Nahuel, para
-    // que el nombre del cliente quede limpio (sin cantidad de comprobantes ni número al lado) y el
-    // detalle de comprobantes se vea únicamente al desplegar, sin importar cuántos tenga.
-    rows.forEach((r,i)=>{
-      const key = kpiDetailOpen+'::'+i+'::'+r.cliente;
-      const expanded = kpiDetailExpanded.has(key);
-      const label = `<span class="kpi-caret">${expanded?'&#9662;':'&#9656;'}</span> ${r.cliente}`;
-      body += fila(label, r.cobrado, r.proyectado, r.total, ` class="cli-row" data-key="${key}"`, '');
-      r.comprobantes.forEach(c=>{
-        const subLabel = `&#8618; Comprobante N&deg; ${c.numero}`;
-        const subAttrs = ` class="sub-row${expanded?'':' hidden'}" data-parent="${key}"`;
-        body += fila(subLabel, c.cobrado, c.proyectado, c.total, subAttrs, '');
-      });
-    });
-    const totC = rows.reduce((s,r)=>s+r.cobrado,0), totP = rows.reduce((s,r)=>s+r.proyectado,0);
-    body += fila(`Total (${rows.length} cliente${rows.length===1?'':'s'})`, totC, totP, totC+totP, ' class="tot-row"', 'font-weight:700');
-  }
-  document.getElementById('kpiDetailTable').innerHTML = `<thead>${thead}</thead><tbody>${body}</tbody>`;
-
-  document.querySelectorAll('#kpiDetailTable tr.cli-row').forEach(tr=>{
-    tr.onclick = () => {
-      const key = tr.dataset.key;
-      if(kpiDetailExpanded.has(key)) kpiDetailExpanded.delete(key);
-      else kpiDetailExpanded.add(key);
-      renderKpiDetail();
-    };
-  });
-}
-const A=()=>document.body.classList.contains('light')?'#2563eb':'#b8ff36';
-
-// v26: reemplaza a la vieja rows()/DATA que usaba "Promedio diario" para su total y su cantidad
-// de "días con actividad" (18 en agosto/2026, mezcla rara de fechas de la lógica vieja que podían
-// caer en fin de semana y a la vez dejar afuera días hábiles reales — ver detalle charlado con
-// Nahuel). Ahora "Promedio diario" cuenta DÍAS HÁBILES (lunes a viernes) del mes elegido, y si el
-// mes elegido es el mes en curso, cuenta solo los ya transcurridos (no el mes completo).
-function businessDaysForMonth(mesKey, hoy){
-  if(!mesKey) return 0;
-  const [y,mo] = mesKey.split('-').map(Number);
-  const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
-  if(mesKey > hoyKey) return 0; // mes futuro: todavía no transcurrió ningún día hábil
-  const lastDay = new Date(y, mo, 0).getDate(); // cantidad de días que tiene ese mes
-  const endDay = (mesKey === hoyKey) ? hoy.getDate() : lastDay;
-  let count = 0;
-  for(let d=1; d<=endDay; d++){
-    const wd = new Date(y, mo-1, d).getDay(); // 0=domingo, 6=sábado
-    if(wd!==0 && wd!==6) count++;
-  }
-  return count;
-}
+const norm=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z0-9]/g,'');
 
 const tip=document.getElementById('tip');
 const showTip=(e,html)=>{tip.innerHTML=html;tip.style.opacity='1';moveTip(e);};
@@ -1059,566 +369,441 @@ const moveTip=e=>{const x=e.clientX,y=e.clientY,w=tip.offsetWidth,h=tip.offsetHe
   tip.style.top=(y+h+10>window.innerHeight?y-h-4:y+8)+'px';};
 const hideTip=()=>tip.style.opacity='0';
 
-function buildMesSeg(){
-  const seg=document.getElementById('mesSeg');
-  let html=`<button data-m="" class="${mesFilter?'':'on'}">Todo el per&iacute;odo</button>`;
-  MESES.forEach(m=>{
-    html+=`<button data-m="${m}" class="${mesFilter===m?'on':''}">${MLBL[m]}</button>`;
-  });
-  seg.innerHTML=html;
-  seg.querySelectorAll('button').forEach(btn=>{
-    btn.onclick=()=>{
-      mesFilter=btn.dataset.m||null;
-      render();
+// ───────────────────────── Load & process ─────────────────────────
+async function fetchCSV(gid){
+  const url=`${PUB_BASE}?gid=${gid}&single=true&output=csv`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return toObjs(await res.text());
+}
+
+function processData(cashRaw, pagosRaw, saldoRaw, incobRaw, exclRaw){
+  const incobCUITs=new Set(incobRaw.map(r=>(r['CUIT']||'').trim()));
+  const exclNames=new Set(exclRaw.map(r=>norm(r['CLIENTE excluido solo DEUDA'])));
+
+  CASH=cashRaw.map(r=>{
+    const fecha=parseDate(r['FECHA']);
+    return {fecha, mes:mesKey(fecha), cliente:r['CLIENTE']||'', importe:toNum(r['IMPORTE A COBRAR']), rubro:(r['RUBRO']||'').trim()};
+  }).filter(r=>r.fecha);
+
+  PAGOS=pagosRaw.map(r=>{
+    const fechaRecibo=parseDate(r['Fecha Recibo']);
+    const pagoFecha=parseDate(r['Pago Fecha']);
+    const empresa=(r['Empresa']||'').trim();
+    const detalle=r['Detalle']||'';
+    return {
+      empresa, empGrupo:EMP_GRUPO_OF[empresa]||null,
+      fecha:parseDate(r['Fecha']), fechaRecibo, mes:mesKey(fechaRecibo),
+      recibo:r['Recibo']||'', comprobante:r['Comprobante']||'',
+      razonSocial:r['Razon Social']||'', detalle,
+      excluido:DETALLE_EXCL.test(detalle),
+      pagoFecha, ingreso:(r['Ingreso']||'').trim(), fondo:(r['Fondo']||'').trim(),
+      pagoImporte:toNum(r['Pago Importe']), dias: r['Dias']!==''&&r['Dias']!=null ? toNum(r['Dias']) : null
+    };
+  }).filter(r=>r.fechaRecibo);
+
+  SALDO=saldoRaw.map(r=>{
+    const cuit=(r['CUIT']||'').trim();
+    const cliente=r['CLIENTE']||'';
+    const emp=(r['EMP']||'').trim();
+    return {
+      emp, empGrupo:EMP_GRUPO_OF[emp]||null, cuit, cliente,
+      cobrador:r['COBRADOR']||'',
+      aCta:toNum(r['A_CTA']), b150:toNum(r['150_DIAS']), b120:toNum(r['120_DIAS']),
+      b90:toNum(r['90_DIAS']), b60:toNum(r['60_DIAS']), b30:toNum(r['30_DIAS']),
+      b0:toNum(r['0_DIAS']), dav:toNum(r['DAV']), total:toNum(r['TOTAL']), deuda:toNum(r['DEUDA']),
+      isIncobrable:incobCUITs.has(cuit), isExcluido:exclNames.has(norm(cliente))
     };
   });
+
+  INCOB=incobRaw.map(r=>({
+    empresa:(r['EMPRESA']||'').trim(), empGrupo:EMP_GRUPO_OF[(r['EMPRESA']||'').trim()]||null,
+    cuit:(r['CUIT']||'').trim(), cliente:r['CLIENTE']||'', cobrador:r['COBRADOR']||'', deuda:toNum(r['DEUDA'])
+  }));
+
+  EXCL=exclRaw.map(r=>({cliente:r['CLIENTE excluido solo DEUDA']||'', monto:Math.abs(toNum(r['Saldo deuda TD']))}));
+
+  const mset=new Set();
+  CASH.forEach(r=>r.mes&&mset.add(r.mes));
+  PAGOS.forEach(r=>r.mes&&mset.add(r.mes));
+  MESES=[...mset].sort();
 }
 
-function getPrevMonth(m){
-  const [y,mo]=m.split('-').map(Number);
-  const pm=mo===1?12:mo-1, py=mo===1?y-1:y;
-  return `${py}-${pm.toString().padStart(2,'0')}`;
+// ───────────────────────── Filtering ─────────────────────────
+function cashRows(){ let r=CASH; if(mesFilter) r=r.filter(d=>d.mes===mesFilter); if(rubFilter) r=r.filter(d=>d.rubro===rubFilter); return r; }
+function pagosRows(){ let r=PAGOS.filter(d=>!d.excluido); if(mesFilter) r=r.filter(d=>d.mes===mesFilter); if(empGrupoFilter) r=r.filter(d=>d.empGrupo===empGrupoFilter); return r; }
+function saldoRows(){ let r=SALDO; if(empGrupoFilter) r=r.filter(d=>d.empGrupo===empGrupoFilter); return r; }
+function saldoRowsNetas(){ return saldoRows().filter(d=>!d.isIncobrable&&!d.isExcluido); }
+function incobRows(){ let r=INCOB; if(empGrupoFilter) r=r.filter(d=>d.empGrupo===empGrupoFilter); return r; }
+
+// ───────────────────────── Detalle de tarjetas KPI ─────────────────────────
+function colTd(col,row){
+  const val=col.render(row);
+  const classes=[];
+  if(col.align==='r') classes.push('r');
+  if(col.wide) classes.push('cl');
+  return `<td${classes.length?` class="${classes.join(' ')}"`:''}>${val}</td>`;
 }
-
-function render(){
-  updateColor();
-  buildMesSeg();
-  // v28: cualquier render() completo (cambio de período/unidad/tema, o abrir/cerrar una tarjeta)
-  // vuelve a colapsar los clientes desplegados — expandir/colapsar un cliente puntual NO pasa por
-  // acá (llama a renderKpiDetail() directo), así que no se pierde al tipear dentro del mismo panel.
-  kpiDetailExpanded.clear();
-  // v26: "Promedio diario" ahora es 100% regla de Graciela, igual que todo lo demás del tablero:
-  // el monto es Cobrado+Proyectado del período elegido (lo mismo que muestra "Total del mes"),
-  // dividido por días HÁBILES (lunes a viernes) — el mes completo si ya terminó, o solo los ya
-  // transcurridos si es el mes en curso. Antes (hasta v25) salía de DATA/rows() (lógica vieja) y
-  // contaba "días con datos" en vez de días hábiles.
-  const {real: totalReal, proy: totalProy} = realProyectadoTotals();
-  // v37: total de la tarjeta nueva "Sin fecha concreta" — no depende de mesFilter (ver
-  // vencSinFechaTotals()), se recalcula en cada render() para respetar unitFilter.
-  const sinFecha = vencSinFechaTotals();
-  const hoy = new Date();
-  const hoyKey = hoy.getFullYear()+'-'+(hoy.getMonth()+1).toString().padStart(2,'0');
-  const diasHabiles = mesFilter ? businessDaysForMonth(mesFilter, hoy) : MESES.reduce((s,m)=>s+businessDaysForMonth(m, hoy), 0);
-  const promedioDiario = diasHabiles>0 ? (totalReal+totalProy)/diasHabiles : 0;
-  const diasPlural = diasHabiles===1?'d&iacute;a h&aacute;bil':'d&iacute;as h&aacute;biles';
-  const diasSub = !mesFilter
-    ? `sobre ${diasHabiles} ${diasPlural} transcurridos (todo el per&iacute;odo)`
-    : (mesFilter===hoyKey
-        ? `sobre ${diasHabiles} ${diasPlural} transcurridos de ${MLBL[mesFilter]}`
-        : `sobre ${diasHabiles} ${diasPlural} de ${MLBL[mesFilter]}`);
-
-  document.getElementById('scope').textContent = unitFilter||'Todas';
-  document.getElementById('clearUnitBtn').classList.toggle('hide', !unitFilter);
-
-  // v25/v37: desglose por unidad (Mix/Ranking) según VENC_TX (Cobrado por fecha de recibo,
-  // Proyectado por fecha de cobranza), respetando el mes elegido arriba — reemplaza el desglose
-  // anterior basado en DATA. v38: "Mejor unidad" (bestUnit/bestPct) se quitó de acá — ese dato ya
-  // se ve en cada chip de "Mix por unidad de negocio" (con su % del total), la tarjeta KPI aparte
-  // quedaba redundante.
-  const unitTot = vencUnitBreakdown(mesFilter);
-  const totalAllUnits = UNIT_NAMES.reduce((s,u)=>s+unitTot[u],0);
-
-  // MoM: mes seleccionado (o ultimo mes con datos) vs mes anterior
-  // v24: antes esta comparación salía de DATA (la lógica "combinada" vieja, que hasta v25 también
-  // usaban Mix/Ranking/Evolución), que quedó desalineada de "Total del mes" (Cobrado+Proyectado
-  // según FECHA DE VENCIMIENTO, regla de Graciela) — por eso no coincidían los números. Ahora usa
-  // la MISMA base que "Total del mes", para que ambas tarjetas sean consistentes entre sí. (v25:
-  // Mix/Ranking/Evolución/Mapa ya también migraron a esta misma base, ver vencUnitBreakdown/
-  // vencByMonthUnit más arriba.)
-  const curMesKey = mesFilter||MESES[MESES.length-1];
-  const prevMesKey = getPrevMonth(curMesKey);
-  // v30/v37: Cobrado entra si t.cobradoMonth(fecha recibo)===mes, Proyectado si
-  // t.month(fecha cobranza)===mes — igual criterio que realProyectadoTotals()/vencUnitBreakdown(),
-  // un comprobante puede aportar una pieza a un mes y otra pieza a otro. Los null (sin fecha
-  // concreta) nunca matchean un mes real, así que ya quedan afuera sin necesidad de guard extra.
-  const totalDelMesVenc = mes => VENC_TX.reduce((s,t)=>{
-    if(unitFilter && t.unit!==unitFilter) return s;
-    let v = 0;
-    if(t.cobradoMonth===mes) v += t.cobrado;
-    if(t.month===mes) v += t.proyectado;
-    return s + v;
-  }, 0);
-  const curMesVta = totalDelMesVenc(curMesKey);
-  const prevMesVta = totalDelMesVenc(prevMesKey);
-  const momDelta = prevMesVta>0 ? (curMesVta-prevMesVta)/prevMesVta*100 : null;
-  const momCls = momDelta===null?'mom-neu':momDelta>=0?'mom-up':'mom-dn';
-  const momSign = momDelta===null?'Sin mes anterior':momDelta>=0?`&uarr; +${momDelta.toFixed(1)}%`:`&darr; ${momDelta.toFixed(1)}%`;
-  const momMax = Math.max(curMesVta,prevMesVta)||1;
-  const curBarW=(curMesVta/momMax*100).toFixed(1);
-  const prevBarW=(prevMesVta/momMax*100).toFixed(1);
-  const curBarCol = momDelta===null?'rgba(255,255,255,.18)':momDelta>=0?A():'#f87171';
-
-  document.getElementById('kpis').innerHTML =
-    `<div class="kpi acc kpi-clickable${kpiDetailOpen==='cobrado'?' active':''}" data-detail="cobrado"><div class="k-lbl">Cobrado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='cobrado'?'&#9662;':'&#9656;'}</span></div>
-      <div class="k-val full">${fmtFull(totalReal)}</div>
-      <div class="k-sub">Columna C (Saldo parcial aplicado), TIPO=Mercader&iacute;a &middot; fecha de recibo ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
-    <div class="kpi mrg kpi-clickable${kpiDetailOpen==='proyectado'?' active':''}" data-detail="proyectado"><div class="k-lbl">Proyectado &middot; ${mesFilter?MLBL[mesFilter]:'per&iacute;odo completo'} <span class="kpi-caret">${kpiDetailOpen==='proyectado'?'&#9662;':'&#9656;'}</span></div>
-      <div class="k-val full">${fmtFull(totalProy)}</div>
-      <div class="k-sub">Saldo pendiente, TIPO=Mercader&iacute;a &middot; fecha de cobranza ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'} &middot; ${unitFilter||'todas las unidades'}</div></div>
-    <div class="kpi kpi-clickable${kpiDetailOpen==='total'?' active':''}" data-detail="total"><div class="k-lbl">Total del mes <span class="kpi-caret">${kpiDetailOpen==='total'?'&#9662;':'&#9656;'}</span></div>
-      <div class="k-val full">${fmtFull(totalReal+totalProy)}</div>
-      <div class="k-sub">Cobrado (fecha de recibo) + Proyectado (fecha de cobranza) ${mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo'}</div></div>
-    <div class="kpi kpi-clickable${kpiDetailOpen==='sinfecha'?' active':''}" data-detail="sinfecha"><div class="k-lbl">Sin fecha concreta <span class="kpi-caret">${kpiDetailOpen==='sinfecha'?'&#9662;':'&#9656;'}</span></div>
-      <div class="k-val full">${fmtFull(sinFecha.total)}</div>
-      <div class="k-sub">Sin fecha de recibo (cobrado) y/o sin fecha de cobranza (proyectado) &middot; ${unitFilter||'todas las unidades'} &middot; no depende del per&iacute;odo elegido</div></div>
-    <div class="kpi"><div class="k-lbl">vs. mes anterior${mesFilter?'':' (&uacute;lt. mes)'}</div>
-      <div class="k-val ${momCls}" style="font-size:${momDelta===null?'clamp(13px,1.35vw,18px)':'clamp(14px,1.6vw,22px)'}">${momSign}</div>
-      <div class="mom-bars">
-        <div class="mom-bar-row">
-          <span class="mom-bar-lbl">${MLBL[prevMesKey]||'Ant'}</span>
-          <div class="mom-bar-track"><div class="mom-bar-fill prev-bar" style="width:${prevBarW}%"></div></div>
-          <span class="mom-bar-amt">${fmtM(prevMesVta)}</span>
-        </div>
-        <div class="mom-bar-row">
-          <span class="mom-bar-lbl">${MLBL[curMesKey]||'Act'}</span>
-          <div class="mom-bar-track"><div class="mom-bar-fill" style="width:${curBarW}%;background:${curBarCol}"></div></div>
-          <span class="mom-bar-amt">${fmtM(curMesVta)}</span>
-        </div>
-      </div></div>
-    <div class="kpi"><div class="k-lbl">Promedio diario</div>
-      <div class="k-val" style="font-size:clamp(16px,1.7vw,22px)">${fmtM(promedioDiario)}</div>
-      <div class="k-sub">${diasSub}</div></div>`;
-
-  // v27: clic en Cobrado/Proyectado/Total del mes abre/cierra su detalle debajo de la fila de KPIs
-  document.querySelectorAll('#kpis .kpi[data-detail]').forEach(el=>{
-    el.onclick = () => {
-      kpiDetailOpen = (kpiDetailOpen===el.dataset.detail) ? null : el.dataset.detail;
-      render();
-    };
-  });
-  renderKpiDetail();
-
-  const byMonthUnit = vencByMonthUnit(); // v25: base común (VENC_TX) para Evolución mensual y el Mapa
-  renderUnidades(unitTot, totalAllUnits);
-  renderMixDetail(); // v32: si había una unidad desplegada, refresca su detalle con el período/filtro actual
-  renderRanking(unitTot, totalAllUnits);
-  renderMonth(byMonthUnit);
-  renderMatrix(byMonthUnit);
-
-  document.getElementById('mixNote').textContent = mesFilter?MLBL[mesFilter]:'período completo';
-  document.getElementById('evNote').textContent = unitFilter||'todas las unidades';
-
-  // v20: la sección de Aging de cartera también respeta el período elegido acá arriba
-  // (regla de Graciela) — se recalcula (sin volver a pedirle el CSV a Sheets) cada vez
-  // que cambia mesFilter, para que Deuda total/Venta real/No real queden siempre en sincro.
-  if(typeof agReloadAndRender==='function') agReloadAndRender();
+function buildDetailTable(rows, sortKey, cols, cap){
+  cap = cap||50;
+  const sorted=[...rows].sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
+  const top=sorted.slice(0,cap), rest=sorted.slice(cap);
+  const restSum=rest.reduce((s,r)=>s+(r[sortKey]||0),0);
+  if(!top.length) return `<div style="color:var(--mut);padding:16px;text-align:center">Sin datos</div>`;
+  let html=`<div style="overflow-x:auto"><table class="tbl"><thead><tr>${cols.map(c=>`<th${c.align==='r'?' class="r"':''}>${c.label}</th>`).join('')}</tr></thead><tbody>`;
+  html+=top.map(r=>`<tr>${cols.map(c=>colTd(c,r)).join('')}</tr>`).join('');
+  html+='</tbody></table></div>';
+  if(rest.length) html+=`<div class="note-box">+ ${rest.length.toLocaleString('es-AR')} registros más · ${fmtFull(restSum)}</div>`;
+  return html;
 }
-
-// v32: cada chip es clicable — abre/cierra debajo un detalle por comprobante de esa unidad
-// (cliente, comprobante, importe), ver vencUnitDetail()/renderMixDetail().
-function renderUnidades(unitTot,total){
-  const wrap=document.getElementById('unidades');
-  wrap.innerHTML = UNIT_NAMES.map(u=>{
-    const v=unitTot[u], pct= total>0? v/total*100:0;
-    const isOpen = mixDetailOpen===u;
-    return `<div class="tipo-chip${isOpen?' active':''}" data-unit="${u}">
-      <div class="tipo-dot" style="background:${COLOR[u]}"></div>
-      <div class="tipo-info">
-        <div class="tipo-name">${u} <span class="kpi-caret">${isOpen?'&#9662;':'&#9656;'}</span></div>
-        <div class="tipo-val">${fmtM(v)}</div>
-        <div class="tipo-sub">${fmtPct(pct)} del total</div>
-      </div>
+const fmtDateShort=d=>d?d.toLocaleDateString('es-AR'):'—';
+function renderKpiDetalle(){
+  const wrap=document.getElementById('kpiDetalleWrap');
+  if(!kpiActiveCard){ wrap.innerHTML=''; return; }
+  let title='', body='';
+  if(kpiActiveCard==='acobrar'){
+    title=`A cobrar · detalle (${mesFilter?mesLbl(mesFilter):'todo el período'}${rubFilter?' · '+rubFilter:''})`;
+    body=buildDetailTable(cashRows(),'importe',[
+      {label:'Fecha', render:r=>fmtDateShort(r.fecha)},
+      {label:'Cliente', wide:true, render:r=>r.cliente},
+      {label:'Rubro', render:r=>r.rubro},
+      {label:'Importe', align:'r', render:r=>fmtFull(r.importe)}
+    ]);
+  } else if(kpiActiveCard==='cobrado'){
+    title=`Cobrado · detalle (${mesFilter?mesLbl(mesFilter):'todo el período'}${empGrupoFilter?' · '+empGrupoFilter:''})`;
+    body=buildDetailTable(pagosRows(),'pagoImporte',[
+      {label:'Fecha recibo', render:r=>fmtDateShort(r.fechaRecibo)},
+      {label:'Cliente', wide:true, render:r=>r.razonSocial},
+      {label:'Comprobante', render:r=>r.comprobante},
+      {label:'Importe', align:'r', render:r=>fmtFull(r.pagoImporte)}
+    ]);
+  } else if(kpiActiveCard==='dias'){
+    title='Días de cobro · detalle (pondera el promedio, ordenado por importe)';
+    body=buildDetailTable(pagosRows().filter(d=>d.dias!=null),'pagoImporte',[
+      {label:'Fecha recibo', render:r=>fmtDateShort(r.fechaRecibo)},
+      {label:'Cliente', wide:true, render:r=>r.razonSocial},
+      {label:'Comprobante', render:r=>r.comprobante},
+      {label:'Importe', align:'r', render:r=>fmtFull(r.pagoImporte)},
+      {label:'Días', align:'r', render:r=>r.dias}
+    ]);
+  } else if(kpiActiveCard==='saldoneto'){
+    title=`Saldo deudor neto · detalle (${empGrupoFilter||'todas las empresas'})`;
+    body=buildDetailTable(saldoRowsNetas(),'deuda',[
+      {label:'Cliente', wide:true, render:r=>r.cliente},
+      {label:'Cobrador', render:r=>r.cobrador},
+      {label:'Saldo', align:'r', render:r=>fmtFull(r.deuda)}
+    ]);
+  } else if(kpiActiveCard==='acta'){
+    title=`Saldo a favor de clientes · detalle (${empGrupoFilter||'todas las empresas'})`;
+    body=buildDetailTable(saldoRows(),'aCta',[
+      {label:'Cliente', wide:true, render:r=>r.cliente},
+      {label:'Cobrador', render:r=>r.cobrador},
+      {label:'A cuenta', align:'r', render:r=>fmtFull(r.aCta)}
+    ]);
+  } else if(kpiActiveCard==='cumpl'){
+    title='Cumplimiento · detalle (a cobrar vs. cobrado del período)';
+    const left=buildDetailTable(cashRows(),'importe',[
+      {label:'Fecha', render:r=>fmtDateShort(r.fecha)},
+      {label:'Cliente', wide:true, render:r=>r.cliente},
+      {label:'Importe', align:'r', render:r=>fmtFull(r.importe)}
+    ]);
+    const right=buildDetailTable(pagosRows(),'pagoImporte',[
+      {label:'Fecha recibo', render:r=>fmtDateShort(r.fechaRecibo)},
+      {label:'Cliente', wide:true, render:r=>r.razonSocial},
+      {label:'Importe', align:'r', render:r=>fmtFull(r.pagoImporte)}
+    ]);
+    body=`<div class="grid">
+      <div><div class="c-note" style="margin-bottom:8px">A cobrar</div>${left}</div>
+      <div><div class="c-note" style="margin-bottom:8px">Cobrado</div>${right}</div>
     </div>`;
+  }
+  wrap.innerHTML=`<div class="card" style="margin-bottom:14px">
+    <div class="c-head"><span class="c-title">${title}</span>
+    <span class="hint detail-close" onclick="kpiActiveCard=null;renderKpiDetalle()">✕ cerrar</span></div>
+    ${body}</div>`;
+}
+function scrollToCard(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  setTimeout(()=>el.classList.remove('flash'),1200);
+}
+
+// ───────────────────────── Render ─────────────────────────
+function render(){
+  const R_cash=cashRows(), R_pagos=pagosRows(), R_saldo=saldoRows(), R_saldoN=saldoRowsNetas(), R_incob=incobRows();
+
+  const totalACobrar=R_cash.reduce((s,d)=>s+d.importe,0);
+  const totalCobrado=R_pagos.reduce((s,d)=>s+d.pagoImporte,0);
+  const cumplPct=totalACobrar>0?(totalCobrado/totalACobrar*100):null;
+
+  const saldoNeto=R_saldoN.reduce((s,d)=>s+d.deuda,0);
+  const aCtaTotal=R_saldo.reduce((s,d)=>s+d.aCta,0);
+  const incobTotal=R_incob.reduce((s,d)=>s+d.deuda,0);
+
+  const today=new Date(); today.setHours(0,0,0,0);
+  const chequesAll=PAGOS.filter(d=>!d.excluido&&(d.ingreso==='ChequesTerceros'||d.fondo==='ChequesTerceros')&&(!empGrupoFilter||d.empGrupo===empGrupoFilter));
+  const chequesPend=chequesAll.filter(d=>d.pagoFecha&&d.pagoFecha>today);
+  const chequesPendTotal=chequesPend.reduce((s,d)=>s+d.pagoImporte,0);
+
+  const diasRows=R_pagos.filter(d=>d.dias!=null);
+  const sumImp=diasRows.reduce((s,d)=>s+d.pagoImporte,0);
+  const diasProm=sumImp>0? diasRows.reduce((s,d)=>s+d.dias*d.pagoImporte,0)/sumImp : null;
+
+  document.getElementById('scope').textContent=empGrupoFilter||'Todas';
+  document.getElementById('clearEmpBtn').classList.toggle('hide',!empGrupoFilter);
+  document.getElementById('clearRubBtn').classList.toggle('hide',!rubFilter);
+  document.getElementById('rubHint').textContent=rubFilter||'todos los rubros';
+
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi acc clickable" data-card="acobrar"><div class="k-lbl">A cobrar (expectativa)</div>
+      <div class="k-val">${fmtFull(totalACobrar)}</div>
+      <div class="k-sub">${mesFilter?mesLbl(mesFilter):'todo el período'} · CASH SIMPLIFICADO</div></div>
+    <div class="kpi mrg clickable" data-card="cobrado"><div class="k-lbl">Cobrado (real)</div>
+      <div class="k-val">${fmtFull(totalCobrado)}</div>
+      <div class="k-sub">${mesFilter?mesLbl(mesFilter):'todo el período'} · excl. IVA/préstamos</div></div>
+    <div class="kpi clickable ${cumplPct===null?'':cumplPct>=90?'mrg':cumplPct>=60?'warn':'bad'}" data-card="cumpl"><div class="k-lbl">Cumplimiento</div>
+      <div class="k-val">${cumplPct===null?'—':fmtPct(cumplPct)}</div>
+      <div class="k-sub">cobrado / a cobrar del período</div></div>
+    <div class="kpi clickable" data-card="dias"><div class="k-lbl">Días promedio de cobro</div>
+      <div class="k-val">${diasProm===null?'—':diasProm.toFixed(0)+' d'}</div>
+      <div class="k-sub">ponderado por importe cobrado</div></div>
+    <div class="kpi bad clickable" data-card="saldoneto"><div class="k-lbl">Saldo deudor neto</div>
+      <div class="k-val">${fmtFull(saldoNeto)}</div>
+      <div class="k-sub">${empGrupoFilter||'todas las empresas'} · excl. incobrables/excluidos</div></div>
+    <div class="kpi clickable" data-card="acta"><div class="k-lbl">Saldo a favor de clientes</div>
+      <div class="k-val">${fmtFull(aCtaTotal)}</div>
+      <div class="k-sub">anticipos / a cuenta (A_CTA)</div></div>
+    <div class="kpi warn scrollto" data-scroll="incobCard"><div class="k-lbl">Incobrables</div>
+      <div class="k-val">${fmtFull(incobTotal)}</div>
+      <div class="k-sub">${R_incob.length.toLocaleString('es-AR')} cuentas dadas de baja</div></div>
+    <div class="kpi scrollto" data-scroll="chequesCard"><div class="k-lbl">Cheques de terceros por acreditar</div>
+      <div class="k-val">${fmtFull(chequesPendTotal)}</div>
+      <div class="k-sub">${chequesPend.length.toLocaleString('es-AR')} cheques pendientes</div></div>`;
+
+  document.querySelectorAll('#kpis .kpi[data-card]').forEach(el=>{
+    el.classList.toggle('active', el.dataset.card===kpiActiveCard);
+    el.onclick=()=>{
+      kpiActiveCard=(kpiActiveCard===el.dataset.card)?null:el.dataset.card;
+      document.querySelectorAll('#kpis .kpi[data-card]').forEach(x=>x.classList.toggle('active',x.dataset.card===kpiActiveCard));
+      renderKpiDetalle();
+    };
+  });
+  document.querySelectorAll('#kpis .kpi[data-scroll]').forEach(el=>{
+    el.onclick=()=>scrollToCard(el.dataset.scroll);
+  });
+  renderKpiDetalle();
+
+  renderAging(R_saldo);
+  renderEvol();
+  renderMixRubro(R_cash,totalACobrar);
+  renderTopDeudores(R_saldoN);
+  renderMixEmpresa(R_pagos,totalCobrado);
+  renderCheques(chequesPend);
+  renderIncobrables(R_incob,incobTotal);
+  renderExcluidos();
+}
+
+function renderAging(R_saldo){
+  const buckets=[
+    ['150_DIAS','150+ días','#f87171',d=>d.b150],
+    ['120_DIAS','120 días','#fb923c',d=>d.b120],
+    ['90_DIAS','90 días','#f59e0b',d=>d.b90],
+    ['60_DIAS','60 días','#eab308',d=>d.b60],
+    ['30_DIAS','30 días','#a3e635',d=>d.b30],
+    ['0_DIAS','0 días','#4ade80',d=>d.b0],
+    ['DAV','A vencer (DAV)','#34e3c6',d=>d.dav],
+  ];
+  const totalBruto=R_saldo.reduce((s,d)=>s+d.total,0)||1;
+  document.getElementById('agingNote').textContent=`TOTAL bruto: ${fmtFull(totalBruto)}`;
+  document.getElementById('aging').innerHTML=buckets.map(([key,label,color,fn])=>{
+    const v=R_saldo.reduce((s,d)=>s+fn(d),0);
+    const pct=v/totalBruto*100;
+    return `<div class="tipo-chip"><span class="tipo-dot" style="background:${color}"></span>
+      <div class="tipo-info"><div class="tipo-name">${label}</div>
+      <div class="tipo-val">${fmtM(v)}</div>
+      <div class="tipo-sub">${pct.toFixed(1)}% del total</div></div></div>`;
   }).join('');
-  wrap.querySelectorAll('.tipo-chip').forEach(chip=>{
-    chip.onclick = () => {
-      const u = chip.dataset.unit;
-      mixDetailOpen = (mixDetailOpen===u) ? null : u;
-      renderUnidades(unitTot,total);
-      renderMixDetail();
-    };
-  });
 }
 
-function renderRanking(unitTot,total){
-  const list = UNIT_NAMES.map(u=>[u,unitTot[u]]).sort((a,b)=>b[1]-a[1]);
-  const max=Math.max(...list.map(o=>o[1]),1);
-  document.getElementById('ranking').innerHTML = list.map(([u,t])=>`
-    <div class="row ${unitFilter===u?'on':''}" data-u="${u}">
-      <div class="nm"><span class="swatch" style="background:${COLOR[u]}"></span>${u}</div>
-      <div class="track"><div class="fill" style="background:${COLOR[u]};box-shadow:0 0 14px ${COLOR[u]}55" data-w="${t/max*100}"></div></div>
-      <div class="amt">${fmtM(t)}</div>
-      <div class="pct">${total>0?fmtPct(t/total*100):'0.0%'}</div>
-    </div>`).join('');
-  document.querySelectorAll('#ranking .row').forEach(r=>{
-    r.onclick=()=>{const u=r.dataset.u; unitFilter=(unitFilter===u)?null:u; render();};
-  });
-  requestAnimationFrame(()=>requestAnimationFrame(()=>
-    document.querySelectorAll('#ranking .fill').forEach(f=>f.style.width=f.dataset.w+'%')));
-}
-
-function renderMonth(byMonthUnit){
-  // v25: antes sumaba DATA (lógica vieja); ahora suma byMonthUnit, derivado de VENC_TX (regla
-  // de Graciela) — mismo criterio que "Total del mes"/Cobrado/Proyectado.
-  const byM = MESES.map(m=>unitFilter? byMonthUnit[m][unitFilter] : UNIT_NAMES.reduce((s,u)=>s+byMonthUnit[m][u],0));
-  const max=Math.max(...byM.map(Math.abs),1);
-  const n=MESES.length;
-  const W=Math.max(560, n*30), H=250, padL=18, padR=14, padB=32, padT=18;
-  const iw=W-padL-padR, ih=H-padT-padB, bw=iw/n*0.55, gap=iw/n;
-  const col=unitFilter?COLOR[unitFilter]:A();
+function renderEvol(){
+  const aCobrarByM=MESES.map(m=>CASH.filter(d=>d.mes===m&&(!rubFilter||d.rubro===rubFilter)).reduce((s,d)=>s+d.importe,0));
+  const cobradoByM=MESES.map(m=>PAGOS.filter(d=>!d.excluido&&d.mes===m&&(!empGrupoFilter||d.empGrupo===empGrupoFilter)).reduce((s,d)=>s+d.pagoImporte,0));
+  const max=Math.max(...aCobrarByM,...cobradoByM,1);
+  const W=520,H=240,padL=18,padR=14,padB=30,padT=18;
+  const iw=W-padL-padR, ih=H-padT-padB, n=Math.max(MESES.length,1), gap=iw/n, bw=gap*0.32;
+  const col1=PAL_ACC(), col2=PAL_TEAL();
   let g='';
-  for(let k=0;k<=4;k++){const y=padT+ih*(k/4); g+=`<line class="gridln" x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}"/>`;}
-  const pts=byM.map((v,i)=>[padL+gap*i+gap/2, padT+ih*(1-v/max)]);
-  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
-  const area=path+` L${pts[n-1][0].toFixed(1)} ${padT+ih} L${pts[0][0].toFixed(1)} ${padT+ih} Z`;
+  for(let k=0;k<=4;k++){const y=padT+ih*(k/4);g+=`<line class="gridln" x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}"/>`;}
   let bars='';
-  byM.forEach((v,i)=>{
-    const x=padL+gap*i+(gap-bw)/2, h=Math.abs(ih*(v/max)), y=padT+ih-Math.max(0,ih*(v/max));
-    const isSel = mesFilter===MESES[i];
-    const op = mesFilter?(isSel?.5:.12):.24;
-    bars+=`<rect class="barv" x="${x.toFixed(1)}" y="${(padT+ih).toFixed(1)}" width="${bw.toFixed(1)}" height="0" rx="4" fill="${col}" opacity="${op}" data-y="${y.toFixed(1)}" data-h="${h.toFixed(1)}" data-m="${MLBL[MESES[i]]}" data-v="${v}" data-mes="${MESES[i]}"></rect>`;
-    if(i%2===0 || n<14){
-      bars+=`<text class="barlbl" x="${(x+bw/2).toFixed(1)}" y="${(padT+ih+16).toFixed(1)}" style="${isSel?'fill:var(--acc);font-weight:600':''}">${MLBL[MESES[i]]}</text>`;
-    }
+  MESES.forEach((m,i)=>{
+    const v1=aCobrarByM[i], v2=cobradoByM[i];
+    const x0=padL+gap*i+(gap-bw*2-2)/2;
+    const h1=ih*(v1/max), h2=ih*(v2/max);
+    const isSel=mesFilter===m;
+    const op=mesFilter?(isSel?1:.25):.85;
+    bars+=`<rect class="barv" x="${x0.toFixed(1)}" y="${(padT+ih).toFixed(1)}" width="${bw.toFixed(1)}" height="0" rx="4" fill="${col1}" opacity="${op}" data-y="${(padT+ih-h1).toFixed(1)}" data-h="${h1.toFixed(1)}" data-lbl="A cobrar" data-m="${mesLbl(m)}" data-v="${v1}" data-mes="${m}"></rect>`;
+    bars+=`<rect class="barv" x="${(x0+bw+2).toFixed(1)}" y="${(padT+ih).toFixed(1)}" width="${bw.toFixed(1)}" height="0" rx="4" fill="${col2}" opacity="${op}" data-y="${(padT+ih-h2).toFixed(1)}" data-h="${h2.toFixed(1)}" data-lbl="Cobrado" data-m="${mesLbl(m)}" data-v="${v2}" data-mes="${m}"></rect>`;
+    bars+=`<text class="barlbl" x="${(x0+bw+1).toFixed(1)}" y="${(padT+ih+16).toFixed(1)}" style="${isSel?'fill:var(--acc);font-weight:600':''}">${mesLbl(m)}</text>`;
   });
-  const dots=pts.map((p,i)=>`<circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5" fill="#080a0e" stroke="${col}" stroke-width="2" data-m="${MLBL[MESES[i]]}" data-v="${byM[i]}" data-mes="${MESES[i]}"/>`).join('');
-  document.getElementById('monthChart').innerHTML =
-    `<svg viewBox="0 0 ${W} ${H}"><defs><linearGradient id="ag" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0" stop-color="${col}" stop-opacity=".28"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
-      ${g}${bars}<path d="${area}" fill="url(#ag)"/><path d="${path}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
+  document.getElementById('evolChart').innerHTML=MESES.length?
+    `<svg viewBox="0 0 ${W} ${H}">${g}${bars}</svg>` :
+    `<div style="color:var(--mut);padding:30px;text-align:center">Sin datos</div>`;
   requestAnimationFrame(()=>requestAnimationFrame(()=>
-    document.querySelectorAll('#monthChart .barv').forEach(b=>{b.setAttribute('y',b.dataset.y);b.setAttribute('height',b.dataset.h);})));
-  document.querySelectorAll('#monthChart .barv, #monthChart .chart-dot').forEach(b=>{
+    document.querySelectorAll('#evolChart .barv').forEach(b=>{b.setAttribute('y',b.dataset.y);b.setAttribute('height',b.dataset.h);})));
+  document.querySelectorAll('#evolChart .barv').forEach(b=>{
     b.style.cursor='pointer';
-    b.onmousemove=e=>showTip(e,`${b.dataset.m} &middot; <span class="t-v">${fmtFull(+b.dataset.v)}</span>`);
+    b.onmousemove=e=>showTip(e,`${b.dataset.lbl} · ${b.dataset.m} · <span class="t-v">${fmtFull(+b.dataset.v)}</span>`);
     b.onmouseleave=hideTip;
-    b.onclick=()=>{
-      const m=b.dataset.mes;
-      mesFilter=(mesFilter===m)?null:m;
-      render();
-    };
+    b.onclick=()=>{ const m=b.dataset.mes; mesFilter=(mesFilter===m)?null:m;
+      document.querySelectorAll('#mesSeg button').forEach(btn=>btn.classList.toggle('on',btn.dataset.m===(mesFilter||''))); render(); };
   });
 }
 
-function renderMatrix(byMonthUnit){
-  // v25: antes leía DATA (lógica vieja); ahora lee byMonthUnit, derivado de VENC_TX (regla de
-  // Graciela) — mismo criterio que "Total del mes"/Cobrado/Proyectado.
-  const max=Math.max(...UNIT_NAMES.map(u=>Math.max(...MESES.map(m=>byMonthUnit[m][u]))),1);
-  let html='<thead><tr><th class="first">Unidad</th>';
-  MESES.forEach(m=>html+=`<th>${MLBL[m]}</th>`);
-  html+='</tr></thead><tbody>';
-  UNIT_NAMES.forEach(u=>{
-    html+=`<tr><td class="nm" data-u="${u}" style="color:${unitFilter===u?COLOR[u]:''}">${u}</td>`;
-    MESES.forEach(m=>{
-      const v=byMonthUnit[m][u];
-      const t = v/max;
-      const isZero = v<=0;
-      const bg = isZero? '' : `background:${COLOR[u]};opacity:${(0.18+t*0.82).toFixed(2)}`;
-      html+=`<td><div class="cell ${isZero?'z':''}" style="${bg}" data-u="${u}" data-m="${m}" data-v="${v}">${isZero?'&middot;':fmtM(v)}</div></td>`;
-    });
-    html+='</tr>';
+function renderMixRubro(R_cash,total){
+  const map={};
+  R_cash.forEach(d=>{const k=d.rubro||'(sin rubro)'; map[k]=(map[k]||0)+d.importe;});
+  const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const max=arr.length?arr[0][1]:1;
+  const PAL=['#b8ff36','#34e3c6','#f59e0b','#9d7bff','#f87171','#38bdf8'];
+  document.getElementById('mixRubro').innerHTML=arr.map(([k,v],i)=>`
+    <div class="row" data-r="${k}"><div class="nm"><span class="swatch" style="background:${PAL[i%PAL.length]}"></span>${k}</div>
+    <div class="track"><div class="fill" style="background:${PAL[i%PAL.length]}" data-w="${v/max*100}"></div></div>
+    <div class="amt">${fmtM(v)}</div></div>`).join('')||`<div style="color:var(--mut);padding:20px;text-align:center">Sin datos</div>`;
+  document.querySelectorAll('#mixRubro .row').forEach(r=>{
+    r.style.cursor='pointer';
+    r.onclick=()=>{const k=r.dataset.r; rubFilter=(rubFilter===k)?null:k;
+      document.querySelectorAll('#rubSeg button').forEach(b=>b.classList.toggle('on',b.dataset.r===rubFilter));
+      document.getElementById('clearRubBtn').classList.toggle('hide',!rubFilter); render();};
   });
-  html+='</tbody>';
-  const tbl=document.getElementById('matrix');
-  tbl.innerHTML=html;
-  tbl.querySelectorAll('td.nm').forEach(td=>{
-    td.onclick=()=>{const u=td.dataset.u; unitFilter=(unitFilter===u)?null:u; render();};
-  });
-  tbl.querySelectorAll('.cell').forEach(c=>{
-    c.onmousemove=e=>showTip(e,`${c.dataset.u} &middot; ${MLBL[c.dataset.m]} &middot; <span class="t-v">${fmtFull(+c.dataset.v)}</span>`);
-    c.onmouseleave=hideTip;
-  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>
+    document.querySelectorAll('#mixRubro .fill').forEach(f=>f.style.width=f.dataset.w+'%')));
 }
 
-document.getElementById('clearUnitBtn').onclick=()=>{unitFilter=null; render();};
+function renderMixEmpresa(R_pagos,total){
+  const map={};
+  Object.keys(EMP_GRUPOS).forEach(g=>map[g]=0);
+  R_pagos.forEach(d=>{ if(d.empGrupo) map[d.empGrupo]=(map[d.empGrupo]||0)+d.pagoImporte; });
+  const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(...arr.map(o=>o[1]),1);
+  const PAL=['#b8ff36','#34e3c6','#f59e0b'];
+  document.getElementById('mixEmpresa').innerHTML=arr.map(([k,v],i)=>`
+    <div class="row"><div class="nm"><span class="swatch" style="background:${PAL[i%PAL.length]}"></span>${k}</div>
+    <div class="track"><div class="fill" style="background:${PAL[i%PAL.length]}" data-w="${v/max*100}"></div></div>
+    <div class="amt">${fmtM(v)}</div></div>`).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>
+    document.querySelectorAll('#mixEmpresa .fill').forEach(f=>f.style.width=f.dataset.w+'%')));
+}
+
+function renderTopDeudores(R_saldoN){
+  const map={};
+  R_saldoN.forEach(d=>{ map[d.cliente]=(map[d.cliente]||0)+d.deuda; });
+  const total=Object.values(map).reduce((s,v)=>s+v,0)||1;
+  const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const max=arr.length?Math.max(...arr.map(o=>Math.abs(o[1]))):1;
+  document.getElementById('topDeudores').innerHTML=arr.map(([c,m],i)=>`
+    <tr><td class="rk">${i+1}</td><td class="cl">${c}</td>
+    <td class="r cbar"><span class="v">${fmtM(m)}</span><i style="width:${Math.abs(m)/max*100}%"></i></td>
+    <td class="r" style="color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:12px">${(m/total*100).toFixed(1)}%</td></tr>`).join('')
+    ||`<tr><td colspan="4" style="color:var(--mut);text-align:center;padding:20px">Sin datos</td></tr>`;
+}
+
+function renderCheques(chequesPend){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const arr=[...chequesPend].sort((a,b)=>a.pagoFecha-b.pagoFecha).slice(0,25);
+  document.getElementById('chequesNote').textContent=`${chequesPend.length.toLocaleString('es-AR')} cheques · ${fmtFull(chequesPend.reduce((s,d)=>s+d.pagoImporte,0))}`;
+  document.getElementById('chequesTbl').innerHTML=arr.map(d=>{
+    const dias=Math.round((d.pagoFecha-today)/86400000);
+    return `<tr><td class="cl">${d.razonSocial}</td><td>${d.comprobante}</td>
+      <td class="r"><span class="num">${fmtFull(d.pagoImporte)}</span></td>
+      <td>${d.pagoFecha.toLocaleDateString('es-AR')}</td>
+      <td class="r">${dias}</td></tr>`;
+  }).join('')||`<tr><td colspan="5" style="color:var(--mut);text-align:center;padding:20px">Sin cheques pendientes</td></tr>`;
+}
+
+function renderIncobrables(R_incob,total){
+  document.getElementById('incobNote').textContent=`${R_incob.length.toLocaleString('es-AR')} cuentas · ${fmtFull(total)}`;
+  const arr=[...R_incob].sort((a,b)=>b.deuda-a.deuda).slice(0,15);
+  document.getElementById('incobTbl').innerHTML=arr.map(d=>`
+    <tr><td class="cl">${d.cliente}</td><td class="cl">${d.cobrador}</td>
+    <td class="r"><span class="num">${fmtFull(d.deuda)}</span></td></tr>`).join('')
+    ||`<tr><td colspan="3" style="color:var(--mut);text-align:center;padding:20px">Sin datos</td></tr>`;
+}
+
+function renderExcluidos(){
+  const total=EXCL.reduce((s,d)=>s+d.monto,0);
+  document.getElementById('exclNote').textContent=`${EXCL.length.toLocaleString('es-AR')} clientes · ${fmtFull(total)} · facturas de IVA / préstamos, restados del saldo neto`;
+  const arr=[...EXCL].sort((a,b)=>b.monto-a.monto).slice(0,15);
+  document.getElementById('exclTbl').innerHTML=arr.map(d=>`
+    <tr><td class="cl">${d.cliente}</td><td class="r"><span class="num">${fmtFull(d.monto)}</span></td></tr>`).join('')
+    ||`<tr><td colspan="2" style="color:var(--mut);text-align:center;padding:20px">Sin datos</td></tr>`;
+}
+
+// ───────────────────────── Filtros (segmentados) ─────────────────────────
+function buildFilters(){
+  const mesSeg=document.getElementById('mesSeg');
+  mesSeg.innerHTML=`<button data-m="">Todo</button>`+MESES.map(m=>`<button data-m="${m}"${m===mesFilter?' class="on"':''}>${mesLbl(m)}</button>`).join('');
+  mesSeg.querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{mesFilter=b.dataset.m||null;mesSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));render();};
+  });
+
+  const empSeg=document.getElementById('empSeg');
+  empSeg.innerHTML=Object.keys(EMP_GRUPOS).map(g=>`<button data-g="${g}">${g}</button>`).join('');
+  empSeg.querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{ empGrupoFilter=(empGrupoFilter===b.dataset.g)?null:b.dataset.g;
+      empSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.g===empGrupoFilter));
+      document.getElementById('clearEmpBtn').classList.toggle('hide',!empGrupoFilter); render(); };
+  });
+  document.getElementById('clearEmpBtn').onclick=()=>{ empGrupoFilter=null; empSeg.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+    document.getElementById('clearEmpBtn').classList.add('hide'); render(); };
+
+  const rubros=[...new Set(CASH.map(d=>d.rubro))].filter(Boolean).sort();
+  const rubSeg=document.getElementById('rubSeg');
+  rubSeg.innerHTML=rubros.map(r=>`<button data-r="${r}">${r}</button>`).join('');
+  rubSeg.querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{ rubFilter=(rubFilter===b.dataset.r)?null:b.dataset.r;
+      rubSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.r===rubFilter));
+      document.getElementById('clearRubBtn').classList.toggle('hide',!rubFilter); render(); };
+  });
+  document.getElementById('clearRubBtn').onclick=()=>{ rubFilter=null; rubSeg.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+    document.getElementById('clearRubBtn').classList.add('hide'); render(); };
+}
+
+// ───────────────────────── Carga de datos ─────────────────────────
+document.getElementById('sheetsBtn').addEventListener('click', async function(){
+  const btn=this, status=document.getElementById('fileStatus');
+  btn.classList.add('loading'); btn.textContent='↻ Cargando…'; status.textContent='';
+  try{
+    const [cashRaw,pagosRaw,saldoRaw,incobRaw,exclRaw]=await Promise.all([
+      fetchCSV(GIDS.CASH), fetchCSV(GIDS.PAGOS), fetchCSV(GIDS.SALDO), fetchCSV(GIDS.INCOB), fetchCSV(GIDS.EXCL)
+    ]);
+    processData(cashRaw,pagosRaw,saldoRaw,incobRaw,exclRaw);
+    mesFilter = MESES.length? MESES[MESES.length-1] : null;
+    empGrupoFilter=null; rubFilter=null;
+    buildFilters();
+    render();
+    document.getElementById('periodo').textContent=
+      `${(CASH.length+PAGOS.length+SALDO.length).toLocaleString('es-AR')} registros · SALDO ${SALDO.length.toLocaleString('es-AR')} clientes · ${MESES.length?mesLbl(MESES[0])+'–'+mesLbl(MESES[MESES.length-1]):'sin fechas'}`;
+    status.textContent=`✓ actualizado ${new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+  }catch(e){
+    status.textContent='✗ error al cargar: '+e.message;
+    document.getElementById('periodo').textContent='Error al cargar los datos';
+  }
+  btn.classList.remove('loading'); btn.textContent='↻ Actualizar datos';
+});
 
 function toggleTheme(){
-  const isLight = document.body.classList.toggle('light');
-  document.getElementById('themeIcon').textContent = isLight? '\u{1F319}':'☀️';
-  document.getElementById('themeLabel').textContent = isLight? 'Modo oscuro':'Modo claro';
+  const isLight=document.body.classList.toggle('light');
+  document.getElementById('themeIcon').textContent=isLight?'🌙':'☀️';
+  document.getElementById('themeLabel').textContent=isLight?'Modo oscuro':'Modo claro';
   render();
-  if(AGING_DATA) agRenderAll(AGING_DATA); // re-pinta el aging con los colores del tema nuevo
+  try{localStorage.setItem('theme',isLight?'light':'dark');}catch(e){}
 }
+try{ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light');
+  document.getElementById('themeIcon').textContent='🌙'; document.getElementById('themeLabel').textContent='Modo oscuro'; } }catch(e){}
 
-(async function init(){
-  document.getElementById('periodo').textContent = 'Cargando datos en vivo desde Sheets…';
-  if(!SHEET_CSV_URL){
-    document.getElementById('periodo').textContent = 'Sin fuente de datos configurada';
-    showError('Todavía no está configurado el link del Sheet publicado (SHEET_CSV_URL vacío en el HTML). Este dashboard no muestra datos hasta que se complete.');
-    return;
-  }
-  try{
-    const raw = await loadData();
-    buildFromRaw(raw);
-    // Por defecto abre en el mes real de HOY (no en "el último mes con datos": ahora que hay
-    // fechas estimadas/proyectadas a futuro —cheques diferidos, forecast de cobranza pendiente—
-    // el último mes con datos puede ser un mes futuro, y no queremos que el tablero abra ahí).
-    // Si el mes en curso todavía no tiene ningún dato cargado, cae al último mes PASADO con datos.
-    if(MESES.length){
-      const hoy = new Date();
-      const hoyKey = hoy.getFullYear() + '-' + (hoy.getMonth()+1).toString().padStart(2,'0');
-      const pasados = MESES.filter(m=>m<=hoyKey);
-      mesFilter = MESES.includes(hoyKey) ? hoyKey : (pasados.length ? pasados[pasados.length-1] : MESES[0]);
-    }
-    render();
-    const ultima = MESES.length? MLBL[MESES[MESES.length-1]] : '';
-    const ahora = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('periodo').textContent = `En vivo desde Sheets · datos hasta ${ultima} · actualizado ${ahora}`;
-  }catch(err){
-    console.error(err);
-    document.getElementById('periodo').textContent = 'Error al cargar datos';
-    showError('No pude leer los datos desde Google Sheets. Revisá tu conexión o que el link siga publicado. Detalle: ' + err.message);
-  }
-})();
-
-// ================================================================
-// ===== AGING (secci&oacute;n agregada originalmente, reconstruida en v12) ====
-// v6-v11: le&iacute;a en vivo la pesta&ntilde;a "Resumen Aging" (un resumen armado a mano por
-// Graciela), publicada aparte como CSV (AGING_CSV_URL, sin gid = la hoja publicada por defecto).
-// v12: Nahuel elimin&oacute; esa pesta&ntilde;a del Sheet, as&iacute; que esta secci&oacute;n ahora se reconstruye
-// enteramente a partir de la MISMA pesta&ntilde;a "Aging" cruda (SHEET_CSV_URL) que usan el tablero
-// principal y el sem&aacute;foro de gerencia — sigue siendo una lectura/agregaci&oacute;n independiente
-// de esas dos (si algo cambia acá, no rompe las otras secciones, y viceversa).
-// v20 (regla de Graciela, reemplaza la definici&oacute;n anterior basada en COBRADO/DESCONTADO):
-//  - "Deuda total" = suma de SALDO de los comprobantes cuya FECHA DE VENCIMIENTO cae en el
-//    per&iacute;odo elegido arriba (o de TODOS si est&aacute; en "Todo el per&iacute;odo"). Ya no se
-//    usa la columna COBRADO/DESCONTADO/FALSO para decidir qu&eacute; entra.
-//  - "Venta real" vs "No real" = columna TIPO: "Mercaderia" es venta real; "Iva" (y comprobantes
-//    sin TIPO, t&iacute;picamente notas de cr&eacute;dito/d&eacute;bito) es "no real".
-//  - Vencido / En plazo / Cumplido (tabla y gr&aacute;fico de Clientes) = tal cual la columna
-//    ESTADO VENCIMIENTO de la pesta&ntilde;a Aging, sin recalcular por fecha. Se agreg&oacute; una 4ta
-//    categor&iacute;a "Otro" por si en el futuro aparece un valor distinto a esos 3 (para no
-//    perder silenciosamente ninguna fila).
-// Si falla la lectura, el error se muestra SOLO en esta secci&oacute;n; el tablero de
-// cobranzas y el sem&aacute;foro de gerencia siguen funcionando igual.
-// ================================================================
-
-function splitCSVLine(line){
-  const out=[]; let cur=''; let inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(inQ){
-      if(c==='"'){ if(line[i+1]==='"'){cur+='"'; i++;} else inQ=false; }
-      else cur+=c;
-    }else{
-      if(c==='"') inQ=true;
-      else if(c===','){ out.push(cur); cur=''; }
-      else cur+=c;
-    }
-  }
-  out.push(cur);
-  return out;
-}
-function agNum(s){
-  // El CSV publicado usa el formato regional del Sheet (es-AR): "." separador
-  // de miles, "," separador decimal (ej. "$ 2.051.731.373,10" o "-$ 395.161,70").
-  // Por eso hay que sacar los puntos de miles y convertir la coma decimal a punto
-  // antes de parsear — un parseFloat directo da un número truncado y equivocado.
-  if(s==null) return 0;
-  s=String(s).trim();
-  if(!s) return 0;
-  let neg=false;
-  if(/^\(.*\)$/.test(s)){ neg=true; s=s.slice(1,-1); } // por si viniera en formato contable "(1.234,56)"
-  s = s.replace(/[^0-9.,\-]/g,'');   // deja solo dígitos, puntos, comas y el signo menos
-  s = s.replace(/\./g,'').replace(',', '.'); // quita puntos de miles, pasa coma decimal a punto
-  const n=parseFloat(s);
-  if(isNaN(n)) return 0;
-  return neg? -Math.abs(n): n;
-}
-const agTxt=s=>(s==null?'':String(s)).trim();
-const agFmtFull=n=>{
-  const neg=n<0;
-  return (neg?'-$':'$')+Math.round(Math.abs(n)).toLocaleString('es-AR',{maximumFractionDigits:0});
-};
-
-// v12: agrega/deriva todo lo que necesita esta sección directamente de la pestaña "Aging"
-// cruda (comprobante por comprobante), en vez de leerlo ya calculado de "Resumen Aging"
-// (que ya no existe). Busca columnas por nombre, no por posición, para no romperse si el
-// Sheet cambia de forma con el tiempo.
-// v20: regla de Graciela — esta sección ahora respeta el mismo período (mes) elegido arriba,
-// usando FECHA DE VENCIMIENTO (ya no la columna COBRADO/DESCONTADO) para decidir qué comprobantes
-// entran. Si arriba está en "Todo el período" (mesFilter=null), se ve la cartera completa, igual
-// que antes.
-// v22: usa el fetch compartido getSheetText() en vez de pedir su propio CSV — ver el comentario
-// junto a SHEET_CSV_URL (esto es lo que causaba el HTTP 400 intermitente).
-function computeAgingFromText(text){
-  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.length>0);
-  if(!lines.length) throw new Error('el CSV no tiene filas');
-  const header = splitCSVLine(lines[0]).map(h=>h.trim().toUpperCase());
-  const idx = name => header.findIndex(h=>h===name);
-  const iSaldo = idx('SALDO');
-  const iTipo = idx('TIPO');
-  const iEstadoVenc = idx('ESTADO VENCIMIENTO');
-  const iAnalista = idx('ANALISTA');
-  const iVendedor = idx('VENDEDOR');
-  const iRazon = idx('RAZON SOCIAL CLIENTE');
-  const iFechaVenc = idx('FECHA DE VENCIMIENTO');
-  if([iSaldo,iTipo,iEstadoVenc,iAnalista,iVendedor,iRazon,iFechaVenc].some(i=>i<0)){
-    throw new Error('no encontré alguna de las columnas esperadas en la pestaña "Aging" (revisá si cambiaron los encabezados)');
-  }
-  const analistaAgg={}, vendedorAgg={}, clienteAgg={};
-  let ventaReal=0, noReal=0, total=0;
-  for(let i=1;i<lines.length;i++){
-    const c = splitCSVLine(lines[i]);
-    const first = (c[0]||'').trim();
-    if(first.toLowerCase()==='total') continue; // fila de totales de la Tabla
-    if(!c.some(v=>v && v.trim())) continue; // fila vacía
-    if(mesFilter){
-      const vencObj = agParseDateFlexible(c[iFechaVenc]);
-      const vencMes = vencObj ? agToISO(vencObj).slice(0,7) : null;
-      if(vencMes!==mesFilter) continue; // fuera del período elegido arriba (o sin fecha de vencimiento usable)
-    }
-    const saldo = agNum(c[iSaldo]);
-    const tipo = (c[iTipo]||'').trim().toLowerCase();
-    const esReal = tipo==='mercaderia'; // "no real" = "Iva" o sin TIPO (NC/ND), acordado con Nahuel
-    total += saldo;
-    if(esReal) ventaReal += saldo; else noReal += saldo;
-
-    // v19: si el campo viene vacío, la fila directamente no se suma a esa tabla/gráfico
-    // (antes se agrupaba bajo "(sin analista)"/"(sin vendedor)"/"(sin cliente)", lo cual
-    // ensuciaba las tablas y gráficos con filas sin datos reales). No afecta a las 4
-    // tarjetas KPI de arriba (Deuda total / Venta real / No real), que siguen sumando
-    // TODAS las filas pendientes de cobro más allá de si tienen o no analista/vendedor/cliente.
-    const analista = (c[iAnalista]||'').trim();
-    if(analista){
-      if(!analistaAgg[analista]) analistaAgg[analista] = {name:analista, real:0, noreal:0, total:0};
-      analistaAgg[analista][esReal?'real':'noreal'] += saldo;
-      analistaAgg[analista].total += saldo;
-    }
-
-    const vendedor = (c[iVendedor]||'').trim();
-    if(vendedor){
-      if(!vendedorAgg[vendedor]) vendedorAgg[vendedor] = {name:vendedor, real:0, noreal:0, total:0};
-      vendedorAgg[vendedor][esReal?'real':'noreal'] += saldo;
-      vendedorAgg[vendedor].total += saldo;
-    }
-
-    const cliente = (c[iRazon]||'').trim();
-    if(cliente){
-      const estadoVenc = (c[iEstadoVenc]||'').trim().toUpperCase();
-      const bucket = estadoVenc==='VENCIDO' ? 'vencido' : estadoVenc==='EN PLAZO' ? 'enplazo' : estadoVenc==='CUMPLIDO' ? 'cumplido' : 'otro';
-      if(!clienteAgg[cliente]) clienteAgg[cliente] = {name:cliente, vencido:0, enplazo:0, cumplido:0, otro:0, total:0};
-      clienteAgg[cliente][bucket] += saldo;
-      clienteAgg[cliente].total += saldo;
-    }
-  }
-  const sortDesc = obj => Object.values(obj).sort((a,b)=>b.total-a.total);
-  return {
-    kpi: {total, ventaReal, noReal},
-    analistas: sortDesc(analistaAgg),
-    vendedores: sortDesc(vendedorAgg),
-    clientes: sortDesc(clienteAgg),
-  };
-}
-
-// v22: usa getSheetText() (fetch compartido) — primera vez pide a Sheets, después sólo
-// recalcula en el cliente con el mismo texto ya cacheado, sin pegarle otra vez a Sheets.
-async function loadAgingFromRaw(){
-  const text = await getSheetText();
-  return computeAgingFromText(text);
-}
-
-function showAgingError(msg){
-  ['agingKpis','agingAnalistaChart','agingVendedorChart','agingClienteChart'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML='';
-  });
-  ['agingAnalistaTable','agingVendedorTable','agingClienteTable'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML='';
-  });
-  const box = document.getElementById('agingErrorBox');
-  box.innerHTML = '<div class="card" style="border-color:#f87171;margin-bottom:14px">'+
-    '<div class="c-title" style="color:#f87171">No se pudo cargar el Aging</div>'+
-    '<div class="c-note" style="margin-top:8px;color:var(--tx)">'+msg+'</div></div>';
-}
-
-// v18: se agrega una breve descripción (k-sub) debajo del total de cada tarjeta,
-// igual que en las tarjetas KPI de la parte superior del tablero (Cobrado, Proyectado, etc.)
-// v20: las descripciones ahora aclaran que el criterio es la FECHA DE VENCIMIENTO del período
-// elegido arriba (regla de Graciela), en vez de "toda la cartera" sin distinción de fecha.
-function agRenderKpis(kpi){
-  const pct = kpi.total>0? kpi.ventaReal/kpi.total*100 : 0;
-  const periodoTxt = mesFilter?MLBL[mesFilter]:'todo el per&iacute;odo';
-  document.getElementById('agingKpis').innerHTML =
-    `<div class="kpi acc"><div class="k-lbl">Deuda total</div><div class="k-val">${agFmtFull(kpi.total)}</div>
-      <div class="k-sub">saldo pendiente &middot; vencimiento ${periodoTxt}</div></div>
-     <div class="kpi"><div class="k-lbl">Venta real</div><div class="k-val" style="color:var(--acc)">${agFmtFull(kpi.ventaReal)}</div>
-      <div class="k-sub">TIPO = Mercader&iacute;a &middot; vencimiento ${periodoTxt}</div></div>
-     <div class="kpi mrg"><div class="k-lbl">No real</div><div class="k-val">${agFmtFull(kpi.noReal)}</div>
-      <div class="k-sub">TIPO = Iva &middot; vencimiento ${periodoTxt}</div></div>
-     <div class="kpi"><div class="k-lbl">% venta real</div><div class="k-val">${fmtPct(pct)}</div>
-      <div class="k-sub">venta real sobre la deuda total del per&iacute;odo</div></div>`;
-}
-
-// v12: tabla genérica de N columnas numéricas + Total deuda (antes admitía sólo 2
-// columnas fijas "a"/"b", ahora la tabla de Clientes necesita 4: Vencido/En plazo/Cumplido/Otro).
-function agRenderTableN(containerId, items, nameLabel, cols){
-  const el = document.getElementById(containerId);
-  let html = `<thead><tr><th>${nameLabel}</th>${cols.map(c=>`<th>${c.label}</th>`).join('')}<th>Total deuda</th></tr></thead><tbody>`;
-  items.forEach(it=>{
-    html += `<tr><td>${it.name}</td>${cols.map(c=>`<td>${agFmtFull(it[c.key]||0)}</td>`).join('')}<td>${agFmtFull(it.total)}</td></tr>`;
-  });
-  html += '</tbody>';
-  el.innerHTML = html;
-}
-
-// Barras horizontales "divergentes": cada fila apila los segmentos (2, 3, 4... los que
-// haga falta) uno a continuación del otro, sobre una escala compartida con cero al centro.
-// Esto permite representar bien los casos donde algún segmento (o el total) sea negativo,
-// algo que una barra apilada tradicional (que arranca siempre en cero) no puede mostrar bien.
-function agRenderDivergingN(containerId, items, series){
-  let lo=0, hi=0;
-  items.forEach(it=>{
-    let cum=0;
-    const stops=[0];
-    series.forEach(s=>{ cum+=(it[s.key]||0); stops.push(cum); });
-    stops.forEach(v=>{ if(v<lo) lo=v; if(v>hi) hi=v; });
-  });
-  const span = (hi-lo)||1;
-  const pct = v => (v-lo)/span*100;
-  const zero = pct(0);
-  const el = document.getElementById(containerId);
-  el.innerHTML = items.map(it=>{
-    let cum=0;
-    let segs='';
-    series.forEach(s=>{
-      const from=cum; cum+=(it[s.key]||0); const to=cum;
-      const left=Math.min(pct(from),pct(to)), w=Math.abs(pct(to)-pct(from));
-      segs += `<div class="dseg" style="left:${left.toFixed(2)}%;width:${w.toFixed(2)}%;background:${s.color}"></div>`;
-    });
-    return `<div class="drow">
-      <div class="dnm" title="${it.name}">${it.name}</div>
-      <div class="dtrack">
-        <div class="dzero" style="left:${zero.toFixed(2)}%"></div>
-        ${segs}
-      </div>
-      <div class="damt">${agFmtFull(it.total)}</div>
-    </div>`;
-  }).join('');
-}
-
-function agRenderAll(ag){
-  agRenderKpis(ag.kpi);
-  agRenderTableN('agingAnalistaTable', ag.analistas, 'Cobrador / Analista', [{key:'real',label:'Venta real'},{key:'noreal',label:'No real'}]);
-  agRenderTableN('agingVendedorTable', ag.vendedores, 'Vendedor', [{key:'real',label:'Venta real'},{key:'noreal',label:'No real'}]);
-  agRenderTableN('agingClienteTable', ag.clientes, 'Cliente', [{key:'vencido',label:'Vencido'},{key:'enplazo',label:'En plazo'},{key:'cumplido',label:'Cumplido'},{key:'otro',label:'Otro'}]);
-  const accCol = A(), noCol = getComputedStyle(document.body).getPropertyValue('--teal').trim();
-  agRenderDivergingN('agingAnalistaChart', ag.analistas, [{key:'real',color:accCol},{key:'noreal',color:noCol}]);
-  agRenderDivergingN('agingVendedorChart', ag.vendedores, [{key:'real',color:accCol},{key:'noreal',color:noCol}]);
-  agRenderDivergingN('agingClienteChart', ag.clientes, [{key:'vencido',color:'#f87171'},{key:'enplazo',color:accCol},{key:'cumplido',color:noCol},{key:'otro',color:'#94a3b8'}]);
-}
-
-let AGING_DATA = null;
-// v20: se llama de nuevo cada vez que cambia el período (mesFilter) arriba, para que
-// Deuda total / Venta real / No real (y sus tablas/gráficos) queden siempre en sincro con
-// el período elegido. v22: usa getSheetText() (fetch compartido) — sólo pide a Sheets la
-// primera vez que hace falta; las siguientes veces recalcula con el texto ya cacheado.
-async function agReloadAndRender(){
-  document.getElementById('agingUpdated').textContent = 'Cargando…';
-  try{
-    AGING_DATA = await loadAgingFromRaw();
-    agRenderAll(AGING_DATA);
-    document.getElementById('agingPeriodNote').textContent = mesFilter?MLBL[mesFilter]:'todo el período';
-    document.getElementById('agingUpdated').textContent =
-      new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-  }catch(err){
-    console.error(err);
-    document.getElementById('agingUpdated').textContent = 'Error';
-    showAgingError('No pude calcular el Aging desde la pesta&ntilde;a "Aging" de Google Sheets. Revis&aacute; que el link de publicaci&oacute;n siga activo. Detalle: ' + err.message);
-  }
-}
-(async function initAging(){
-  await agReloadAndRender();
-})();
+document.getElementById('sheetsBtn').click();
 </script>
 </body>
 </html>
