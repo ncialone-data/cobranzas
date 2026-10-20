@@ -456,6 +456,10 @@ function cashRows(){ let r=CASH; if(mesFilter) r=r.filter(d=>d.mes===mesFilter);
 function pagosRows(){ let r=PAGOS.filter(d=>!d.excluido); if(mesFilter) r=r.filter(d=>d.mes===mesFilter); if(empGrupoFilter) r=r.filter(d=>d.empGrupo===empGrupoFilter); return r; }
 function saldoRows(){ let r=SALDO.filter(d=>!d.isInterno); if(empGrupoFilter) r=r.filter(d=>d.empGrupo===empGrupoFilter); return r; }
 function saldoRowsNetas(){ return saldoRows().filter(d=>!d.isIncobrable&&!d.isExcluido); }
+// Saldo deudor: solo clientes con DEUDA > 0 (sin internos, incobrables ni excluidos)
+function saldoRowsDeudores(){ return saldoRowsNetas().filter(d=>d.deuda>0); }
+// Saldo a favor: solo el excedente, es decir clientes con DEUDA < 0 (pagaron/anticiparon más de lo que deben). aFavor = -DEUDA
+function saldoRowsAFavor(){ return saldoRowsNetas().filter(d=>d.deuda<0).map(d=>({...d,aFavor:-d.deuda})); }
 function incobRows(){ let r=INCOB; if(empGrupoFilter) r=r.filter(d=>d.empGrupo===empGrupoFilter); return r; }
 
 // ───────────────────────── Detalle de tarjetas KPI ─────────────────────────
@@ -510,17 +514,17 @@ function renderKpiDetalle(){
     ]);
   } else if(kpiActiveCard==='saldoneto'){
     title=`Saldo deudor neto · detalle (${empGrupoFilter||'todas las empresas'})`;
-    body=buildDetailTable(saldoRowsNetas(),'deuda',[
+    body=buildDetailTable(saldoRowsDeudores(),'deuda',[
       {label:'Cliente', wide:true, render:r=>r.cliente},
       {label:'Cobrador', render:r=>r.cobrador},
       {label:'Saldo', align:'r', render:r=>fmtFull(r.deuda)}
     ]);
   } else if(kpiActiveCard==='acta'){
     title=`Saldo a favor de clientes · detalle (${empGrupoFilter||'todas las empresas'})`;
-    body=buildDetailTable(saldoRows(),'aCta',[
+    body=buildDetailTable(saldoRowsAFavor(),'aFavor',[
       {label:'Cliente', wide:true, render:r=>r.cliente},
       {label:'Cobrador', render:r=>r.cobrador},
-      {label:'A cuenta', align:'r', render:r=>fmtFull(r.aCta)}
+      {label:'A favor', align:'r', render:r=>fmtFull(r.aFavor)}
     ]);
   } else if(kpiActiveCard==='cumpl'){
     title='Cumplimiento · detalle (a cobrar vs. cobrado del período)';
@@ -560,8 +564,9 @@ function render(){
   const totalCobrado=R_pagos.reduce((s,d)=>s+d.pagoImporte,0);
   const cumplPct=totalACobrar>0?(totalCobrado/totalACobrar*100):null;
 
-  const saldoNeto=R_saldoN.reduce((s,d)=>s+d.deuda,0);
-  const aCtaTotal=R_saldo.reduce((s,d)=>s+d.aCta,0);
+  const R_deudores=saldoRowsDeudores(), R_aFavor=saldoRowsAFavor();
+  const saldoNeto=R_deudores.reduce((s,d)=>s+d.deuda,0);
+  const aCtaTotal=R_aFavor.reduce((s,d)=>s+d.aFavor,0);
   const incobTotal=R_incob.reduce((s,d)=>s+d.deuda,0);
 
   const today=new Date(); today.setHours(0,0,0,0);
@@ -593,10 +598,10 @@ function render(){
       <div class="k-sub">ponderado por importe cobrado</div></div>
     <div class="kpi bad clickable" data-card="saldoneto"><div class="k-lbl">Saldo deudor neto</div>
       <div class="k-val">${fmtFull(saldoNeto)}</div>
-      <div class="k-sub">${empGrupoFilter||'todas las empresas'} · excl. incobrables/excluidos/internos</div></div>
+      <div class="k-sub">${empGrupoFilter||'todas las empresas'} · ${R_deudores.length.toLocaleString('es-AR')} clientes con deuda · excl. incobrables/excluidos/internos</div></div>
     <div class="kpi clickable" data-card="acta"><div class="k-lbl">Saldo a favor de clientes</div>
       <div class="k-val">${fmtFull(aCtaTotal)}</div>
-      <div class="k-sub">anticipos / a cuenta (A_CTA) · excl. internos</div></div>
+      <div class="k-sub">${R_aFavor.length.toLocaleString('es-AR')} clientes · excedente sobre su deuda · excl. incobrables/excluidos/internos</div></div>
     <div class="kpi warn scrollto" data-scroll="incobCard"><div class="k-lbl">Incobrables</div>
       <div class="k-val">${fmtFull(incobTotal)}</div>
       <div class="k-sub">${R_incob.length.toLocaleString('es-AR')} cuentas dadas de baja</div></div>
@@ -620,7 +625,7 @@ function render(){
   renderAging(R_saldo);
   renderEvol();
   renderMixRubro(R_cash,totalACobrar);
-  renderTopDeudores(R_saldoN);
+  renderTopDeudores(R_deudores);
   renderMixEmpresa(R_pagos,totalCobrado);
   renderCheques(chequesPend);
   renderIncobrables(R_incob,incobTotal);
